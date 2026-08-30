@@ -33,10 +33,11 @@ MIN_SURNAME_TOKEN <- 4L
 #' ran 27.1% unmatched against 9.8% for unhyphenated, a 2.8x gap.
 #'
 #' @param x a single surname string.
+#' @param strip_alternates see [name_key()].
 #' @return character vector of components; `character(0)` when nothing survives.
 #' @export
-surname_tokens <- function(x) {
-  k <- name_key(x)
+surname_tokens <- function(x, strip_alternates = TRUE) {
+  k <- name_key(x, strip_alternates)
   if (length(k) != 1L) stop("surname_tokens() takes one name", call. = FALSE)
   if (is.na(k) || !nzchar(k)) return(character(0))
   toks <- strsplit(gsub("[^A-Z']+", " ", k), "\\s+")[[1]]
@@ -53,10 +54,11 @@ surname_tokens <- function(x) {
 #' and comparability is the whole point of the middle-name axis.
 #'
 #' @param x character vector.
+#' @param strip_alternates see [name_key()].
 #' @return list of character vectors, one per input.
 #' @export
-middle_tokens <- function(x) {
-  k <- blank_na(x)
+middle_tokens <- function(x, strip_alternates = TRUE) {
+  k <- blank_na(x, strip_alternates)
   lapply(strsplit(k, "[^A-Z']+"), function(t) unique(t[nzchar(t)]))
 }
 
@@ -66,11 +68,12 @@ middle_tokens <- function(x) {
 #' W; they remain available in the parsed columns for reporting.
 #'
 #' @param given,middle character vectors.
+#' @param strip_alternates see [name_key()].
 #' @return list of character vectors.
 #' @export
-given_tokens <- function(given, middle = NULL) {
-  b <- if (is.null(middle)) blank_na(given) else
-    trimws(paste(blank_na(given), blank_na(middle)))
+given_tokens <- function(given, middle = NULL, strip_alternates = TRUE) {
+  b <- if (is.null(middle)) blank_na(given, strip_alternates) else
+    trimws(paste(blank_na(given, strip_alternates), blank_na(middle, strip_alternates)))
   lapply(strsplit(b, "[^A-Z']+"), function(t) {
     t <- t[nchar(t) >= 2L]
     unique(t[nzchar(t)])

@@ -40,7 +40,8 @@ has_name_information <- function(x) !is.na(x) & nzchar(x)
 #' @return character vector.
 #' @export
 strip_parenthetical <- function(x) {
-  out <- gsub("([A-Z'])\\(([^)]*)\\)", "\\1\\2", x)   # word-internal: unwrap
+  # [A-Za-z'] not [A-Z']: this also runs BEFORE parsing, on mixed-case input.
+  out <- gsub("([A-Za-z'])\\(([^)]*)\\)", "\\1\\2", x)   # word-internal: unwrap
   out <- gsub("\\([^)]*\\)", " ", out)                # standalone: drop
   out <- gsub("\\([^)]*$", " ", out)                  # unclosed: runs to end
   # "]" FIRST inside the class is the portable way to mean a literal bracket;
@@ -68,10 +69,32 @@ strip_parenthetical <- function(x) {
 #' `NA` in, `NA` out. Callers needing `""` for a join must say so via
 #' [blank_na()], so absence is never converted to a value by accident.
 #'
+#' @section Migrating from an existing normaliser:
+#' `strip_alternates` exists so a swap can be PROVEN rather than assumed. The
+#' incumbent normaliser this was extracted alongside does not remove
+#' parenthesised alternate names; this one does, and that is a deliberate fix,
+#' not an accident of reimplementation -- every roster row whose derived middle
+#' initial came out as `"("` failed to resolve, 9 of 9.
+#'
+#' So the migration is two reviewable steps, not one leap:
+#'
+#' \preformatted{
+#'   name_key(x, strip_alternates = FALSE)   # byte-identical to the incumbent
+#'   name_key(x)                             # then flip, as its own diff
+#' }
+#'
+#' Step one should change nothing and can be merged on that evidence. Step two
+#' changes keys for exactly the rows carrying a bracket, and deserves to be
+#' looked at on its own.
+#'
 #' @param x character vector.
+#' @param strip_alternates logical: remove parenthesised alternate names.
+#'   `TRUE` is correct for person names and is the default. `FALSE` reproduces a
+#'   normaliser that does not handle the convention -- use it to prove a swap,
+#'   not to ship.
 #' @return character vector.
 #' @export
-name_key <- function(x) {
+name_key <- function(x, strip_alternates = TRUE) {
   if (is.null(x) || length(x) == 0L) return(character(0))
   x <- as.character(x)
   # A NUL byte terminates a PCRE string, silently truncating the rest of the
@@ -93,7 +116,7 @@ name_key <- function(x) {
   }
   out <- stringi::stri_trans_general(out, "Latin-ASCII")
   out <- toupper(out)
-  out <- strip_parenthetical(out)
+  if (isTRUE(strip_alternates)) out <- strip_parenthetical(out)
   out <- gsub("\\s+", " ", trimws(out))
   out[is.na(x)] <- NA_character_
   out
@@ -101,10 +124,11 @@ name_key <- function(x) {
 
 #' Normalised key with absence rendered as `""`, for use as a join key.
 #' @param x character vector.
+#' @param strip_alternates see [name_key()].
 #' @return character vector, `NA` mapped to `""`.
 #' @export
-blank_na <- function(x) {
-  k <- name_key(x)
+blank_na <- function(x, strip_alternates = TRUE) {
+  k <- name_key(x, strip_alternates)
   k[is.na(k)] <- ""
   k
 }
@@ -116,10 +140,11 @@ blank_na <- function(x) {
 #' yields the unaccented letter and joins against the registry spelling.
 #'
 #' @param x character vector.
+#' @param strip_alternates see [name_key()].
 #' @return character vector of single letters, or `NA`.
 #' @export
-first_initial <- function(x) {
-  k <- name_key(x)
+first_initial <- function(x, strip_alternates = TRUE) {
+  k <- name_key(x, strip_alternates)
   out <- substr(k, 1L, 1L)
   out[is.na(k) | !nzchar(k)] <- NA_character_
   out
@@ -137,10 +162,11 @@ first_initial <- function(x) {
 #' a recorded middle name, and never let it veto on its own.
 #'
 #' @param given character vector: the roster's given-name field.
+#' @param strip_alternates see [name_key()].
 #' @return list with `given` and `middle_from_given`, both normalised.
 #' @export
-split_given <- function(given) {
-  k <- blank_na(given)
+split_given <- function(given, strip_alternates = TRUE) {
+  k <- blank_na(given, strip_alternates)
   list(given = sub("\\s.*$", "", k),
        middle_from_given = trimws(sub("^[^ ]*", "", k)))
 }

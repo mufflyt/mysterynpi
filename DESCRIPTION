@@ -13,8 +13,8 @@ Description: One definition of the name-handling a provider linkage needs:
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.1)
-Imports: stringi, utils
-Suggests: testthat (>= 3.0.0), knitr, rmarkdown
+Imports: stringi, stats
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown, humaniformat
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 RoxygenNote: 7.3.2

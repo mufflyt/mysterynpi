@@ -1,0 +1,19 @@
+Package: mysterynpi
+Title: Name Keys and Agreement Rules for Linking Person Rosters to NPI
+Version: 0.1.0
+Authors@R: person("Tyler", "Muffly", email = "tyler.muffly@dhha.org",
+                  role = c("aut", "cre"))
+Description: One definition of the name-handling a provider linkage needs:
+    transliterating join keys, given/middle/surname tokenisation, and the
+    agreement rules that decide whether two records name the same person.
+    Every rule here encodes a defect that has already shipped in a real
+    pipeline, and each ships with the test that catches its return. The
+    package deliberately stops short of blocking, scoring and bijection:
+    those are pipeline science, not shared machinery.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1)
+Imports: stringi, utils
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.3.2

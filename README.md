@@ -53,12 +53,43 @@ packaging:
 | naive normalisation preserves accents rather than stripping them | accented names could not reach their unaccented registry spelling by **any** blocking route; unmatched ran 30% against 10.4% | `name_key()` |
 | middle names compared at position 1 | a maiden surname in a different slot scored as a disagreement and deleted the candidate; 82 rows lost their only match and were published as "no candidate" | `middle_agreement()` |
 
+## What it covers
+
+| stage | functions |
+|---|---|
+| keys | `name_key()`, `blank_na()`, `has_name_information()`, `first_initial()`, `strip_parenthetical()`, `split_given()` |
+| tokens | `middle_tokens()`, `given_tokens()`, `surname_tokens()` |
+| agreement | `middle_agreement()`, `person_matches()` |
+| ordered classes | `resolve_ordered_classes()` and its parts |
+| one-to-one | `award_contested()`, `count_rivals()` |
+| contract | `assert_middle_agreement_contract()` |
+
+See `vignette("resolving-a-roster")`.
+
+The split between **mechanism** and **policy** is the design. "Collapse to one
+row per (person, candidate), take the strongest class, resolve only when that
+class holds exactly one" is mechanism. *Which* classes exist and what evidence
+earns each one is policy, and stays with you.
+
 ## What is deliberately NOT here
 
-Blocking, scoring, evidence-class ordering, and the one-to-one bijection.
-Those are pipeline science, not shared machinery — they encode what a
-particular study is willing to claim about identity, and burying them in a
-dependency is how a cohort changes without a commit.
+**Blocking.** Which candidates to generate — exact name, surname plus initial,
+fuzzy surname, surname component — and which class each earns, is where a study
+declares what it will claim from a name. That belongs in your pipeline, in code
+a reviewer can read.
+
+**Scoring gates.** Gender and credential gates encode claims about identity, not
+facts about strings.
+
+**A method-priority lookup keyed on strategy names.** One existed upstream; it
+contained none of the calling pipeline's method names, so every row missed the
+lookup and was coalesced to a constant. A shared table that silently does
+nothing is worse than no table.
+
+**A blended match score.** A numeric threshold expresses a continuous question
+about categorical evidence. The upstream version's margin constant turned out to
+have zero-conflict behaviour that was *structural* — the candidates it compared
+never coexisted — rather than evidence the threshold was right.
 
 Two specific exclusions worth naming:
 

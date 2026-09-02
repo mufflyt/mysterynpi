@@ -79,3 +79,21 @@ given_tokens <- function(given, middle = NULL, strip_alternates = TRUE) {
     unique(t[nzchar(t)])
   })
 }
+
+#' Surname components as a long (id, token) data frame
+#'
+#' Returned long rather than as a list column because every caller joins on the
+#' token; a list column would have to be unnested at each call site.
+#'
+#' @param x character vector of surnames.
+#' @param id vector of identifiers, the same length as `x`.
+#' @param strip_alternates see [name_key()].
+#' @return data.frame(id, token), zero rows where a surname yields no component.
+#' @export
+surname_token_table <- function(x, id, strip_alternates = TRUE) {
+  stopifnot(length(x) == length(id))
+  lst <- lapply(x, surname_tokens, strip_alternates = strip_alternates)
+  n <- lengths(lst)
+  data.frame(id = rep(id, n), token = unlist(lst, use.names = FALSE),
+             stringsAsFactors = FALSE)
+}

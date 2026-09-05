@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "mysterynpi: Name Keys and Agreement Rules for Linking Person Rosters to NPI"
-version: 0.2.0
+version: 0.3.0
 date-released: "2026-09-05"
 authors:
   - family-names: Muffly

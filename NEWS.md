@@ -1,4 +1,4 @@
-# mysterynpi (development version)
+# mysterynpi 0.3.0
 
 * ONE nickname system, similarity scoring dark by default. The scoring
   API extracted from isochrones (`create_nickname_dictionary()`,

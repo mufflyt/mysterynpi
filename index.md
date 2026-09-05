@@ -113,6 +113,14 @@ evidence the threshold was right.
 
 Two specific exclusions worth naming:
 
+- **Similarity scoring is fenced, not forbidden (2026-09).** The package
+  now carries isochrones’ nickname-aware Jaro-Winkler scoring — RANKING
+  machinery for candidate generation, the stage fuzz was always
+  legitimate at. The fence is machine-enforced: no agreement verdict can
+  reach the scoring module through any call chain (a call-graph guard
+  asserts it; a mutation proves the guard fires), and the scoring
+  dictionary is deliberately separate from `NICKNAME_EDGES`, because a
+  table change there moves verdicts while a change here moves scores.
 - **No edit-distance tolerance on the middle name.** One was added and
   removed the same day. Measured: it changed 64 of 30,740 candidate
   pairs and was worth 22 records, while admitting pairs that are

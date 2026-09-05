@@ -113,6 +113,14 @@ evidence the threshold was right.
 
 Two specific exclusions worth naming:
 
+- **Similarity scoring is fenced, not forbidden (2026-09).** The package
+  now carries isochrones’ nickname-aware Jaro-Winkler scoring — RANKING
+  machinery for candidate generation, the stage fuzz was always
+  legitimate at. The fence is machine-enforced: no agreement verdict can
+  reach the scoring module through any call chain (a call-graph guard
+  asserts it; a mutation proves the guard fires), and the scoring
+  dictionary is deliberately separate from `NICKNAME_EDGES`, because a
+  table change there moves verdicts while a change here moves scores.
 - **No edit-distance tolerance on the middle name.** One was added and
   removed the same day. Measured: it changed 64 of 30,740 candidate
   pairs and was worth 22 records, while admitting pairs that are
@@ -262,6 +270,26 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
 - [`surname_rarity()`](https://mufflyt.github.io/mysterynpi/reference/surname_rarity.md)
   : How common is this surname? Census facts, for ordered-class
   refinement
+
+## Similarity scoring (candidate ranking, never verdicts)
+
+The fenced exception; extracted from isochrones, quirks pinned.
+
+- [`create_nickname_dictionary()`](https://mufflyt.github.io/mysterynpi/reference/create_nickname_dictionary.md)
+  : Build the bidirectional nickname dictionary used by the similarity
+  score
+- [`get_nickname_dictionary()`](https://mufflyt.github.io/mysterynpi/reference/get_nickname_dictionary.md)
+  : Cached access to the nickname dictionary
+- [`get_canonical_name()`](https://mufflyt.github.io/mysterynpi/reference/get_canonical_name.md)
+  : Resolve a name, possibly a nickname, to its canonical formal form
+- [`are_nickname_equivalents()`](https://mufflyt.github.io/mysterynpi/reference/are_nickname_equivalents.md)
+  : Do two names share a canonical formal root?
+- [`get_nicknames_for_name()`](https://mufflyt.github.io/mysterynpi/reference/get_nicknames_for_name.md)
+  : All recorded nicknames for a formal name
+- [`calculate_enhanced_first_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/calculate_enhanced_first_name_similarity.md)
+  : Nickname-aware first-name similarity SCORE (never a verdict)
+- [`create_nickname_aware_similarity()`](https://mufflyt.github.io/mysterynpi/reference/create_nickname_aware_similarity.md)
+  : Factory: similarity closure with a bound dictionary
 
 ## Clerical review
 

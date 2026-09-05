@@ -105,6 +105,26 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : How common is this surname? Census facts, for ordered-class
   refinement
 
+## Similarity scoring (candidate ranking, never verdicts)
+
+The fenced exception; extracted from isochrones, quirks pinned.
+
+- [`create_nickname_dictionary()`](https://mufflyt.github.io/mysterynpi/reference/create_nickname_dictionary.md)
+  : Build the bidirectional nickname dictionary used by the similarity
+  score
+- [`get_nickname_dictionary()`](https://mufflyt.github.io/mysterynpi/reference/get_nickname_dictionary.md)
+  : Cached access to the nickname dictionary
+- [`get_canonical_name()`](https://mufflyt.github.io/mysterynpi/reference/get_canonical_name.md)
+  : Resolve a name, possibly a nickname, to its canonical formal form
+- [`are_nickname_equivalents()`](https://mufflyt.github.io/mysterynpi/reference/are_nickname_equivalents.md)
+  : Do two names share a canonical formal root?
+- [`get_nicknames_for_name()`](https://mufflyt.github.io/mysterynpi/reference/get_nicknames_for_name.md)
+  : All recorded nicknames for a formal name
+- [`calculate_enhanced_first_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/calculate_enhanced_first_name_similarity.md)
+  : Nickname-aware first-name similarity SCORE (never a verdict)
+- [`create_nickname_aware_similarity()`](https://mufflyt.github.io/mysterynpi/reference/create_nickname_aware_similarity.md)
+  : Factory: similarity closure with a bound dictionary
+
 ## Clerical review
 
 A blinded, class-stratified sample, and the precision it buys.

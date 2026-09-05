@@ -67,3 +67,23 @@ test_that("the shipped contract passes, and can fail", {
   inflator <- function(x) rep("retired", length(x))
   expect_error(assert_license_status_contract(inflator))
 })
+
+test_that("the audit documents the mapping per source, unmapped first", {
+  status <- c(rep("Deceased", 3), rep("Retired", 2), "Status 47",
+              rep("Surrendered", 4), "Expired", NA)
+  source <- c(rep("FL", 6), rep("NY-OPMC", 4), "CO", "CO")
+  a <- license_status_audit(status, source)
+  expect_identical(names(a), c("source", "status_raw", "class", "n", "mapped"))
+  # FL: the unmapped row leads, then by count
+  fl <- a[a$source == "FL", ]
+  expect_identical(fl$status_raw[1], "Status 47")
+  expect_false(fl$mapped[1])
+  expect_identical(fl$status_raw[2:3], c("Deceased", "Retired"))
+  expect_identical(fl$class[2:3], c("deceased", "retired"))
+  expect_identical(fl$n[2:3], c(3L, 2L))
+  # NA input is a documented row, not a vanished one
+  expect_true("<NA>" %in% a$status_raw[a$source == "CO"])
+  # the audit applies the SAME mapping the pipeline applied
+  expect_identical(a$class[a$source == "NY-OPMC"], "disciplinary")
+  expect_error(license_status_audit(c("A", "B"), "FL"), "same length")
+})

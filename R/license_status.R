@@ -99,3 +99,48 @@ normalize_license_status <- function(x, levels = LICENSE_STATUS_LEVELS) {
   key <- toupper(trimws(gsub("[[:space:][:punct:]]+", " ", levels$status)))
   unname(stats::setNames(levels$class, key)[u])
 }
+
+#' The mapping that was applied, per source, as a document
+#'
+#' A normalisation nobody can audit is a normalisation nobody should trust.
+#' For each source (a state, a file, a download date -- whatever the caller
+#' names), this records every RAW status the source carried, the class it
+#' was mapped to, and how many rows carried it -- including the unmapped
+#' ones, listed first, because an unmapped status is a decision waiting to
+#' be made, not a rounding error. `FL: Deceased(350) -> deceased` is a line
+#' a reviewer can check against the board's own site; "we normalised
+#' statuses" is not.
+#'
+#' The returned frame IS the methods-appendix table: write it next to the
+#' artifact it describes and ship it with the study. Rerun on refreshed
+#' data, its diff shows exactly which vocabulary the boards changed.
+#'
+#' @param status character vector of recorded license statuses.
+#' @param source character vector, the same length: which document each row
+#'   came from (`"FL"`, `"IL-2026-08"`, a filename).
+#' @param levels see [normalize_license_status()]; passed through, so the
+#'   audit records the SAME mapping the pipeline applied.
+#' @return data.frame, one row per (source, raw status): `source`,
+#'   `status_raw`, `class` (`NA` when unmapped), `n`, `mapped`. Unmapped
+#'   rows sort first within each source, then by descending count.
+#' @export
+license_status_audit <- function(status, source,
+                                 levels = LICENSE_STATUS_LEVELS) {
+  if (length(status) != length(source)) {
+    stop("status and source must be the same length", call. = FALSE)
+  }
+  raw <- as.character(status)
+  raw[is.na(raw)] <- "<NA>"
+  cls <- normalize_license_status(status, levels = levels)
+  agg <- stats::aggregate(
+    list(n = seq_along(raw)),
+    by = list(source = as.character(source), status_raw = raw,
+              class = ifelse(is.na(cls), "<unmapped>", cls)),
+    FUN = length)
+  agg$mapped <- agg$class != "<unmapped>"
+  agg$class[!agg$mapped] <- NA_character_
+  agg <- agg[order(agg$source, agg$mapped, -agg$n, agg$status_raw), ,
+             drop = FALSE]
+  rownames(agg) <- NULL
+  agg[, c("source", "status_raw", "class", "n", "mapped")]
+}

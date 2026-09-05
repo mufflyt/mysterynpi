@@ -10,7 +10,10 @@
   cause, and only the board's own word for retired is retirement. Unmapped
   statuses map to `NA` and decide nothing; a board-specific vocabulary
   extends via the `levels` argument as reviewable data. Two new mutants
-  guard the inflation directly.
+  guard the inflation directly. `license_status_audit()` documents the
+  applied mapping per source -- every raw status, its class, its count,
+  unmapped first -- as the methods-appendix table a reviewer can check
+  against the board itself.
 
 * `ROSTER_BENCHMARK` — the labeled roster-to-registry benchmark nobody had:
   190 fully synthetic pairs, truth by construction, one defect family per

@@ -3,6 +3,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/LICENSE-text.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/articles/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/articles/vetoes-and-quarantine.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/authors.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/news/index.html</loc></url>
@@ -15,6 +16,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/award_contested.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/blank_na.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/clerical_precision.html</loc></url>
@@ -51,6 +53,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_name_noise.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_parenthetical.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_token_table.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_tokens.html</loc></url>
 </urlset>

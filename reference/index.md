@@ -89,6 +89,8 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Do two recorded licenses corroborate? (This rule cannot veto.)
 - [`normalize_license()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license.md)
   : Normalise a recorded license number for comparison
+- [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
+  : Do two surnames agree, disagree, or decide nothing?
 
 ## Clerical review
 
@@ -137,4 +139,7 @@ Assertions a caller runs in its own suite.
   : Assert that suffix agreement still behaves as this caller relies on.
 - [`assert_license_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_agreement_contract.md)
   : Assert that license agreement still behaves as this caller relies
+  on.
+- [`assert_surname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.md)
+  : Assert that surname agreement still behaves as this caller relies
   on.

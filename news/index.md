@@ -1,6 +1,32 @@
 # Changelog
 
-## mysterynpi (development version)
+## mysterynpi 0.2.0
+
+- [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md),
+  [`assert_surname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.md)
+  — the axis that only had exact equality gets its three-verdict rule:
+  exact key equality corroborates even below the token floor
+  (`LEE`/`LEE`), shared components span hyphenation and dropped parts,
+  apostrophes are folded (`O'BRIEN`/`OBRIEN`), particles never count,
+  and the maiden-as-middle rescue corroborates a changed surname
+  surviving in the other record’s middle slot. Conflicts deserve
+  quarantine discipline in marriage-plausible cohorts — see the new
+  vignette.
+
+- **Verdict change** (the contracts call this a major-bump class of
+  change, absorbed into 0.2.0):
+  [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
+  now treats a single letter as an initial, not a nickname — `"J"` vs
+  `"JAMES"` moves from `"conflicts"` to `"corroborates"` (compatibility,
+  never identity), `"J"` vs `"ROBERT"` still conflicts. Mirrors
+  [`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md)’s
+  initial semantics; closes the initials residual from issue
+  [\#3](https://github.com/mufflyt/mysterynpi/issues/3). The verdict
+  snapshot was regenerated and the diff reviewed.
+
+- New vignette `vetoes-and-quarantine`: the deterministic policy for
+  error-prone-field conflicts — veto in weaker evidence classes,
+  quarantine at the strongest, record every veto.
 
 - Testing patterns imported from the public name-matching ecosystem,
   each credited in the file that carries it: a golden verdict corpus

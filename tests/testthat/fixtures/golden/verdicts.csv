@@ -1,0 +1,71 @@
+## Golden verdict corpus: every row is a test case and must reproduce EXACTLY.
+## Pattern from datamade/probablepeople (MIT) tests/test_tagging.py, where each
+## labeled example is parametrized as its own test and the contract is stated
+## in a comment. The contract, adopted verbatim: every newly discovered hard
+## case is appended to this corpus IN THE SAME PR that fixes it.
+## Provenance: hand-adjudicated synthetic cases. Sources per row in `note`:
+##   shipped-defect  = a defect this package exists to prevent (see R/ docs)
+##   issue-3         = measured ghost pairs from github.com/mufflyt/mysterynpi#3
+##   corpus-edge     = a recorded NICKNAME_EDGES fact worth pinning
+##   npi-shape       = registry-style formatting vs roster-style formatting
+## All names are synthetic or drawn from the vendored public corpora; no real
+## identifiable person is asserted about.
+rule,a,state_a,b,state_b,expected,note
+middle,A REINHARD,,REINHARD,,corroborates,shipped-defect: position must not manufacture disagreement
+middle,BETH HARVEY,,H,,corroborates,shipped-defect: initial corroborates a token it abbreviates
+middle,M,,ANN MARIE,,corroborates,shipped-defect: single initial vs token set
+middle,VL,,VELMA LAURITZEN,,corroborates,shipped-defect: concatenated initials are initials
+middle,MJ,,MARY JANE,,corroborates,shipped-defect: concatenated initials are initials
+middle,VL,,LAURITZEN VELMA,,conflicts,shipped-defect: initials map in order
+middle,JANE,,JOAN,,conflicts,veto must keep vetoing
+middle,MARILYN,,F,,conflicts,initial that abbreviates nothing on the other side
+middle,JULIA,,JULIE,,conflicts,shipped-defect: no edit-distance tolerance
+middle,ELISABETH,,ELIZABETH,,conflicts,shipped-defect: no edit-distance tolerance
+middle,B,,BETH,,corroborates,initial vs full at shortest granularity
+middle,,,MARIE,,uninformative,absence is never evidence of difference
+middle,WORKMAN,,G,,conflicts,maiden-style token vs unrelated initial
+gender,Female,,F,,corroborates,encoding difference must not manufacture a veto
+gender, male ,,M,,corroborates,whitespace and case ignored
+gender,M,,F,,conflicts,the veto itself
+gender,FEMALE,,MALE,,conflicts,the veto itself
+gender,U,,F,,uninformative,unknown decides nothing
+gender,1,,M,,uninformative,numeric conventions are refused not guessed
+gender,2,,F,,uninformative,numeric conventions are refused not guessed
+gender,,,F,,uninformative,absence decides nothing
+nickname,BETH,,ELIZABETH,,corroborates,recorded edge admits
+nickname,ELIZABETH,,LIZ,,corroborates,recorded edge admits in either direction
+nickname,BOB,,BOBBY,,corroborates,shared formal name ROBERT admits
+nickname,AL,,ALBERT,,corroborates,hub nickname pairs with each formal name
+nickname,AL,,ALEXANDER,,corroborates,hub nickname pairs with each formal name
+nickname,ALBERT,,ALEXANDER,,conflicts,shipped-defect: a shared nickname must not weld two formal names
+nickname,ELISABETH,,ELIZABETH,,conflicts,no spelling tolerance; only recorded edges admit
+nickname,JANE,,JOAN,,conflicts,no recorded relation
+nickname,JULIA,,JULIE,,corroborates,corpus-edge: recorded usage edge; the table speaks not edit distance
+nickname,k.c.,,CASEY,,corroborates,corpus-edge: dotted initialism normalizes to KC
+nickname,RICK,,RICHARD,,corroborates,issue-3: a contraction the weaker dictionary missed
+nickname,KATIE,,KATHERINE,,corroborates,issue-3: a contraction the weaker dictionary missed
+nickname,PEG,,MARGARET,,corroborates,issue-3: irregular hypocorism recorded in the corpus
+nickname,NANCY,,ANN,,corroborates,issue-3: irregular hypocorism recorded in the corpus
+nickname,MARVIN,,MORRIS,,conflicts,issue-3: confirmed ghost; same gender so only this rule catches it
+nickname,GEORGE,,GRETA,,conflicts,issue-3: confirmed ghost written onto a living physician
+nickname,CHRISTINA,,CHRISTOPHER,,conflicts,prefix rules would admit this cross-gender derivative
+nickname,PATRICIA,,PATRICK,,conflicts,prefix rules would admit this cross-gender derivative
+nickname,DANIELLE,,DANIEL,,conflicts,prefix rules would admit this cross-gender derivative
+nickname,,,MARY,,uninformative,absence decides nothing
+suffix,JR,,SR,,conflicts,shipped-defect: the canonical father/son false match
+suffix,II,,III,,conflicts,different generations conflict
+suffix,JR,,II,,corroborates,both a second-of-name; house style is not a veto
+suffix,2ND,,Jr.,,corroborates,spelling variants of the same generation
+suffix,III,,3rd,,corroborates,spelling variants of the same generation
+suffix,Jr.,,JUNIOR,,corroborates,periods and long forms normalize
+suffix,SENIOR,,snr,,corroborates,periods and long forms normalize
+suffix,V,,IV,,uninformative,V is an initial far more often than a fifth-of-name
+suffix,,,JR,,uninformative,absence decides nothing
+license,MD-12345,CO,md 12345,co,corroborates,npi-shape: case and punctuation are formatting
+license,A.1.2,TX,A12,TX,corroborates,npi-shape: periods are formatting
+license,12345,CO,12345,TX,uninformative,same number in two states is a numbering coincidence
+license,12345,CO,99999,CO,uninformative,not a conflict: a quarter of NPIs carry multiple licenses
+license,0052,CO,52,CO,uninformative,zero padding is meaning not formatting
+license,MD12345,CO,12345,CO,uninformative,a profession prefix is meaning not formatting
+license,12345,,12345,CO,uninformative,a number without its state is not yet a license
+license,,CO,12345,CO,uninformative,absence decides nothing

@@ -64,6 +64,25 @@ test_that("the parse tree references no approximate-matching capability", {
   expect_identical(intersect(seen, banned_pkgs), character(0))
 })
 
+# The two guards above read SOURCE files, which are absent when tests run
+# against the installed package under R CMD check -- there they skip, and a
+# skipped guard proves nothing on the day it matters (loudness rule from
+# derek73/python-nameparser's ja-extra CI job). This walk inspects the
+# INSTALLED namespace's function bodies, so it runs everywhere, always.
+test_that("no function in the installed namespace references fuzzy machinery", {
+  ns <- asNamespace("mysterynpi")
+  fns <- Filter(is.function, mget(ls(ns, all.names = TRUE), envir = ns,
+                                  ifnotfound = list(NULL)))
+  seen <- unique(unlist(lapply(fns, referenced_symbols)))
+  banned <- c("adist", "agrep", "agrepl", "stringdist", "stringsim",
+              "amatch", "stringdistmatrix", "jarowinkler", "soundex",
+              "nysiis", "metaphone", "phonetic", "fastLink",
+              "compare.dedup", "pair_blocking",
+              "phonics", "RecordLinkage", "reclin", "reclin2", "fuzzyjoin")
+  expect_identical(intersect(seen, banned), character(0))
+  expect_gt(length(fns), 30)     # the guard must actually be seeing the package
+})
+
 test_that("the package declares no approximate-matching dependency", {
   d <- read.dcf(system.file("DESCRIPTION", package = "mysterynpi"))
   deps <- paste(d[, intersect(colnames(d), c("Imports", "Depends", "LinkingTo"))],

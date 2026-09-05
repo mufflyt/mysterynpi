@@ -31,13 +31,18 @@ jobs:
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
+    # The devel leg is advisory (pattern from howardjp/phonics, BSD-2-Clause,
+    # R-CMD-check.yaml): breakage on tomorrow's R should surface without
+    # blocking today's merge; it becomes blocking at release time.
+    continue-on-error: ${{ matrix.config.advisory || false }}
+
     strategy:
       fail-fast: false
       matrix:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release', advisory: true}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
 
@@ -65,3 +70,29 @@ jobs:
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+
+  # Generated docs must be fresh (pattern from howardjp/phonics,
+  # BSD-2-Clause): regenerate Rd from the roxygen comments and require zero
+  # diff, so man/ can never silently lag the documentation people actually
+  # edit. NAMESPACE is hand-maintained here and deliberately not regenerated.
+  documentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::roxygen2
+          needs: check
+
+      - name: Regenerate Rd and require zero diff
+        run: |
+          Rscript -e 'roxygen2::roxygenise(roclets = "rd")'
+          git diff --exit-code -- man

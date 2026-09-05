@@ -1,3 +1,29 @@
+# Semantic invariants on the TABLE itself, not the functions over it --
+# pattern from carltonnorthern/nicknames (Apache-2.0), python/test_package.py,
+# which asserts its lookups reconstruct each other and its data stays
+# canonical. The CI drift gate (data-integrity.yaml) covers regeneration;
+# these cover meaning.
+test_that("the table's semantics hold: no self-edges, canonical form", {
+  expect_identical(sum(NICKNAME_EDGES$name == NICKNAME_EDGES$nickname), 0L)
+  norm <- function(x) gsub("[.]", "", toupper(trimws(x)))
+  expect_identical(NICKNAME_EDGES$name, norm(NICKNAME_EDGES$name))
+  expect_identical(NICKNAME_EDGES$nickname, norm(NICKNAME_EDGES$nickname))
+  expect_false(is.unsorted(order(NICKNAME_EDGES$name,
+                                 NICKNAME_EDGES$nickname)))
+  # the forward and inverted lookups must reconstruct the same relation
+  fwd <- split(NICKNAME_EDGES$nickname, NICKNAME_EDGES$name)
+  inv <- split(NICKNAME_EDGES$name, NICKNAME_EDGES$nickname)
+  rebuilt <- data.frame(
+    name = rep(unlist(inv, use.names = FALSE),
+               times = 1),
+    nickname = rep(names(inv), lengths(inv)),
+    stringsAsFactors = FALSE)
+  rebuilt <- rebuilt[order(rebuilt$name, rebuilt$nickname), ]
+  rownames(rebuilt) <- NULL
+  expect_identical(rebuilt, NICKNAME_EDGES)
+  expect_identical(sort(unique(names(fwd))), unique(NICKNAME_EDGES$name))
+})
+
 test_that("the vendored table is what the build script promises", {
   expect_identical(names(NICKNAME_EDGES), c("name", "nickname"))
   expect_gt(nrow(NICKNAME_EDGES), 2500)

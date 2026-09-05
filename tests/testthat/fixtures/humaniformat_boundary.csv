@@ -1,0 +1,18 @@
+## Vendor-boundary fixture: the EXACT humaniformat::parse_names() outputs
+## parse_person() depends on, recorded from humaniformat as installed on
+## 2026-09-05. Ironholds/humaniformat last pushed in 2022; a dormant upstream
+## will not announce drift, so this file does. A failure here means the vendor
+## boundary moved -- audit parse_person() before touching these expectations.
+## Note the third row records humaniformat's RAW comma behaviour (first_name
+## "Williams,") -- parse_person() works around it; if upstream ever starts
+## handling commas itself, that workaround would double-apply, and this row
+## is the tripwire. Pattern: vendor-boundary pinning, motivated by the
+## dormancy finding in the 2026-09 ecosystem survey.
+## Provenance: recorded outputs of humaniformat::parse_names(), synthetic names.
+full_name,first_name,middle_name,last_name
+Jon W Williams,Jon,W,Williams
+Ann M. Barbaccia,Ann,M.,Barbaccia
+"Williams, W. Jon","Williams,",W.,Jon
+Mary Beth OBrien,Mary,Beth,OBrien
+JAMES VAN DER BEEK,JAMES,,VAN DER BEEK
+Jane Doe-Smith,Jane,,Doe-Smith

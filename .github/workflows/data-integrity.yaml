@@ -1,0 +1,53 @@
+# The vendored-data drift gate: regenerate NICKNAME_EDGES from its pinned
+# upstream commit and require a byte-identical result, so the shipped table
+# can never silently diverge from its source or its canonical form.
+#
+# Pattern from opensanctions/rigour (MIT) -- build.yml's "Check generated
+# data is up to date" step (`make build && git diff --exit-code`) -- and from
+# carltonnorthern/nicknames (Apache-2.0), whose ensure-normalized CI job
+# re-canonicalises names.csv and diffs. Path-filtered (splink's one-concern-
+# per-workflow shape): this only needs to run when the data or its build
+# script changes.
+on:
+  push:
+    branches: [main, master]
+    paths: ['data-raw/**', 'data/**']
+  pull_request:
+    paths: ['data-raw/**', 'data/**']
+  workflow_dispatch:
+
+name: data-integrity.yaml
+
+permissions: read-all
+
+jobs:
+  regenerate-and-diff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      # The gate compares the OBJECT, not the .rda bytes: serialization is not
+      # guaranteed byte-stable across platforms and R versions, and a gate
+      # that cries wolf gets deleted. identical() on the loaded frame is the
+      # contract that matters.
+      - name: Regenerate from the pinned commit and require the identical table
+        run: |
+          cp data/NICKNAME_EDGES.rda /tmp/shipped.rda
+          Rscript data-raw/NICKNAME_EDGES.R
+          Rscript -e '
+            shipped <- local({ load("/tmp/shipped.rda"); NICKNAME_EDGES })
+            rebuilt <- local({ load("data/NICKNAME_EDGES.rda"); NICKNAME_EDGES })
+            if (!identical(shipped, rebuilt)) {
+              cat("shipped rows:", nrow(shipped), " rebuilt rows:", nrow(rebuilt), "\n")
+              only_shipped <- setdiff(do.call(paste, shipped), do.call(paste, rebuilt))
+              only_rebuilt <- setdiff(do.call(paste, rebuilt), do.call(paste, shipped))
+              if (length(only_shipped)) cat("only in shipped:", head(only_shipped, 10), sep = "\n  ")
+              if (length(only_rebuilt)) cat("only in rebuilt:", head(only_rebuilt, 10), sep = "\n  ")
+              stop("data/NICKNAME_EDGES.rda has drifted from its pinned regeneration")
+            }
+            cat("table identical to its regeneration:", nrow(rebuilt), "edges\n")'

@@ -51,3 +51,27 @@ jobs:
               stop("data/NICKNAME_EDGES.rda has drifted from its pinned regeneration")
             }
             cat("table identical to its regeneration:", nrow(rebuilt), "edges\n")'
+
+      - name: WINKLER_CENSUS must regenerate identically from its pinned commit
+        run: |
+          cp data/WINKLER_CENSUS.rda /tmp/shipped_wc.rda
+          Rscript data-raw/WINKLER_CENSUS.R
+          Rscript -e '
+            shipped <- local({ load("/tmp/shipped_wc.rda"); WINKLER_CENSUS })
+            rebuilt <- local({ load("data/WINKLER_CENSUS.rda"); WINKLER_CENSUS })
+            stopifnot(identical(shipped, rebuilt))
+            cat("WINKLER_CENSUS identical:", nrow(rebuilt), "rows\n")'
+
+      # ROSTER_BENCHMARK is authored code with no external source; the gate
+      # catches the generator and the shipped data drifting apart. The
+      # benchmark's rda AND its CSV twin must both match.
+      - name: ROSTER_BENCHMARK must match its generator
+        run: |
+          cp data/ROSTER_BENCHMARK.rda /tmp/shipped_rb.rda
+          Rscript data-raw/ROSTER_BENCHMARK.R
+          Rscript -e '
+            shipped <- local({ load("/tmp/shipped_rb.rda"); ROSTER_BENCHMARK })
+            rebuilt <- local({ load("data/ROSTER_BENCHMARK.rda"); ROSTER_BENCHMARK })
+            stopifnot(identical(shipped, rebuilt))
+            cat("ROSTER_BENCHMARK identical:", nrow(rebuilt), "pairs\n")'
+          git diff --exit-code -- inst/extdata/roster_benchmark.csv

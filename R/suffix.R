@@ -57,20 +57,32 @@ normalize_suffix <- function(x) {
 #' When a string carries more than one recognised suffix token the LAST one
 #' wins (suffixes trail), and all of them are removed from the name.
 #'
+#' COMMAS SURVIVE. The returned name keeps its commas (minus any left
+#' dangling at the end), because [parse_person()]'s "Last, First" reversal
+#' NEEDS them: an earlier version of this function split on commas and
+#' rejoined with spaces, which silently turned `"Thomas, William"` into
+#' `"Thomas William"` and handed the parser the surname as a given name.
+#' The roster benchmark caught it -- three formatting-family pairs rejected
+#' on a comma this function had eaten.
+#'
 #' @param x character vector of raw name strings.
 #' @return data.frame with `name` (the string with suffix tokens removed,
-#'   whitespace normalised) and `suffix` (canonical label or `NA`).
+#'   whitespace normalised, commas preserved) and `suffix` (canonical label
+#'   or `NA`).
 #' @export
 extract_suffix <- function(x) {
   x <- as.character(x)
   res <- lapply(x, function(s) {
     if (is.na(s)) return(list(name = NA_character_, suffix = NA_character_))
-    parts <- strsplit(s, "[[:space:],]+")[[1]]
+    parts <- strsplit(s, "[[:space:]]+")[[1]]
     parts <- parts[nzchar(parts)]
-    canon <- normalize_suffix(parts)
+    # detection strips punctuation; the KEPT tokens keep theirs, so the
+    # commas parse_person() relies on survive
+    canon <- normalize_suffix(gsub("[.,]", "", parts))
     hit <- !is.na(canon)
-    list(name = gsub("[[:space:]]+", " ",
-                     trimws(paste(parts[!hit], collapse = " "))),
+    nm <- paste(parts[!hit], collapse = " ")
+    nm <- gsub("[[:space:]]+", " ", trimws(gsub("[ ,]+$", "", nm)))
+    list(name = nm,
          suffix = if (any(hit)) canon[max(which(hit))] else NA_character_)
   })
   data.frame(name = vapply(res, `[[`, character(1), "name"),

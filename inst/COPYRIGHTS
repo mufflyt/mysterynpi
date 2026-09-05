@@ -1,0 +1,30 @@
+Vendored data and its licenses
+==============================
+
+The mysterynpi package itself is MIT (see LICENSE). It vendors three data
+artifacts from other sources, each rebuilt by a pinned script in data-raw/:
+
+NICKNAME_EDGES
+  Source:  https://github.com/carltonnorthern/nicknames (names.csv)
+  License: Apache License 2.0 -- full text: inst/nicknames-LICENSE
+  Script:  data-raw/NICKNAME_EDGES.R (pinned commit recorded there)
+
+WINKLER_CENSUS
+  Source:  https://github.com/TeamCohen/secondstring (data/censusText.txt);
+           synthetic census pairs authored by William Winkler and
+           distributed with the SecondString project (Cohen, Ravikumar &
+           Fienberg, 2003)
+  License: Carnegie Mellon University, 2003 -- permissive with notice
+           retention; full text: inst/secondstring-LICENSE
+  Script:  data-raw/WINKLER_CENSUS.R (pinned commit recorded there)
+
+SURNAME_FREQUENCIES
+  Source:  U.S. Census Bureau, "Frequently Occurring Surnames from the
+           2010 Census",
+           https://www.census.gov/topics/population/genealogy/data/2010_surnames.html
+  License: U.S. government work, public domain
+  Script:  data-raw/SURNAME_FREQUENCIES.R
+
+ROSTER_BENCHMARK is authored with this package (data-raw/ROSTER_BENCHMARK.R)
+and carries the package's MIT license; its surnames are drawn from the
+public-domain Census file above and no row describes a real person.

@@ -1,0 +1,197 @@
+## ROSTER_BENCHMARK: labeled synthetic roster -> NPPES-shaped pairs.
+## Provenance: authored in data-raw/ROSTER_BENCHMARK.R (mysterynpi); truth
+## assigned by construction, one defect family per block. Surnames from the
+## public-domain Census 2010 frequency file; no real person is described.
+## License: MIT, as part of the mysterynpi package.
+
+"pair_id","family","truth","note","roster_name","roster_gender","roster_state","roster_license","npi_first","npi_middle","npi_last","npi_suffix","npi_credential","npi_gender","npi_state","npi_license"
+"BM001","exact","match","clean agreement, the baseline","Mary Johnson","F","CO","11001","MARY",NA,"JOHNSON",NA,"MD","F","CO","11001"
+"BM002","exact","match","clean agreement, the baseline","Robert Miller","M","CO","11002","ROBERT",NA,"MILLER",NA,"MD","M","CO","11002"
+"BM003","exact","match","clean agreement, the baseline","Linda Davis","F","CO","11003","LINDA",NA,"DAVIS",NA,"MD","F","CO","11003"
+"BM004","exact","match","clean agreement, the baseline","James Wilson","M","CO","11004","JAMES",NA,"WILSON",NA,"MD","M","CO","11004"
+"BM005","exact","match","clean agreement, the baseline","Patricia Moore","F","CO","11005","PATRICIA",NA,"MOORE",NA,"MD","F","CO","11005"
+"BM006","exact","match","clean agreement, the baseline","Michael Taylor","M","CO","11006","MICHAEL",NA,"TAYLOR",NA,"MD","M","CO","11006"
+"BM007","exact","match","clean agreement, the baseline","Barbara Anderson","F","CO","11007","BARBARA",NA,"ANDERSON",NA,"MD","F","CO","11007"
+"BM008","exact","match","clean agreement, the baseline","William Thomas","M","CO","11008","WILLIAM",NA,"THOMAS",NA,"MD","M","CO","11008"
+"BM009","exact","match","clean agreement, the baseline","Susan Jackson","F","CO","11009","SUSAN",NA,"JACKSON",NA,"MD","F","CO","11009"
+"BM010","exact","match","clean agreement, the baseline","David White","M","CO","11010","DAVID",NA,"WHITE",NA,"MD","M","CO","11010"
+"BM011","formatting","match","case, periods, spacing and credential punctuation are formatting","  mary   johnson ",NA,"CO","MD-12001","MARY",NA,"JOHNSON",NA,"MD",NA,"CO","MD12001"
+"BM012","formatting","match","case, periods, spacing and credential punctuation are formatting","ROBERT MILLER, M.D.",NA,"CO","MD-12002","ROBERT",NA,"MILLER",NA,"MD",NA,"CO","MD12002"
+"BM013","formatting","match","case, periods, spacing and credential punctuation are formatting","Linda R. Davis",NA,"CO","MD-12003","LINDA","R","DAVIS",NA,"MD",NA,"CO","MD12003"
+"BM014","formatting","match","case, periods, spacing and credential punctuation are formatting","james wilson jr",NA,"CO","MD-12004","JAMES",NA,"WILSON","JR","MD",NA,"CO","MD12004"
+"BM015","formatting","match","case, periods, spacing and credential punctuation are formatting","Dr. Patricia Moore",NA,"CO","MD-12005","PATRICIA",NA,"MOORE",NA,"MD",NA,"CO","MD12005"
+"BM016","formatting","match","case, periods, spacing and credential punctuation are formatting","Michael  B.  Taylor",NA,"CO","MD-12006","MICHAEL","B","TAYLOR",NA,"MD",NA,"CO","MD12006"
+"BM017","formatting","match","case, periods, spacing and credential punctuation are formatting","BARBARA ANDERSON RN",NA,"CO","MD.12007","BARBARA",NA,"ANDERSON",NA,"MD",NA,"CO","MD12007"
+"BM018","formatting","match","case, periods, spacing and credential punctuation are formatting","Thomas, William",NA,"CO","MD.12008","WILLIAM",NA,"THOMAS",NA,"MD",NA,"CO","MD12008"
+"BM019","formatting","match","case, periods, spacing and credential punctuation are formatting","Susan Jackson, D.O.",NA,"CO","MD.12009","SUSAN",NA,"JACKSON",NA,"MD",NA,"CO","MD12009"
+"BM020","formatting","match","case, periods, spacing and credential punctuation are formatting","White, David, M.D.",NA,"CO","MD.12010","DAVID",NA,"WHITE",NA,"MD",NA,"CO","MD12010"
+"BM021","formatting","match","case, periods, spacing and credential punctuation are formatting","LINDA DAVIS",NA,"CO","MD.12011","LINDA",NA,"DAVIS",NA,"MD",NA,"CO","MD12011"
+"BM022","formatting","match","case, periods, spacing and credential punctuation are formatting","Wilson, James B.",NA,"CO","MD.12012","JAMES","B","WILSON",NA,"MD",NA,"CO","MD12012"
+"BM023","transliteration","match","an accent must reach its unaccented registry spelling","José Álvarez",NA,"CO",NA,"JOSE",NA,"ALVAREZ",NA,"MD",NA,"CO",NA
+"BM024","transliteration","match","an accent must reach its unaccented registry spelling","María Muñoz",NA,"CO",NA,"MARIA",NA,"MUNOZ",NA,"MD",NA,"CO",NA
+"BM025","transliteration","match","an accent must reach its unaccented registry spelling","Piotr Mróz",NA,"CO",NA,"PIOTR",NA,"MROZ",NA,"MD",NA,"CO",NA
+"BM026","transliteration","match","an accent must reach its unaccented registry spelling","Hans Müller",NA,"CO",NA,"HANS",NA,"MUELLER",NA,"MD",NA,"CO",NA
+"BM027","transliteration","match","an accent must reach its unaccented registry spelling","Sinéad O'Brien",NA,"CO",NA,"SINEAD",NA,"OBRIEN",NA,"MD",NA,"CO",NA
+"BM028","transliteration","match","an accent must reach its unaccented registry spelling","François Côté",NA,"CO",NA,"FRANCOIS",NA,"COTE",NA,"MD",NA,"CO",NA
+"BM029","transliteration","match","an accent must reach its unaccented registry spelling","Renée Dubé",NA,"CO",NA,"RENEE",NA,"DUBE",NA,"MD",NA,"CO",NA
+"BM030","transliteration","match","an accent must reach its unaccented registry spelling","Søren Åkesson",NA,"CO",NA,"SOREN",NA,"AKESSON",NA,"MD",NA,"CO",NA
+"BM031","transliteration","match","an accent must reach its unaccented registry spelling","Zoë Brontë",NA,"CO",NA,"ZOE",NA,"BRONTE",NA,"MD",NA,"CO",NA
+"BM032","transliteration","match","an accent must reach its unaccented registry spelling","André Muñiz",NA,"CO",NA,"ANDRE",NA,"MUNIZ",NA,"MD",NA,"CO",NA
+"BM033","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Beth Garcia",NA,"CO",NA,"ELIZABETH",NA,"GARCIA",NA,"MD",NA,"CO",NA
+"BM034","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Liz Martinez",NA,"CO",NA,"ELIZABETH",NA,"MARTINEZ",NA,"MD",NA,"CO",NA
+"BM035","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Bob Robinson",NA,"CO",NA,"ROBERT",NA,"ROBINSON",NA,"MD",NA,"CO",NA
+"BM036","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Bill Clark",NA,"CO",NA,"WILLIAM",NA,"CLARK",NA,"MD",NA,"CO",NA
+"BM037","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Peggy Rodriguez",NA,"CO",NA,"MARGARET",NA,"RODRIGUEZ",NA,"MD",NA,"CO",NA
+"BM038","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Nancy Lewis",NA,"CO",NA,"ANN",NA,"LEWIS",NA,"MD",NA,"CO",NA
+"BM039","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Rick Lee",NA,"CO",NA,"RICHARD",NA,"LEE",NA,"MD",NA,"CO",NA
+"BM040","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Katie Walker",NA,"CO",NA,"KATHERINE",NA,"WALKER",NA,"MD",NA,"CO",NA
+"BM041","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Deb Hall",NA,"CO",NA,"DEBORAH",NA,"HALL",NA,"MD",NA,"CO",NA
+"BM042","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Chris Allen",NA,"CO",NA,"CHRISTOPHER",NA,"ALLEN",NA,"MD",NA,"CO",NA
+"BM043","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Mike Young",NA,"CO",NA,"MICHAEL",NA,"YOUNG",NA,"MD",NA,"CO",NA
+"BM044","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Kathy Hernandez",NA,"CO",NA,"KATHERINE",NA,"HERNANDEZ",NA,"MD",NA,"CO",NA
+"BM045","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Jim King",NA,"CO",NA,"JAMES",NA,"KING",NA,"MD",NA,"CO",NA
+"BM046","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Tom Wright",NA,"CO",NA,"THOMAS",NA,"WRIGHT",NA,"MD",NA,"CO",NA
+"BM047","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Sue Lopez",NA,"CO",NA,"SUSAN",NA,"LOPEZ",NA,"MD",NA,"CO",NA
+"BM048","nickname","match","a recorded hypocorism, admitted by the corpus and nothing fuzzier","Dan Hill",NA,"CO",NA,"DANIEL",NA,"HILL",NA,"MD",NA,"CO",NA
+"BM049","maiden-as-middle","match","the changed surname survives in a middle slot","Katherine Reinhard Rye",NA,"CO",NA,"KATHERINE","A","REINHARD",NA,"MD",NA,"CO",NA
+"BM050","maiden-as-middle","match","the changed surname survives in a middle slot","Pamela Harvey Capista",NA,"CO",NA,"PAMELA","BETH","HARVEY",NA,"MD",NA,"CO",NA
+"BM051","maiden-as-middle","match","the changed surname survives in a middle slot","Alyssa Bantz Hindmon",NA,"CO",NA,"ALYSSA","DIANE","BANTZ",NA,"MD",NA,"CO",NA
+"BM052","maiden-as-middle","match","the changed surname survives in a middle slot","Laura Scott Baker",NA,"CO",NA,"LAURA",NA,"SCOTT",NA,"MD",NA,"CO",NA
+"BM053","maiden-as-middle","match","the changed surname survives in a middle slot","Emily Green Adams",NA,"CO",NA,"EMILY",NA,"GREEN",NA,"MD",NA,"CO",NA
+"BM054","maiden-as-middle","match","the changed surname survives in a middle slot","Rachel Nelson Carter",NA,"CO",NA,"RACHEL","L","NELSON",NA,"MD",NA,"CO",NA
+"BM055","maiden-as-middle","match","the changed surname survives in a middle slot","Amanda Mitchell Perez",NA,"CO",NA,"AMANDA",NA,"MITCHELL",NA,"MD",NA,"CO",NA
+"BM056","maiden-as-middle","match","the changed surname survives in a middle slot","Melissa Roberts Turner",NA,"CO",NA,"MELISSA","J","ROBERTS",NA,"MD",NA,"CO",NA
+"BM057","maiden-as-middle","match","the changed surname survives in a middle slot","Stephanie Phillips Campbell",NA,"CO",NA,"STEPHANIE",NA,"PHILLIPS",NA,"MD",NA,"CO",NA
+"BM058","maiden-as-middle","match","the changed surname survives in a middle slot","Nicole Parker Evans",NA,"CO",NA,"NICOLE",NA,"PARKER",NA,"MD",NA,"CO",NA
+"BM059","maiden-as-middle","match","the changed surname survives in a middle slot","Heather Edwards Collins",NA,"CO",NA,"HEATHER","M","EDWARDS",NA,"MD",NA,"CO",NA
+"BM060","maiden-as-middle","match","the changed surname survives in a middle slot","Christine Stewart Morris",NA,"CO",NA,"CHRISTINE",NA,"STEWART",NA,"MD",NA,"CO",NA
+"BM061","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Anna McCarthy-Dervin",NA,"CO",NA,"ANNA",NA,"MCCARTHY",NA,"MD",NA,"CO",NA
+"BM062","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Sofia Rivera-Cruz",NA,"CO",NA,"SOFIA",NA,"RIVERA",NA,"MD",NA,"CO",NA
+"BM063","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Grace Cooper-Reed",NA,"CO",NA,"GRACE",NA,"REED",NA,"MD",NA,"CO",NA
+"BM064","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Chloe Bailey-Ward",NA,"CO",NA,"CHLOE",NA,"WARD",NA,"MD",NA,"CO",NA
+"BM065","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Lily Torres-Vega",NA,"CO",NA,"LILY",NA,"VEGA",NA,"MD",NA,"CO",NA
+"BM066","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Ella Ramirez-Sosa",NA,"CO",NA,"ELLA",NA,"RAMIREZ",NA,"MD",NA,"CO",NA
+"BM067","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Maria de la Cruz",NA,"CO",NA,"MARIA",NA,"CRUZ",NA,"MD",NA,"CO",NA
+"BM068","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Carmen Vega Santos",NA,"CO",NA,"CARMEN",NA,"SANTOS",NA,"MD",NA,"CO",NA
+"BM069","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Isabel Cruz-Ortiz",NA,"CO",NA,"ISABEL",NA,"ORTIZ",NA,"MD",NA,"CO",NA
+"BM070","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Elena Santos-Diaz",NA,"CO",NA,"ELENA",NA,"DIAZ",NA,"MD",NA,"CO",NA
+"BM071","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Victoria Reyes-Luna",NA,"CO",NA,"VICTORIA",NA,"LUNA",NA,"MD",NA,"CO",NA
+"BM072","compound-surname","match","hyphenated and dropped components; 27.1% vs 9.8% unmatched upstream","Julia Flores-Marin",NA,"CO",NA,"JULIA",NA,"FLORES",NA,"MD",NA,"CO",NA
+"BM073","initials","match","an initial corroborates the name it abbreviates","J. Sanders",NA,"CO",NA,"JAMES",NA,"SANDERS",NA,"MD",NA,"CO",NA
+"BM074","initials","match","an initial corroborates the name it abbreviates","M. Bryant",NA,"CO",NA,"MARY",NA,"BRYANT",NA,"MD",NA,"CO",NA
+"BM075","initials","match","an initial corroborates the name it abbreviates","K. Griffin",NA,"CO",NA,"KAREN",NA,"GRIFFIN",NA,"MD",NA,"CO",NA
+"BM076","initials","match","an initial corroborates the name it abbreviates","R. Hayes",NA,"CO",NA,"ROBERT",NA,"HAYES",NA,"MD",NA,"CO",NA
+"BM077","initials","match","an initial corroborates the name it abbreviates","L. Simmons",NA,"CO",NA,"LINDA",NA,"SIMMONS",NA,"MD",NA,"CO",NA
+"BM078","initials","match","an initial corroborates the name it abbreviates","A. Foster",NA,"CO",NA,"AMY",NA,"FOSTER",NA,"MD",NA,"CO",NA
+"BM079","initials","match","an initial corroborates the name it abbreviates","D. Gonzales",NA,"CO",NA,"DAVID",NA,"GONZALES",NA,"MD",NA,"CO",NA
+"BM080","initials","match","an initial corroborates the name it abbreviates","S. Butler",NA,"CO",NA,"SUSAN",NA,"BUTLER",NA,"MD",NA,"CO",NA
+"BM081","initials","match","an initial corroborates the name it abbreviates","C. Barnes",NA,"CO",NA,"CAROL",NA,"BARNES",NA,"MD",NA,"CO",NA
+"BM082","initials","match","an initial corroborates the name it abbreviates","E. Fisher",NA,"CO",NA,"EMILY",NA,"FISHER",NA,"MD",NA,"CO",NA
+"BM083","initials","nonmatch","an incompatible initial still vetoes","J. Henderson",NA,"CO",NA,"ROBERT",NA,"HENDERSON",NA,"MD",NA,"CO",NA
+"BM084","initials","nonmatch","an incompatible initial still vetoes","M. Coleman",NA,"CO",NA,"DAVID",NA,"COLEMAN",NA,"MD",NA,"CO",NA
+"BM085","initials","nonmatch","an incompatible initial still vetoes","K. Jenkins",NA,"CO",NA,"SUSAN",NA,"JENKINS",NA,"MD",NA,"CO",NA
+"BM086","initials","nonmatch","an incompatible initial still vetoes","R. Perry",NA,"CO",NA,"JAMES",NA,"PERRY",NA,"MD",NA,"CO",NA
+"BM087","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Henry Powell Sr",NA,"CO",NA,"HENRY",NA,"POWELL","JR","MD",NA,"CO",NA
+"BM088","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Walter Long Sr",NA,"CO",NA,"WALTER",NA,"LONG","JR","MD",NA,"CO",NA
+"BM089","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Arthur Ross Sr",NA,"CO",NA,"ARTHUR",NA,"ROSS","JR","MD",NA,"CO",NA
+"BM090","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Frank Wood Sr",NA,"CO",NA,"FRANK",NA,"WOOD","JR","MD",NA,"CO",NA
+"BM091","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Roy Cox Sr",NA,"CO",NA,"ROY",NA,"COX","JR","MD",NA,"CO",NA
+"BM092","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Earl Ford Sr",NA,"CO",NA,"EARL",NA,"FORD","JR","MD",NA,"CO",NA
+"BM093","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Henry A. Powell",NA,"CO",NA,"HENRY","T","POWELL","JR","MD",NA,"CO",NA
+"BM094","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Walter Long III",NA,"CO",NA,"WALTER",NA,"LONG","JR","MD",NA,"CO",NA
+"BM095","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Arthur Ross II",NA,"CO",NA,"ARTHUR",NA,"ROSS","III","MD",NA,"CO",NA
+"BM096","suffix-generations","nonmatch","father and son: same name, same address, one generation apart","Frank Wood 3rd",NA,"CO",NA,"FRANK",NA,"WOOD","II","MD",NA,"CO",NA
+"BM097","suffix-generations","match","JR and II are the same generation written twice","Henry Powell Jr",NA,"CO",NA,"HENRY",NA,"POWELL","II","MD",NA,"CO",NA
+"BM098","suffix-generations","match","JR and II are the same generation written twice","Walter Long 2nd",NA,"CO",NA,"WALTER",NA,"LONG","JR","MD",NA,"CO",NA
+"BM099","suffix-generations","match","JR and II are the same generation written twice","Arthur Ross Jr",NA,"CO",NA,"ARTHUR",NA,"ROSS","II","MD",NA,"CO",NA
+"BM100","suffix-generations","match","JR and II are the same generation written twice","Frank Wood II",NA,"CO",NA,"FRANK",NA,"WOOD","JR","MD",NA,"CO",NA
+"BM101","suffix-generations","match","JR and II are the same generation written twice","Roy Cox Junior",NA,"CO",NA,"ROY",NA,"COX","JR","MD",NA,"CO",NA
+"BM102","suffix-generations","match","JR and II are the same generation written twice","Earl Ford Jr.",NA,"CO",NA,"EARL",NA,"FORD","II","MD",NA,"CO",NA
+"BM103","stale-gender","match","a recorded gender conflict on a true match; quarantine, not deletion","Jordan Brooks","F","CO","15001","JORDAN",NA,"BROOKS",NA,"MD","M","CO","15001"
+"BM104","stale-gender","match","a recorded gender conflict on a true match; quarantine, not deletion","Casey Reed","M","CO","15002","CASEY",NA,"REED",NA,"MD","F","CO","15002"
+"BM105","stale-gender","match","a recorded gender conflict on a true match; quarantine, not deletion","Taylor Price","F","CO","15003","TAYLOR",NA,"PRICE",NA,"MD","M","CO","15003"
+"BM106","stale-gender","match","a recorded gender conflict on a true match; quarantine, not deletion","Morgan Bell","M","CO","15004","MORGAN",NA,"BELL",NA,"MD","F","CO","15004"
+"BM107","stale-gender","match","a recorded gender conflict on a true match; quarantine, not deletion","Riley Murphy","F","CO","15005","RILEY",NA,"MURPHY",NA,"MD","M","CO","15005"
+"BM108","stale-gender","match","a recorded gender conflict on a true match; quarantine, not deletion","Avery Rivera","M","CO","15006","AVERY",NA,"RIVERA",NA,"MD","F","CO","15006"
+"BM109","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Julia K. Bennett",NA,"CO",NA,"JULIE","R","BENNETT",NA,"MD",NA,"CO",NA
+"BM110","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Lee Watson",NA,"CO",NA,"LEA",NA,"WATSON",NA,"MD",NA,"CO",NA
+"BM111","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Elisabeth Gray",NA,"CO",NA,"ELIZABETH",NA,"GRAY",NA,"MD",NA,"CO",NA
+"BM112","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Ann T. Hughes",NA,"CO",NA,"ANNE","W","HUGHES",NA,"MD",NA,"CO",NA
+"BM113","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Kristina Sullivan",NA,"CO",NA,"KRISHNA",NA,"SULLIVAN",NA,"MD",NA,"CO",NA
+"BM114","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Jane Russell",NA,"CO",NA,"JOAN",NA,"RUSSELL",NA,"MD",NA,"CO",NA
+"BM115","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Sara M. Ortiz",NA,"CO",NA,"SARAH","L","ORTIZ",NA,"MD",NA,"CO",NA
+"BM116","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Jon P. Wallace",NA,"CO",NA,"JOHN","T","WALLACE",NA,"MD",NA,"CO",NA
+"BM117","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Carol D. West",NA,"CO",NA,"CAROLE","G","WEST",NA,"MD",NA,"CO",NA
+"BM118","spelling-trap","nonmatch","different people an edit apart; where the corpus records the spellings as substitutable (JULIA/JULIE) the deciding evidence is the middle initial, because spelling alone must not decide in either direction","Dana Wells",NA,"CO",NA,"DANA","R","WELLES",NA,"MD",NA,"CO",NA
+"BM119","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Christina Fleming",NA,"CO",NA,"CHRISTOPHER",NA,"FLEMING",NA,"MD",NA,"CO",NA
+"BM120","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Patricia Warren",NA,"CO",NA,"PATRICK",NA,"WARREN",NA,"MD",NA,"CO",NA
+"BM121","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Paula Gibson",NA,"CO",NA,"PAUL",NA,"GIBSON",NA,"MD",NA,"CO",NA
+"BM122","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Erica Mason",NA,"CO",NA,"ERIC",NA,"MASON",NA,"MD",NA,"CO",NA
+"BM123","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Danielle Hunt",NA,"CO",NA,"DANIEL",NA,"HUNT",NA,"MD",NA,"CO",NA
+"BM124","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Geraldine Rice",NA,"CO",NA,"GERALD",NA,"RICE",NA,"MD",NA,"CO",NA
+"BM125","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Michelle Boyd",NA,"CO",NA,"MICHAEL",NA,"BOYD",NA,"MD",NA,"CO",NA
+"BM126","cross-gender-derivative","nonmatch","a prefix rule would admit every one of these","Georgia Fox",NA,"CO",NA,"GEORGE",NA,"FOX",NA,"MD",NA,"CO",NA
+"BM127","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","Mary Ann Smith",NA,"CO","16001","MARY","JO","SMITH",NA,"MD",NA,"TX","26001"
+"BM128","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","John David Johnson",NA,"CO","16002","JOHN","MARK","JOHNSON",NA,"MD",NA,"TX","26002"
+"BM129","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","Mary Lou Williams",NA,"CO","16003","MARY","ELLEN","WILLIAMS",NA,"MD",NA,"AZ","26003"
+"BM130","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","James Earl Brown",NA,"CO","16004","JAMES","TODD","BROWN",NA,"MD",NA,"AZ","26004"
+"BM131","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","Linda Kay Jones",NA,"CO","16005","LINDA","RAE","JONES",NA,"MD",NA,"NM","26005"
+"BM132","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","Robert Dean Garcia",NA,"CO","16006","ROBERT","GLEN","GARCIA",NA,"MD",NA,"NM","26006"
+"BM133","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","Mary Beth Smith",NA,"CO","16007","MARY","JANE","SMITH",NA,"MD",NA,"UT","26007"
+"BM134","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","John Paul Johnson",NA,"CO","16008","JOHN","MARK","JOHNSON",NA,"MD",NA,"UT","26008"
+"BM135","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","Linda Sue Miller",NA,"CO","16009","LINDA","GAIL","MILLER",NA,"MD",NA,"WY","26009"
+"BM136","common-name-collision","nonmatch","agreement on SMITH is weak evidence; the middles and licenses disagree","James Ray Davis",NA,"CO","16010","JAMES","DEAN","DAVIS",NA,"MD",NA,"KS","26010"
+"BM137","hub-nickname","nonmatch","a shared nickname must not weld two formal names","Albert Freeman",NA,"CO",NA,"ALEXANDER",NA,"FREEMAN",NA,"MD",NA,"CO",NA
+"BM138","hub-nickname","nonmatch","a shared nickname must not weld two formal names","Alexander Freeman",NA,"CO",NA,"ALBERT",NA,"FREEMAN",NA,"MD",NA,"CO",NA
+"BM139","hub-nickname","nonmatch","a shared nickname must not weld two formal names","Christina Webb",NA,"CO",NA,"CHRISTINE",NA,"WEBB",NA,"MD",NA,"CO",NA
+"BM140","hub-nickname","nonmatch","a shared nickname must not weld two formal names","Katherine Tucker",NA,"CO",NA,"KATHLEEN",NA,"TUCKER",NA,"MD",NA,"CO",NA
+"BM141","hub-nickname","nonmatch","a shared nickname must not weld two formal names","Margaret Porter",NA,"CO",NA,"MARJORIE",NA,"PORTER",NA,"MD",NA,"CO",NA
+"BM142","hub-nickname","nonmatch","a shared nickname must not weld two formal names","Antonia Nichols",NA,"CO",NA,"ANTOINETTE",NA,"NICHOLS",NA,"MD",NA,"CO",NA
+"BM143","noise","match","credentials, placeholders and alternates are noise, not names","Ann M. Barbaccia (Pollack), M.D.",NA,"CO",NA,"ANN","M","BARBACCIA",NA,"MD",NA,"CO",NA
+"BM144","noise","match","credentials, placeholders and alternates are noise, not names","Samuel (NMN) Anaya",NA,"CO",NA,"SAMUEL",NA,"ANAYA",NA,"MD",NA,"CO",NA
+"BM145","noise","match","credentials, placeholders and alternates are noise, not names","Cynthia (Cindi) Holt",NA,"CO",NA,"CYNTHIA",NA,"HOLT",NA,"MD",NA,"CO",NA
+"BM146","noise","match","credentials, placeholders and alternates are noise, not names","Sandoval, Gloria, CNM",NA,"CO",NA,"GLORIA",NA,"SANDOVAL",NA,"MD",NA,"CO",NA
+"BM147","noise","match","credentials, placeholders and alternates are noise, not names","Kim, Grace, M.D., F.A.C.O.G.",NA,"CO",NA,"GRACE",NA,"KIM",NA,"MD",NA,"CO",NA
+"BM148","noise","match","credentials, placeholders and alternates are noise, not names","Prof. Alan Chen PhD",NA,"CO",NA,"ALAN",NA,"CHEN",NA,"MD",NA,"CO",NA
+"BM149","noise","match","credentials, placeholders and alternates are noise, not names","Ms. Petra Novak",NA,"CO",NA,"PETRA",NA,"NOVAK",NA,"MD",NA,"CO",NA
+"BM150","noise","match","credentials, placeholders and alternates are noise, not names","Rev. Paul Weber MD",NA,"CO",NA,"PAUL",NA,"WEBER",NA,"MD",NA,"CO",NA
+"BM151","noise","match","credentials, placeholders and alternates are noise, not names","Diaz, Rosa (Rose)",NA,"CO",NA,"ROSA",NA,"DIAZ",NA,"MD",NA,"CO",NA
+"BM152","noise","match","credentials, placeholders and alternates are noise, not names","O'Neal, Shannon R.N.",NA,"CO",NA,"SHANNON",NA,"ONEAL",NA,"MD",NA,"CO",NA
+"BM153","noise","match","credentials, placeholders and alternates are noise, not names","Vu, Lan, D.O.",NA,"CO",NA,"LAN",NA,"VU",NA,"MD",NA,"CO",NA
+"BM154","noise","match","credentials, placeholders and alternates are noise, not names","Cohen, Miriam MPH",NA,"CO",NA,"MIRIAM",NA,"COHEN",NA,"MD",NA,"CO",NA
+"BM155","license-anchor","match","same state and number: the strongest key after the NPI itself","Betsy Sherman",NA,"CO","MD-17001","ELIZABETH",NA,"SHERMAN",NA,"MD",NA,"CO","MD17001"
+"BM156","license-anchor","match","same state and number: the strongest key after the NPI itself","Billy Newton",NA,"CO","MD-17002","WILLIAM",NA,"NEWTON",NA,"MD",NA,"CO","MD17002"
+"BM157","license-anchor","match","same state and number: the strongest key after the NPI itself","Peg Curtis",NA,"CO","MD-17003","MARGARET",NA,"CURTIS",NA,"MD",NA,"CO","MD17003"
+"BM158","license-anchor","match","same state and number: the strongest key after the NPI itself","Kate Norris",NA,"CO","MD-17004","KATHERINE",NA,"NORRIS",NA,"MD",NA,"CO","MD17004"
+"BM159","license-anchor","match","same state and number: the strongest key after the NPI itself","Debbie Mccormick",NA,"CO","MD-17005","DEBORAH",NA,"MCCORMICK",NA,"MD",NA,"CO","MD17005"
+"BM160","license-anchor","match","same state and number: the strongest key after the NPI itself","Christy Barrett",NA,"CO","MD-17006","CHRISTINA",NA,"BARRETT",NA,"MD",NA,"CO","MD17006"
+"BM161","license-anchor","match","same state and number: the strongest key after the NPI itself","Bobby Mcguire",NA,"CO","MD-17007","ROBERT",NA,"MCGUIRE",NA,"MD",NA,"CO","MD17007"
+"BM162","license-anchor","match","same state and number: the strongest key after the NPI itself","Jimmy Mullins",NA,"CO","MD-17008","JAMES",NA,"MULLINS",NA,"MD",NA,"CO","MD17008"
+"BM163","license-anchor","nonmatch","the same number in another state is a numbering coincidence","Karen Blake",NA,"CO","18001","SHARON",NA,"BLAKE",NA,"MD",NA,"TX","18001"
+"BM164","license-anchor","nonmatch","the same number in another state is a numbering coincidence","Steven Doyle",NA,"CO","18002","STUART",NA,"DOYLE",NA,"MD",NA,"TX","18002"
+"BM165","license-anchor","nonmatch","the same number in another state is a numbering coincidence","Janet Frost",NA,"CO","18003","JANICE",NA,"FROST",NA,"MD",NA,"AZ","18003"
+"BM166","license-anchor","nonmatch","the same number in another state is a numbering coincidence","Gary Hardy",NA,"CO","18004","GERALD",NA,"HARDY",NA,"MD",NA,"AZ","18004"
+"BM167","stacked-defects","match","several defects at once, as real rows arrive","beth reinhard rye, m.d.",NA,"CO",NA,"ELIZABETH","A","REINHARD",NA,"MD",NA,"CO",NA
+"BM168","stacked-defects","match","several defects at once, as real rows arrive","DR. LIZ MCCARTHY-DERVIN",NA,"CO",NA,"ELIZABETH",NA,"MCCARTHY",NA,"MD",NA,"CO",NA
+"BM169","stacked-defects","match","several defects at once, as real rows arrive","  bob   o'brien jr ",NA,"CO",NA,"ROBERT",NA,"OBRIEN","JR","MD",NA,"CO",NA
+"BM170","stacked-defects","match","several defects at once, as real rows arrive","Peg Alvarez (Pegs)",NA,"CO",NA,"MARGARET",NA,"ALVAREZ",NA,"MD",NA,"CO",NA
+"BM171","stacked-defects","match","several defects at once, as real rows arrive","Katie de la Cruz CNM",NA,"CO",NA,"KATHERINE",NA,"CRUZ",NA,"MD",NA,"CO",NA
+"BM172","stacked-defects","match","several defects at once, as real rows arrive","kathy Harvey Capista",NA,"CO",NA,"KATHERINE","BETH","HARVEY",NA,"MD",NA,"CO",NA
+"BM173","stacked-defects","match","several defects at once, as real rows arrive","J. Ramirez-Sosa, M.D.",NA,"CO",NA,"JORGE",NA,"RAMIREZ",NA,"MD",NA,"CO",NA
+"BM174","stacked-defects","match","several defects at once, as real rows arrive","chris muñoz II",NA,"CO",NA,"CHRISTOPHER",NA,"MUNOZ","JR","MD",NA,"CO",NA
+"BM175","stacked-defects","match","several defects at once, as real rows arrive","Deb Santos-Diaz RN",NA,"CO",NA,"DEBORAH",NA,"DIAZ",NA,"MD",NA,"CO",NA
+"BM176","stacked-defects","match","several defects at once, as real rows arrive","Mike Mueller 2nd",NA,"CO",NA,"MICHAEL",NA,"MUELLER","JR","MD",NA,"CO",NA
+"BM177","stacked-defects","nonmatch","the traps stacked: near-miss spelling plus generation plus initial","Julia Bennett-Cole Jr",NA,"CO",NA,"JULIE",NA,"BENNETT","SR","MD",NA,"CO",NA
+"BM178","stacked-defects","nonmatch","the traps stacked: near-miss spelling plus generation plus initial","L. Watson Sr",NA,"CO",NA,"ROBERT",NA,"WATSON","JR","MD",NA,"CO",NA
+"BM179","stacked-defects","nonmatch","the traps stacked: near-miss spelling plus generation plus initial","Ann Hughes III",NA,"CO",NA,"ANNE",NA,"HUGHES","II","MD",NA,"CO",NA
+"BM180","stacked-defects","nonmatch","the traps stacked: near-miss spelling plus generation plus initial","Elisabeth Gray-Fox",NA,"CO",NA,"ELIZABETH",NA,"GRAY",NA,"MD",NA,"CO",NA
+"BM181","stacked-defects","nonmatch","the traps stacked: near-miss spelling plus generation plus initial","Christina Fleming Jr",NA,"CO",NA,"CHRISTOPHER",NA,"FLEMING","SR","MD",NA,"CO",NA
+"BM182","stacked-defects","nonmatch","the traps stacked: near-miss spelling plus generation plus initial","Albert Freeman Sr",NA,"CO",NA,"ALEXANDER",NA,"FREEMAN","JR","MD",NA,"CO",NA
+"BM183","absence","match","almost nothing recorded; only the name decides, and it can","Olga Petrov",NA,NA,NA,"OLGA",NA,"PETROV",NA,NA,NA,NA,NA
+"BM184","absence","match","almost nothing recorded; only the name decides, and it can","Amir Haddad",NA,NA,NA,"AMIR",NA,"HADDAD",NA,NA,NA,NA,NA
+"BM185","absence","match","almost nothing recorded; only the name decides, and it can","Wei Zhang",NA,NA,NA,"WEI",NA,"ZHANG",NA,NA,NA,NA,NA
+"BM186","absence","match","almost nothing recorded; only the name decides, and it can","Fatima Noor",NA,NA,NA,"FATIMA",NA,"NOOR",NA,NA,NA,NA,NA
+"BM187","absence","match","almost nothing recorded; only the name decides, and it can","Kwame Mensah",NA,NA,NA,"KWAME",NA,"MENSAH",NA,NA,NA,NA,NA
+"BM188","absence","match","almost nothing recorded; only the name decides, and it can","Ingrid Larsen",NA,NA,NA,"INGRID",NA,"LARSEN",NA,NA,NA,NA,NA
+"BM189","absence","match","almost nothing recorded; only the name decides, and it can","Tariq Aziz",NA,NA,NA,"TARIQ",NA,"AZIZ",NA,NA,NA,NA,NA
+"BM190","absence","match","almost nothing recorded; only the name decides, and it can","Mei Chen",NA,NA,NA,"MEI",NA,"CHEN",NA,NA,NA,NA,NA

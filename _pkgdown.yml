@@ -63,6 +63,13 @@ reference:
   - resolve_ordered_classes
   - count_rivals
   - award_contested
+  - duplicate_differences
+- title: Evaluation corpora
+  desc: Vendored and authored data; licenses in inst/COPYRIGHTS.
+  contents:
+  - ROSTER_BENCHMARK
+  - WINKLER_CENSUS
+  - SURNAME_FREQUENCIES
 - title: NPI
   contents:
   - npi_luhn_ok

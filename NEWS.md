@@ -1,5 +1,25 @@
 # mysterynpi (development version)
 
+* `ROSTER_BENCHMARK` — the labeled roster-to-registry benchmark nobody had:
+  190 fully synthetic pairs, truth by construction, one defect family per
+  block, shipped as data and as plain CSV. The reference policy in
+  `vignette("roster-benchmark")` separates it perfectly (126 accepts and 58
+  rejects all correct; 6 stale-gender true matches quarantined for review,
+  as designed). Building it caught a real defect: `extract_suffix()` was
+  eating the comma that `parse_person()`'s "Last, First" reversal needs —
+  fixed and pinned.
+* Two evaluation corpora vendored with full attribution
+  (`inst/COPYRIGHTS`): `WINKLER_CENSUS` (Winkler's synthetic census pairs
+  via the SecondString project, CMU license, 327 labeled matches with the
+  household-duplicate pathology kept) and `SURNAME_FREQUENCIES` (Census
+  2010 top 1,000, public domain, ties kept as Census assigned them).
+* `duplicate_differences()` — for rows sharing an NPI, license, or id:
+  which columns disagree, with differ-by-absence (`JR` vs nothing — one
+  person incompletely transcribed) distinguished from differ-by-value
+  (`JR` vs `SR` — two people), and fully identical duplicates reported
+  rather than silently vanishing.
+* A draft JOSS paper (`paper.md`) accompanies the package.
+
 * `npi_search()` and `parse_npi_search()` — query the public NPPES registry
   for the fields a linkage wants: names, honorific, suffix, credential,
   gender (normalised, raw code kept), practice ZIP and state, enumeration

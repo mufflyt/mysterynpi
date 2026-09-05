@@ -12,8 +12,20 @@ test_that("extract_suffix splits the suffix out and keeps both parts", {
   got <- extract_suffix(c("John Smith Jr.", "SMITH, JOHN, JR",
                           "Samuel V Anaya", "Jane Doe", NA))
   expect_identical(got$suffix, c("JR", "JR", NA, NA, NA))
-  expect_identical(got$name, c("John Smith", "SMITH JOHN",
+  expect_identical(got$name, c("John Smith", "SMITH, JOHN",
                                "Samuel V Anaya", "Jane Doe", NA))
+})
+
+test_that("commas survive extraction, because the reversal needs them", {
+  # the roster benchmark caught the earlier comma-eating version: parse
+  # order is extract_suffix() THEN parse_person(), and the reversal must
+  # still see "Thomas, William" as Last-comma-First
+  got <- extract_suffix(c("Thomas, William", "Powell, Henry, Jr."))
+  expect_identical(got$name, c("Thomas, William", "Powell, Henry"))
+  expect_identical(got$suffix, c(NA, "JR"))
+  p <- parse_person(extract_suffix("Thomas, William")$name)
+  expect_identical(p$first, "WILLIAM")
+  expect_identical(p$last, "THOMAS")
 })
 
 test_that("extract_suffix must run BEFORE strip_name_noise, which deletes it", {

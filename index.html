@@ -234,7 +234,8 @@
 <div class="section level2">
 <h2 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a>
 </h2>
-<p><code>0.1.0</code>, extracted from a working linkage but <strong>not yet adopted by it</strong>. The migration — pointing <code>midwifery</code> and <code>isochrones</code> at this instead of their own copies — is the next step and has not been done. Until then this is a fourth copy, which is the thing it exists to prevent; adopt it or delete it.</p>
+<p>Adopted. As of 2026-09-05 (<code>midwifery</code> PR #162), the AMCB→NPPES pipeline’s name machinery is a shim over this package — every <code>amcb_*</code> call site delegates here, pinned <code>&gt;= 0.2.0</code>, with the package contracts asserted in that repository’s own CI. The migration was proven, not assumed: all function surfaces identical over the cohort’s 23,543 distinct name values, <code>parse_person</code> identical over 77,379 author and roster strings, and the full pipeline <strong>byte-identical end to end</strong> — same crosswalk, same audit, same diagnostics, sha256 for sha256; the only differing bytes in any output were the manifest’s three wall-clock lines.</p>
+<p><code>isochrones</code> — the repository these rules were first extracted from — is the remaining copy, and the next migration.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

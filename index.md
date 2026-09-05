@@ -141,8 +141,16 @@ suite and pin a version.
 
 ## Status
 
-`0.1.0`, extracted from a working linkage but **not yet adopted by it**.
-The migration — pointing `midwifery` and `isochrones` at this instead of
-their own copies — is the next step and has not been done. Until then
-this is a fourth copy, which is the thing it exists to prevent; adopt it
-or delete it.
+Adopted. As of 2026-09-05 (`midwifery` PR \#162), the AMCB→NPPES
+pipeline’s name machinery is a shim over this package — every `amcb_*`
+call site delegates here, pinned `>= 0.2.0`, with the package contracts
+asserted in that repository’s own CI. The migration was proven, not
+assumed: all function surfaces identical over the cohort’s 23,543
+distinct name values, `parse_person` identical over 77,379 author and
+roster strings, and the full pipeline **byte-identical end to end** —
+same crosswalk, same audit, same diagnostics, sha256 for sha256; the
+only differing bytes in any output were the manifest’s three wall-clock
+lines.
+
+`isochrones` — the repository these rules were first extracted from — is
+the remaining copy, and the next migration.

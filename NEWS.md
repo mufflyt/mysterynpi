@@ -1,24 +1,25 @@
 # mysterynpi (development version)
 
-* Similarity scoring, the fenced exception: `create_nickname_dictionary()`,
-  `get_nickname_dictionary()`, `get_canonical_name()`,
-  `are_nickname_equivalents()`, `get_nicknames_for_name()`,
-  `calculate_enhanced_first_name_similarity()`,
-  `create_nickname_aware_similarity()` — extracted verbatim from
-  isochrones' nickname system and proven byte-identical over 4,000 real
-  ABOG name pairs. This is candidate-RANKING machinery, deliberately
-  distinct from `NICKNAME_EDGES`/`nickname_agreement()` (which move
-  verdicts): scores rank, only agreement rules decide, and the no-fuzzy
-  guard evolved to say precisely that — fuzzy machinery may exist ONLY in
-  the fenced module, nothing outside references it, and no verdict can
-  REACH it through any call chain (asserted by call-graph walk over the
-  installed namespace; an eighteenth mutant smuggles the score into
-  middle_agreement() and the guard kills it). Extraction quirks are
-  pinned, not repaired — RICK resolves to ERIC, JULIE-as-formal shadows
-  its nickname role — because a behaviour-preserving extraction must
-  preserve behaviour it would not have written; repairs are versioned
-  decisions for another day. stringdist joins Suggests, loaded at the
-  point of use only.
+* ONE nickname system, similarity scoring dark by default. The scoring
+  API extracted from isochrones (`create_nickname_dictionary()`,
+  `get_canonical_name()`, `are_nickname_equivalents()`,
+  `get_nicknames_for_name()`, `calculate_enhanced_first_name_similarity()`,
+  `create_nickname_aware_similarity()`, `get_nickname_dictionary()`) was
+  first proven byte-identical over 4,000 real ABOG pairs, then
+  CONSOLIDATED onto `NICKNAME_EDGES` -- the same pinned corpus the verdict
+  rule reads -- by owner decision: two nickname tables is how two layers
+  quietly disagree about what a name may stand for. Consolidation is a
+  deliberate score change that repairs the old dictionary's quirks (RICK
+  now resolves to RICHARD; JULIA/JULIE scores 0.98 via its recorded edge)
+  and collapses the dead 0.96/0.94 sub-tiers into 0.98; equivalence is now
+  the verdict rule's own one-hop relation, so AL pairs with ALBERT and
+  ALEXANDER while ALBERT and ALEXANDER stay distinct -- in scores exactly
+  as in verdicts. The Jaro-Winkler path is OFF BY DEFAULT:
+  `options(mysterynpi.enable_similarity_scoring = TRUE)` is the reviewable
+  opt-in, and a mutant that removes the gate is killed alongside the one
+  that smuggles the score into a verdict. The no-fuzzy guard holds all of
+  it: fuzzy symbols only inside the fenced module, nothing outside
+  references it, no verdict can reach it. stringdist in Suggests only.
 
 * The join ledger: `ledgered_join()` and `join_ledger_entry()` — row-count
   reconciliation as a shipped artifact, one row per join per step. The

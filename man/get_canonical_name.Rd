@@ -2,19 +2,23 @@
 % Please edit documentation in R/similarity_scoring.R
 \name{get_canonical_name}
 \alias{get_canonical_name}
-\title{Resolve a name, possibly a nickname, to its canonical formal form}
+\title{Resolve a name, possibly a nickname, to a canonical formal form}
 \usage{
 get_canonical_name(name, nickname_dict)
 }
 \arguments{
-\item{name}{a name; NULL and length-one NA return as given.}
+\item{name}{a name.}
 
 \item{nickname_dict}{from [create_nickname_dictionary()]; NULL returns
 the input.}
 }
 \value{
-the formal name, or the normalised input when unknown.
+one formal name, or the normalised input when unknown.
 }
 \description{
-Resolve a name, possibly a nickname, to its canonical formal form
+A hub nickname has SEVERAL formal roots (`AL` records dozens); this
+returns the lexicographically first as a stable display value. Ranking
+and equivalence never rely on it -- [are_nickname_equivalents()] uses
+ALL roots. Unknown names return normalised; NULL and length-one NA
+return as given.
 }

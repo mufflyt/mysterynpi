@@ -16,17 +16,19 @@
 # shared, the decision to use it -- and at which pipeline stage -- stays
 # policy.
 #
-# EXTRACTED VERBATIM from mufflyt/isochrones R/nickname_system.R
-# (2026-09-05, at 2a0ddc99b), proven byte-identical over 4,000 real ABOG
-# name pairs before and after the swap. Verbatim includes the QUIRKS, which
-# are pinned by tests rather than silently repaired, because a
-# behaviour-preserving extraction must preserve behaviour it would not have
-# written: the mapping list carries duplicate formal-name entries whose
-# second definitions are shadowed; reused nicknames resolve to whichever
-# formal name wrote them LAST (RICK belongs to ERIC, not RICHARD; DONNIE to
-# DONNA, not RONALD); and a handful of names are recorded as their own
-# nicknames. Repairing any of that changes scores and is a deliberate,
-# versioned decision for another day.
+# ONE NICKNAME SYSTEM (2026-09-05, by owner decision). The scoring API was
+# first extracted verbatim from mufflyt/isochrones R/nickname_system.R and
+# proven byte-identical; it was then CONSOLIDATED onto NICKNAME_EDGES -- the
+# same pinned corpus the nickname_agreement() verdict reads -- because two
+# nickname tables is how two layers quietly disagree about what a name may
+# stand for. Consolidation is a deliberate, versioned score change: the
+# hand-rolled dictionary's quirks (RICK resolving to ERIC by last-write,
+# shadowed duplicate entries, JULIE-as-formal hiding its nickname role) are
+# FIXED here, not preserved, and the old byte-identical behaviour remains
+# available only in history. Equivalence now uses the verdict rule's own
+# one-hop relation: a recorded edge or a shared formal root, never
+# transitive closure, so AL may stand for ALBERT or ALEXANDER without ever
+# welding ALBERT to ALEXANDER -- in scores exactly as in verdicts.
 #
 # stringdist is a Suggests, required at the point of use only, so the
 # package's verdict machinery installs and runs without it.
@@ -34,15 +36,12 @@
 
 .nickname_cache <- new.env(parent = emptyenv())
 
-#' Build the bidirectional nickname dictionary used by the similarity score
+#' The nickname dictionary, derived from the one corpus
 #'
-#' ~125 formal first names mapped to their common variants, extracted
-#' verbatim from isochrones' nickname system (quirks pinned -- see the file
-#' header). Distinct from [NICKNAME_EDGES] on purpose: that corpus feeds the
-#' three-verdict [nickname_agreement()] rule; this dictionary feeds a
-#' SIMILARITY SCORE for candidate ranking, and the two must never be
-#' silently merged, because a table change here moves scores while a table
-#' change there moves verdicts.
+#' Derived entirely from [NICKNAME_EDGES] -- the same pinned corpus
+#' [nickname_agreement()] reads -- so verdicts and scores share ONE truth
+#' about what a name may stand for. `nickname_to_formal` is multi-valued:
+#' a hub nickname like `AL` carries every formal root the corpus records.
 #'
 #' @param verbose message the build, as the original did.
 #' @return list: `formal_to_nicknames`, `nickname_to_formal`, `source`,
@@ -50,176 +49,21 @@
 #' @export
 create_nickname_dictionary <- function(verbose = TRUE) {
   if (verbose) {
-    message("Building comprehensive nickname dictionary...")
+    message("Deriving nickname dictionary from NICKNAME_EDGES...")
   }
-  nickname_mappings <- list(
-    "ROBERT" = c("BOB", "BOBBY", "ROB", "ROBBIE", "BERT"),
-    "WILLIAM" = c("BILL", "BILLY", "WILL", "WILLY", "LIAM"),
-    "JAMES" = c("JIM", "JIMMY", "JAMIE", "JAMEY"),
-    "JOHN" = c("JACK", "JOHNNY", "JACK", "JOCK"),
-    "MICHAEL" = c("MIKE", "MICKEY", "MICK", "MIKEY"),
-    "DAVID" = c("DAVE", "DAVY", "DAVEY"),
-    "RICHARD" = c("RICK", "RICKY", "RICH", "RICHIE", "DICK"),
-    "CHARLES" = c("CHUCK", "CHARLIE", "CHUCKY", "CHAS"),
-    "CHRISTOPHER" = c("CHRIS", "CHRISTY", "KIT"),
-    "MATTHEW" = c("MATT", "MATTY"),
-    "ANTHONY" = c("TONY", "TONEY"),
-    "DONALD" = c("DON", "DONNY", "DONNIE"),
-    "STEVEN" = c("STEVE", "STEVIE"),
-    "JOSEPH" = c("JOE", "JOEY"),
-    "THOMAS" = c("TOM", "TOMMY", "THOM"),
-    "DANIEL" = c("DAN", "DANNY", "DANIEL"),
-    "PAUL" = c("PAULIE"),
-    "MARK" = c("MARKY"),
-    "GEORGE" = c("GEORG"),
-    "KENNETH" = c("KEN", "KENNY"),
-    "JOSHUA" = c("JOSH"),
-    "KEVIN" = c("KEV"),
-    "BRIAN" = c("BRI"),
-    "EDWARD" = c("ED", "EDDIE", "TED", "TEDDY"),
-    "RONALD" = c("RON", "RONNY", "RONNIE"),
-    "TIMOTHY" = c("TIM", "TIMMY"),
-    "JASON" = c("JASE"),
-    "JEFFREY" = c("JEFF", "JEFFIE"),
-    "RYAN" = c("RY"),
-    "JACOB" = c("JAKE", "JAKEY"),
-    "GARY" = c("GARY"),
-    "NICHOLAS" = c("NICK", "NICKY"),
-    "ERIC" = c("RICK", "RICKY"),
-    "JONATHAN" = c("JON", "JONNY"),
-    "STEPHEN" = c("STEVE", "STEVIE"),
-    "LARRY" = c("LAWRENCE"),
-    "JUSTIN" = c("JUST"),
-    "SCOTT" = c("SCOTTY"),
-    "BRANDON" = c("BRAND"),
-    "BENJAMIN" = c("BEN", "BENNY", "BENJI"),
-    "SAMUEL" = c("SAM", "SAMMY"),
-    "FRANK" = c("FRANKY", "FRANKIE"),
-    "PATRICK" = c("PAT", "PATTY", "PADDY"),
-    "RAYMOND" = c("RAY", "RAYMUND"),
-    "JACK" = c("JACKY", "JACKIE"),
-    "DENNIS" = c("DENNY", "DENNIE"),
-    "JERRY" = c("GERR", "GERALD"),
-    "TYLER" = c("TY"),
-    "AARON" = c("ARON"),
-    "JOSE" = c("JOSEPH"),
-    "HENRY" = c("HANK", "HARRY", "HENRI"),
-    "ADAM" = c("ADDY"),
-    "DOUGLAS" = c("DOUG", "DOUGIE"),
-    "NATHAN" = c("NATE", "NATEY"),
-    "PETER" = c("PETE", "PETEY"),
-    "ZACHARY" = c("ZACK", "ZACKY", "ZACH"),
-    "KYLE" = c("KY"),
-    "NOAH" = c("NO"),
-    "ALAN" = c("AL", "ALLIE"),
-    "ETHAN" = c("ETH"),
-    "JEREMY" = c("JERRY", "JEREM"),
-    "CARL" = c("CHARLIE"),
-    "HAROLD" = c("HARRY", "HAL"),
-    "ARTHUR" = c("ART", "ARTIE"),
-    "LAWRENCE" = c("LARRY", "LANCE"),
-    "SEAN" = c("SHAWN"),
-    "CHRISTIAN" = c("CHRIS", "CHRISTY"),
-    "ALBERT" = c("AL", "ALBIE", "BERT"),
-    "JUSTIN" = c("JUST"),
-    "WAYNE" = c("WAY"),
-    "RALPH" = c("RALPHY"),
-    "ROY" = c("ROYIE"),
-    "EUGENE" = c("GENE"),
-    "LOUIS" = c("LOU", "LOUIE"),
-    "PHILIP" = c("PHIL", "PHILLY"),
-    "MARY" = c("MARY", "MARIE", "MARIA", "MOLLY", "POLLY"),
-    "PATRICIA" = c("PAT", "PATTY", "TRICIA", "PATSY"),
-    "JENNIFER" = c("JEN", "JENNY", "JENNIE"),
-    "LINDA" = c("LIN", "LINDY"),
-    "ELIZABETH" = c("LIZ", "LIZZY", "BETH", "BETTY", "BETSY", "ELIZA"),
-    "BARBARA" = c("BARB", "BARBIE", "BABS"),
-    "SUSAN" = c("SUE", "SUZY", "SUSIE", "SUZIE"),
-    "JESSICA" = c("JESS", "JESSIE"),
-    "SARAH" = c("SARA"),
-    "KAREN" = c("KARI", "KARRIE"),
-    "NANCY" = c("NAN", "NANNY"),
-    "LISA" = c("LIS"),
-    "BETTY" = c("BET", "BETTE"),
-    "HELEN" = c("HELEN"),
-    "SANDRA" = c("SANDY", "SANDI"),
-    "DONNA" = c("DON", "DONNIE"),
-    "CAROL" = c("CARRIE", "CAROLINE"),
-    "RUTH" = c("RUTHIE"),
-    "SHARON" = c("SHARI", "SHERRY"),
-    "MICHELLE" = c("MICH", "MICKEY", "MICKI", "SHELLY"),
-    "LAURA" = c("LAUR", "LAURIE"),
-    "SARAH" = c("SARA"),
-    "KIMBERLY" = c("KIM", "KIMMY"),
-    "DEBORAH" = c("DEB", "DEBBIE", "DEBBI"),
-    "DOROTHY" = c("DOT", "DOTTIE", "DOLLY"),
-    "AMY" = c("AMI"),
-    "ANGELA" = c("ANGIE", "ANG"),
-    "ASHLEY" = c("ASH", "ASHIE"),
-    "BRENDA" = c("BREN"),
-    "EMMA" = c("EM", "EMMY"),
-    "OLIVIA" = c("OLLY", "LIV", "LIVY"),
-    "CYNTHIA" = c("CINDY", "CYNDI", "CYNN"),
-    "MARIE" = c("MARY"),
-    "JANET" = c("JAN", "JANNY"),
-    "CATHERINE" = c("CATHY", "CATH", "KATE", "KATIE", "KAT"),
-    "FRANCES" = c("FRAN", "FRANNIE", "FANNY"),
-    "CHRISTINE" = c("CHRIS", "CHRISTY", "CHRISSY"),
-    "SAMANTHA" = c("SAM", "SAMMY"),
-    "DEBRA" = c("DEB", "DEBBIE"),
-    "RACHEL" = c("RAY"),
-    "CAROLYN" = c("CAROL", "CARRIE"),
-    "JANET" = c("JAN", "JANNY"),
-    "VIRGINIA" = c("GINNY", "GINGER", "VIRGINIA"),
-    "MARIA" = c("MARY", "MARIE"),
-    "HEATHER" = c("HEATH"),
-    "DIANE" = c("DI", "DIDI"),
-    "JULIE" = c("JUL", "JULY"),
-    "JOYCE" = c("JOY"),
-    "VICTORIA" = c("VICKY", "VIC", "TORI"),
-    "KELLY" = c("KEL"),
-    "CHRISTINA" = c("CHRIS", "CHRISTY", "TINA", "CHRISSY"),
-    "JOAN" = c("JO", "JOANIE"),
-    "EVELYN" = c("EVE", "EVIE"),
-    "LAUREN" = c("LAUR"),
-    "JUDITH" = c("JUDY", "JUDIE"),
-    "MEGAN" = c("MEG", "MEGGIE"),
-    "CHERYL" = c("CHERI", "CHERRY"),
-    "ANDREA" = c("ANDI", "ANDIE"),
-    "HANNAH" = c("HAN"),
-    "JACQUELINE" = c("JACKIE", "JACK", "JAC"),
-    "MARTHA" = c("MARTY"),
-    "GLORIA" = c("GLORY"),
-    "TERESA" = c("TERRI", "TERRY", "TERI"),
-    "SARA" = c("SARAH"),
-    "JANICE" = c("JAN"),
-    "MARIE" = c("MARY"),
-    "JULIA" = c("JULIE", "JUL"),
-    "HEATHER" = c("HEATH"),
-    "DIANE" = c("DI"),
-    "RUTH" = c("RUTHIE"),
-    "JULIE" = c("JUL"),
-    "JOYCE" = c("JOY"),
-    "VIRGINIA" = c("GINNY", "GINGER")
-  )
-  formal_to_nicknames <- nickname_mappings
-  nickname_to_formal <- list()
-  for (formal_name in names(nickname_mappings)) {
-    nicknames <- nickname_mappings[[formal_name]]
-    for (nickname in nicknames) {
-      nickname_to_formal[[nickname]] <- formal_name
-    }
-  }
+  e <- mysterynpi::NICKNAME_EDGES
+  formal_to_nicknames <- split(e$nickname, e$name)
+  nickname_to_formal  <- split(e$name, e$nickname)
   dict <- list(
     formal_to_nicknames = formal_to_nicknames,
     nickname_to_formal = nickname_to_formal,
-    source = "integrated_codebase_patterns",
+    source = "mysterynpi::NICKNAME_EDGES (carltonnorthern/nicknames, pinned)",
     created = Sys.time(),
     formal_count = length(formal_to_nicknames),
     nickname_count = length(nickname_to_formal)
   )
   if (verbose) {
-    message(sprintf("Nickname dictionary created with %d formal names and %d nicknames",
+    message(sprintf("Nickname dictionary derived: %d formal names, %d nicknames",
                     dict$formal_count, dict$nickname_count))
   }
   dict
@@ -236,11 +80,20 @@ get_nickname_dictionary <- function(refresh = FALSE) {
   .nickname_cache$dict
 }
 
-#' Resolve a name, possibly a nickname, to its canonical formal form
-#' @param name a name; NULL and length-one NA return as given.
+#' Resolve a name, possibly a nickname, to a canonical formal form
+#'
+#' A DISPLAY LABEL, arbitrary-but-stable, and documented as such: the
+#' corpus records SUBSTITUTABILITY, not hierarchy -- it contains cycles
+#' (`BOB` and `ROBERT` each list the other) and hub nicknames with dozens
+#' of roots -- so no true canonical exists. This returns the
+#' lexicographically first recorded root when the name has any, else the
+#' normalised name itself. Nothing ranks or decides on it;
+#' [are_nickname_equivalents()] carries the meaning, over ALL roots.
+#' @param name a name.
 #' @param nickname_dict from [create_nickname_dictionary()]; NULL returns
 #'   the input.
-#' @return the formal name, or the normalised input when unknown.
+#' @return one stable label; the normalised input when the corpus records
+#'   no root for it.
 #' @export
 get_canonical_name <- function(name, nickname_dict) {
   if (is.null(name) || is.null(nickname_dict) ||
@@ -248,27 +101,35 @@ get_canonical_name <- function(name, nickname_dict) {
     return(name)
   }
   name_clean <- normalize_string(name)
-  if (name_clean %in% names(nickname_dict$formal_to_nicknames)) {
-    return(name_clean)
-  }
-  if (name_clean %in% names(nickname_dict$nickname_to_formal)) {
-    return(nickname_dict$nickname_to_formal[[name_clean]])
+  roots <- nickname_dict$nickname_to_formal[[name_clean]]
+  if (!is.null(roots) && length(roots)) {
+    return(sort(roots)[1])
   }
   name_clean
 }
 
-#' Do two names share a canonical formal root?
+#' Are two names one-hop equivalent under the corpus?
+#'
+#' THE SAME RELATION [nickname_agreement()] corroborates on: equal after
+#' normalisation, a recorded edge in either direction, or a shared formal
+#' root. One hop, never transitive closure -- a shared NICKNAME does not
+#' equate two formal names, so `AL` pairs with `ALBERT` and with
+#' `ALEXANDER` while `ALBERT` and `ALEXANDER` stay distinct.
 #' @param name1,name2 names to compare.
 #' @param nickname_dict from [create_nickname_dictionary()]; NULL is FALSE.
 #' @return logical.
 #' @export
 are_nickname_equivalents <- function(name1, name2, nickname_dict) {
-  if (is.null(nickname_dict)) {
+  if (is.null(nickname_dict) || is.null(name1) || is.null(name2) ||
+      (length(name1) == 1 && is.na(name1)) ||
+      (length(name2) == 1 && is.na(name2))) {
     return(FALSE)
   }
-  canonical1 <- get_canonical_name(name1, nickname_dict)
-  canonical2 <- get_canonical_name(name2, nickname_dict)
-  !is.null(canonical1) && !is.null(canonical2) && canonical1 == canonical2
+  x <- normalize_string(name1); y <- normalize_string(name2)
+  if (x == y) return(TRUE)
+  cx <- c(x, nickname_dict$nickname_to_formal[[x]])
+  cy <- c(y, nickname_dict$nickname_to_formal[[y]])
+  length(intersect(cx, cy)) > 0
 }
 
 #' All recorded nicknames for a formal name
@@ -290,11 +151,19 @@ get_nicknames_for_name <- function(formal_name, nickname_dict) {
 #' Nickname-aware first-name similarity SCORE (never a verdict)
 #'
 #' A number for RANKING candidates, extracted verbatim from isochrones:
-#' 1.0 exact after normalisation; 0.98 both map to one formal name; 0.96
-#' one is the other's canonical form; 0.94 cross-nickname; 0.5 neutral for
-#' missing; otherwise Jaro-Winkler similarity (the larger of raw and
-#' umlaut-digraph-simplified). Scores rank; only agreement rules decide,
-#' and the no-fuzzy guard proves they cannot reach this function.
+#' 1.0 exact after normalisation; 0.98 one-hop nickname equivalent under
+#' the consolidated corpus (the same relation the verdict rule
+#' corroborates on); 0.5 neutral for missing; otherwise Jaro-Winkler
+#' similarity (the larger of raw and umlaut-digraph-simplified). The old
+#' extraction's 0.96/0.94 sub-tiers were artifacts of the retired two-table
+#' shape and are consolidated into 0.98. Scores rank; only agreement rules
+#' decide, and the no-fuzzy guard proves they cannot reach this function.
+#'
+#' OFF BY DEFAULT: calling this without
+#' `options(mysterynpi.enable_similarity_scoring = TRUE)` stops with
+#' instructions. The opt-in line belongs in the pipeline script it governs,
+#' where a reviewer reads it -- approximate scoring must be a decision,
+#' never a default.
 #'
 #' @param name1,name2 names to compare.
 #' @param nickname_dict from [create_nickname_dictionary()]; NULL falls back
@@ -303,6 +172,18 @@ get_nicknames_for_name <- function(formal_name, nickname_dict) {
 #' @export
 calculate_enhanced_first_name_similarity <- function(name1, name2,
                                                      nickname_dict = NULL) {
+  # DARK BY DEFAULT. Approximate scoring never runs by accident: the caller
+  # opts in with one visible line, and that line is the reviewable record
+  # that a pipeline chose to rank with fuzz. The dictionary lookups above
+  # need no gate -- they are deterministic table reads.
+  if (!isTRUE(getOption("mysterynpi.enable_similarity_scoring", FALSE))) {
+    stop(paste0(
+      "Similarity scoring is OFF by default. Opting in is a policy ",
+      "decision that belongs in reviewable pipeline code:\n",
+      "  options(mysterynpi.enable_similarity_scoring = TRUE)\n",
+      "Scores rank candidates; they never decide identity -- the agreement ",
+      "rules do, and they cannot reach this function."), call. = FALSE)
+  }
   if (!requireNamespace("stringdist", quietly = TRUE)) {
     stop("calculate_enhanced_first_name_similarity() requires stringdist.\n",
          "  install.packages(\"stringdist\")", call. = FALSE)
@@ -333,18 +214,8 @@ calculate_enhanced_first_name_similarity <- function(name1, name2,
   if (is.null(nickname_dict)) {
     return(1 - stringdist::stringdist(name1_norm, name2_norm, method = "jw"))
   }
-  canonical1 <- get_canonical_name(name1_clean, nickname_dict)
-  canonical2 <- get_canonical_name(name2_clean, nickname_dict)
-  if (!is.null(canonical1) && !is.null(canonical2) && canonical1 == canonical2) {
+  if (are_nickname_equivalents(name1_clean, name2_clean, nickname_dict)) {
     return(0.98)
-  }
-  if (canonical1 == name2_clean || canonical2 == name1_clean) {
-    return(0.96)
-  }
-  if (!is.null(canonical1) && !is.null(canonical2)) {
-    if (canonical1 == canonical2) {
-      return(0.94)
-    }
   }
   jw_similarity <- 1 - stringdist::stringdist(name1_norm, name2_norm,
                                               method = "jw")

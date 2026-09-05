@@ -93,6 +93,12 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Decompose a license number into prefix, digits, and suffix
 - [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md)
   : Does each license fit the shape its state's board actually issues?
+- [`normalize_license_status()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license_status.md)
+  : Normalise recorded board license statuses to their exit classes
+- [`LICENSE_STATUS_LEVELS`](https://mufflyt.github.io/mysterynpi/reference/LICENSE_STATUS_LEVELS.md)
+  : The status vocabulary: recorded board spellings and their classes
+- [`license_status_audit()`](https://mufflyt.github.io/mysterynpi/reference/license_status_audit.md)
+  : The mapping that was applied, per source, as a document
 - [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
   : Do two surnames agree, disagree, or decide nothing?
 
@@ -164,3 +170,6 @@ Assertions a caller runs in its own suite.
 - [`assert_surname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.md)
   : Assert that surname agreement still behaves as this caller relies
   on.
+- [`assert_license_status_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_status_contract.md)
+  : Assert that license-status normalisation still refuses the 4x
+  inflation.

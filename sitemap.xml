@@ -9,6 +9,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/news/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/paper.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/LICENSE_STATUS_LEVELS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_NOISE.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.html</loc></url>
@@ -18,6 +19,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/WINKLER_CENSUS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_license_agreement_contract.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_license_status_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.html</loc></url>
@@ -39,6 +41,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_anatomy.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_conformance.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/license_status_audit.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_tokens.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/name_key.html</loc></url>
@@ -46,6 +49,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_gender.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_license.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_license_status.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_name_columns.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_physician_names.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_string.html</loc></url>

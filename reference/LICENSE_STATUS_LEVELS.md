@@ -1,0 +1,36 @@
+# The status vocabulary: recorded board spellings and their classes
+
+One row per recorded spelling. The classes, and the claim each supports:
+
+## Usage
+
+``` r
+LICENSE_STATUS_LEVELS
+```
+
+## Format
+
+data.frame with columns \`status\`, \`class\`.
+
+## Details
+
+\* \`active\` – licensed and unrestricted. Not an exit. \*
+\`restricted\` – licensed under discipline (probation, restriction,
+suspension). Still practicing for workforce purposes; never an exit. \*
+\`retired\` – the board SAYS retired (including emeritus). The only
+class a retirement study may count as retirement. \* \`deceased\` –
+death. Never retirement: a death certificate read as a retirement both
+inflates the signal and misdates the exit. \* \`disciplinary\` –
+revoked, surrendered, relinquished. Exit, not retirement: an exit under
+discipline says why the person left, and it is not "chose to stop". \*
+\`lapsed\` – expired, delinquent, cancelled, inactive, not renewed. An
+exit of UNKNOWN cause: moved states, changed careers, or retired without
+saying so. A study may quarantine these for review or model them
+separately; it may not silently read them as retired.
+
+Spellings match after uppercasing, trimming, and collapsing punctuation
+to single spaces, so \`"Null & Void"\` and \`NULL AND VOID\` meet the
+same row. A caller whose board uses a spelling this table lacks supplies
+its own rows via the \`levels\` argument of
+\[normalize_license_status()\] – a reviewable data decision, not a code
+change.

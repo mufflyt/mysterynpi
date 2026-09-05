@@ -2,6 +2,24 @@
 
 ## mysterynpi (development version)
 
+- [`normalize_license_status()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license_status.md),
+  `LICENSE_STATUS_LEVELS`,
+  [`assert_license_status_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_status_contract.md)
+  — state boards do not share a vocabulary for not-practicing, and
+  reading theirs naively inflates a retirement signal roughly fourfold.
+  Six classes — active, restricted, retired, deceased, disciplinary,
+  lapsed — with the landmines pinned by contract: FL/IL `Deceased` is
+  death, OPMC’s surrenders and revocations are exits-by-discipline,
+  CO/DE/WI’s `Expired` is a lapse of unknown cause, and only the board’s
+  own word for retired is retirement. Unmapped statuses map to `NA` and
+  decide nothing; a board-specific vocabulary extends via the `levels`
+  argument as reviewable data. Two new mutants guard the inflation
+  directly.
+  [`license_status_audit()`](https://mufflyt.github.io/mysterynpi/reference/license_status_audit.md)
+  documents the applied mapping per source – every raw status, its
+  class, its count, unmapped first – as the methods-appendix table a
+  reviewer can check against the board itself.
+
 - `ROSTER_BENCHMARK` — the labeled roster-to-registry benchmark nobody
   had: 190 fully synthetic pairs, truth by construction, one defect
   family per block, shipped as data and as plain CSV. The reference

@@ -72,6 +72,7 @@ point of packaging:
 | NPI | [`npi_luhn_ok()`](https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.md), [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md) + [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md) — the registry’s answers, with its absences kept honest (no birth year; years-enumerated is a lower bound) |
 | board licenses | [`license_anatomy()`](https://mufflyt.github.io/mysterynpi/reference/license_anatomy.md), [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md) — prefix/digits/suffix shapes, with each state’s format learned from its own column and misfits flagged for review, never rewritten |
 | duplicates | [`duplicate_differences()`](https://mufflyt.github.io/mysterynpi/reference/duplicate_differences.md) — for rows sharing a key: which columns disagree, with differ-by-absence distinguished from differ-by-value |
+| board statuses | [`normalize_license_status()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license_status.md) — six exit classes; death, discipline and lapses can never read as “retired”, and unmapped decides nothing |
 | corpora | `ROSTER_BENCHMARK` (190 labeled synthetic pairs; see [`vignette("roster-benchmark")`](https://mufflyt.github.io/mysterynpi/articles/roster-benchmark.md)), `WINKLER_CENSUS`, `SURNAME_FREQUENCIES`, `NICKNAME_EDGES` — licenses in `inst/COPYRIGHTS` |
 | contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md) and one per agreement rule |
 
@@ -241,6 +242,12 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Decompose a license number into prefix, digits, and suffix
 - [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md)
   : Does each license fit the shape its state's board actually issues?
+- [`normalize_license_status()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license_status.md)
+  : Normalise recorded board license statuses to their exit classes
+- [`LICENSE_STATUS_LEVELS`](https://mufflyt.github.io/mysterynpi/reference/LICENSE_STATUS_LEVELS.md)
+  : The status vocabulary: recorded board spellings and their classes
+- [`license_status_audit()`](https://mufflyt.github.io/mysterynpi/reference/license_status_audit.md)
+  : The mapping that was applied, per source, as a document
 - [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
   : Do two surnames agree, disagree, or decide nothing?
 
@@ -312,6 +319,9 @@ Assertions a caller runs in its own suite.
 - [`assert_surname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.md)
   : Assert that surname agreement still behaves as this caller relies
   on.
+- [`assert_license_status_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_status_contract.md)
+  : Assert that license-status normalisation still refuses the 4x
+  inflation.
 
 # Articles
 

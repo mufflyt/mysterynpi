@@ -65,7 +65,7 @@ packaging:
 | keys | `name_key()`, `blank_na()`, `has_name_information()`, `first_initial()`, `strip_parenthetical()`, `split_given()` |
 | tokens | `middle_tokens()`, `given_tokens()`, `surname_tokens()` |
 | suffixes | `extract_suffix()`, `normalize_suffix()` — parse the suffix out *before* the noise strip deletes it |
-| agreement | `middle_agreement()`, `person_matches()`, `gender_agreement()`, `nickname_agreement()`, `suffix_agreement()`, `license_agreement()` |
+| agreement | `middle_agreement()`, `person_matches()`, `gender_agreement()`, `nickname_agreement()`, `suffix_agreement()`, `license_agreement()`, `surname_agreement()` |
 | ordered classes | `resolve_ordered_classes()` and its parts |
 | one-to-one | `award_contested()`, `count_rivals()` |
 | clerical review | `clerical_sample()`, `clerical_precision()` — blinded, class-stratified, seed-pinned |

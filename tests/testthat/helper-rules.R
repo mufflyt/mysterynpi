@@ -20,6 +20,9 @@ rule_specs <- list(
   suffix = list(
     fn = suffix_agreement,
     verdicts = c("corroborates", "conflicts", "uninformative")),
+  surname = list(
+    fn = function(a, b) surname_agreement(a, b),
+    verdicts = c("corroborates", "conflicts", "uninformative")),
   license = list(
     fn = function(a, b) {
       license_agreement(a, rep("CO", length(a)), b, rep("CO", length(b)))

@@ -44,4 +44,9 @@ names together. AL vs ALBERT corroborates; ALBERT vs ALEXANDER conflicts.
 Each element should be ONE given-name token (e.g. one element of
 [given_tokens()]). Inputs pass through [name_key()] plus period removal,
 so `"k.c."` meets the table's `KC`.
+
+A SINGLE LETTER IS AN INITIAL, NOT A NICKNAME, and is compared as
+[middle_agreement()] compares initials: `"J"` corroborates `"JAMES"` --
+compatibility, never identity -- and conflicts with `"ROBERT"`. The table
+is not consulted for it.
 }

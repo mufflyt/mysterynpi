@@ -129,6 +129,9 @@ assert_nickname_agreement_contract <- function(fn = nickname_agreement) {
     # no edit-distance tolerance -- only recorded edges admit
     list("ELISABETH", "ELIZABETH", "conflicts"),
     list("JANE", "JOAN",          "conflicts"),
+    # an initial is compatibility, not a nickname (issue #3 residual)
+    list("J", "JAMES",            "corroborates"),
+    list("J", "ROBERT",           "conflicts"),
     # absence decides nothing
     list("", "MARY",              "uninformative"),
     list(NA_character_, "MARY",   "uninformative"))
@@ -208,6 +211,51 @@ assert_license_agreement_contract <- function(fn = license_agreement) {
   if (!inherits(try(fn(c("1", "2"), "CO", "1", "CO"), silent = TRUE),
                 "try-error")) {
     stop("license_agreement contract: mismatched lengths must error, not recycle",
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+#' Assert that surname agreement still behaves as this caller relies on.
+#'
+#' Pins the component logic, the sub-floor exact match, the apostrophe fold,
+#' the particle refusal, and the maiden-as-middle rescue -- each a measured
+#' failure mode of exact-equality surname comparison.
+#'
+#' @param fn the function to test; defaults to [surname_agreement()].
+#' @return `TRUE` invisibly, or `stop()` naming the property that failed.
+#' @export
+assert_surname_agreement_contract <- function(fn = surname_agreement) {
+  expect <- list(
+    # a shared component spans hyphenation and dropped parts
+    list("MCCARTHY-DERVIN", "MCCARTHY",   "corroborates"),
+    # exact equality still counts below the token floor
+    list("LEE", "LEE",                    "corroborates"),
+    # formatting must not veto
+    list("O'BRIEN", "OBRIEN",             "corroborates"),
+    # particles are convention, not identity
+    list("DE LA CRUZ", "DE LEON",         "conflicts"),
+    # recorded difference conflicts
+    list("LEE", "SMITH",                  "conflicts"),
+    # absence decides nothing
+    list("", "SMITH",                     "uninformative"),
+    list(NA_character_, "SMITH",          "uninformative"))
+  for (e in expect) {
+    got <- fn(e[[1]], e[[2]])
+    if (!identical(got, e[[3]])) {
+      stop(sprintf("surname_agreement contract: %s vs %s gave '%s', expected '%s'",
+                   if (is.na(e[[1]])) "NA" else e[[1]], e[[2]], got, e[[3]]),
+           call. = FALSE)
+    }
+  }
+  rescued <- fn("RYE", "REINHARD", middle_a = "REINHARD", middle_b = "A")
+  if (!identical(rescued, "corroborates")) {
+    stop("surname_agreement contract: the maiden-as-middle rescue must ",
+         "corroborate RYE vs REINHARD when REINHARD sits in the middle slot",
+         call. = FALSE)
+  }
+  if (!inherits(try(fn(c("A", "B"), "A"), silent = TRUE), "try-error")) {
+    stop("surname_agreement contract: mismatched lengths must error, not recycle",
          call. = FALSE)
   }
   invisible(TRUE)

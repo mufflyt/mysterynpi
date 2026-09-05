@@ -21,6 +21,7 @@ test_that("every frozen verdict reproduces bit-for-bit", {
       nickname = nickname_agreement(a[i], b[i]),
       suffix   = suffix_agreement(a[i], b[i]),
       license  = license_agreement(a[i], sa[i], b[i], sb[i]),
+      surname  = surname_agreement(a[i], b[i]),
       stop("snapshot names an unknown rule: ", r))
   }
   mism <- which(got != snap$verdict)

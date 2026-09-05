@@ -66,6 +66,11 @@
 #' [given_tokens()]). Inputs pass through [name_key()] plus period removal,
 #' so `"k.c."` meets the table's `KC`.
 #'
+#' A SINGLE LETTER IS AN INITIAL, NOT A NICKNAME, and is compared as
+#' [middle_agreement()] compares initials: `"J"` corroborates `"JAMES"` --
+#' compatibility, never identity -- and conflicts with `"ROBERT"`. The table
+#' is not consulted for it.
+#'
 #' @param a,b character vectors of given-name tokens, the same length.
 #' @param edges the edge table; defaults to [NICKNAME_EDGES]. A caller with
 #'   a study-specific table supplies it here and the rule's behaviour over it
@@ -87,6 +92,16 @@ nickname_agreement <- function(a, b, edges = mysterynpi::NICKNAME_EDGES) {
       return("uninformative")
     }
     if (x == y) return("corroborates")
+    # A single letter is an initial, not a nickname, and is handled exactly
+    # as middle_agreement() handles it: "J" corroborates "JAMES" -- weak,
+    # compatible, never identifying -- and conflicts with "ROBERT". Before
+    # this branch existed, "J" vs "JAMES" returned "conflicts", which read a
+    # roster that records only initials as disagreeing with everyone
+    # (github.com/mufflyt/mysterynpi#3, the initials residual).
+    if (nchar(x) == 1L || nchar(y) == 1L) {
+      return(if (substr(x, 1L, 1L) == substr(y, 1L, 1L)) "corroborates"
+             else "conflicts")
+    }
     # one hop: each token, plus the formal names it is recorded to stand for
     cx <- c(x, formals_of[[x]])
     cy <- c(y, formals_of[[y]])

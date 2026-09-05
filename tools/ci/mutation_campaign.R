@@ -31,8 +31,9 @@
 # Run from the package root:  Rscript tools/ci/mutation_campaign.R
 # =============================================================================
 
-MIN_ASSERTIONS <- 200L   # baseline is 238; the floor catches wholesale
-                         # discovery loss, not ordinary edits
+MIN_ASSERTIONS <- 450L   # baseline is ~580; the floor catches wholesale
+                         # discovery loss, not ordinary edits, and must be
+                         # raised as the suite grows or it guards nothing
 
 CATALOGUE <- list(
   list(id = "surname-token-floor",
@@ -85,6 +86,16 @@ CATALOGUE <- list(
        find = "cols <- setdiff(cols, class)",
        repl = "cols <- unique(c(cols))     ",
        why  = "a caller listing the class column gets it on the reviewer sheet; blinding is gone"),
+  list(id = "surname-rescue-removed",
+       file = "R/surname.R",
+       find = "if (length(intersect(tb, mta[[i]])) || length(intersect(ta, mtb[[i]]))) {",
+       repl = "if (FALSE) {",
+       why  = "the maiden-as-middle rescue is gone; a changed surname deletes its own candidate"),
+  list(id = "nickname-initial-flip",
+       file = "R/nicknames.R",
+       find = "return(if (substr(x, 1L, 1L) == substr(y, 1L, 1L)) \"corroborates\"",
+       repl = "return(if (substr(x, 1L, 1L) != substr(y, 1L, 1L)) \"corroborates\"",
+       why  = "an initial corroborates every name it cannot abbreviate and vetoes its own"),
   list(id = "resolve-keeps-weakest",
        file = "R/resolve.R",
        find = "as.integer(stats::ave(d[[class]], key, FUN = min))[keep]",

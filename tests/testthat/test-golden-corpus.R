@@ -16,6 +16,7 @@ dispatch <- function(row) {
     nickname = nickname_agreement(row$a, row$b),
     suffix   = suffix_agreement(row$a, row$b),
     license  = license_agreement(row$a, row$state_a, row$b, row$state_b),
+    surname  = surname_agreement(row$a, row$b),
     stop("golden corpus names an unknown rule: ", row$rule))
 }
 
@@ -33,7 +34,8 @@ test_that("every golden row reproduces its adjudicated verdict exactly", {
 test_that("the corpus covers every three-verdict rule and every verdict", {
   g <- read_golden()
   expect_setequal(unique(g$rule),
-                  c("middle", "gender", "nickname", "suffix", "license"))
+                  c("middle", "gender", "nickname", "suffix", "license",
+                    "surname"))
   expect_setequal(unique(g$expected),
                   c("corroborates", "conflicts", "uninformative"))
   # each rule must exercise absence -- the verdict that is easiest to lose

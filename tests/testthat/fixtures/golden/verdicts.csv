@@ -69,3 +69,12 @@ license,0052,CO,52,CO,uninformative,zero padding is meaning not formatting
 license,MD12345,CO,12345,CO,uninformative,a profession prefix is meaning not formatting
 license,12345,,12345,CO,uninformative,a number without its state is not yet a license
 license,,CO,12345,CO,uninformative,absence decides nothing
+surname,MCCARTHY-DERVIN,,MCCARTHY,,corroborates,shipped-defect: hyphenated surnames ran 27.1% unmatched vs 9.8%
+surname,HARVEY CAPISTA,,CAPISTA,,corroborates,a dropped component no edit distance can cross
+surname,DE LA CRUZ,,DE LEON,,conflicts,particles are convention not identity
+surname,LEE,,LEE,,corroborates,exact equality below the token floor still counts
+surname,O'BRIEN,,OBRIEN,,corroborates,apostrophes are formatting never a veto
+surname,LEE,,SMITH,,conflicts,recorded difference conflicts
+surname,,,SMITH,,uninformative,absence decides nothing
+nickname,J,,JAMES,,corroborates,issue-3 residual: an initial is compatibility not a nickname
+nickname,J,,ROBERT,,conflicts,issue-3 residual: an incompatible initial still vetoes

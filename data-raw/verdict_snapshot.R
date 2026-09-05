@@ -18,8 +18,8 @@ load("data/NICKNAME_EDGES.rda")
 formals_pool <- head(sort(unique(NICKNAME_EDGES$name)), 25)
 nicks_pool   <- head(sort(unique(NICKNAME_EDGES$nickname)), 25)
 name_pool <- unique(c(formals_pool, nicks_pool,
-                      "ELISABETH", "K.C.", "MARY JANE", "VL", "B", "",
-                      NA_character_))
+                      "ELISABETH", "K.C.", "MARY JANE", "VL", "B", "J",
+                      "JAMES", "", NA_character_))
 
 gender_pool  <- c("M", "F", "Male", "female", "U", "X", "1", "2", "", NA)
 suffix_pool  <- c("JR", "Jr.", "JUNIOR", "SR", "SNR", "II", "2ND", "III",
@@ -41,6 +41,14 @@ rows$middle <- data.frame(
 rows$nickname <- data.frame(
   rule = "nickname", a = g$a, state_a = "", b = g$b, state_b = "",
   verdict = nickname_agreement(g$a, g$b), stringsAsFactors = FALSE)
+
+surname_pool <- c("LEE", "SMITH", "GARCIA", "MCCARTHY", "MCCARTHY-DERVIN",
+                  "DE LA CRUZ", "DE LEON", "O'BRIEN", "OBRIEN",
+                  "HARVEY CAPISTA", "VAN DYKE", "", NA)
+g <- grid_of(surname_pool)
+rows$surname <- data.frame(
+  rule = "surname", a = g$a, state_a = "", b = g$b, state_b = "",
+  verdict = surname_agreement(g$a, g$b), stringsAsFactors = FALSE)
 
 g <- grid_of(gender_pool)
 rows$gender <- data.frame(

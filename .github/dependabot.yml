@@ -1,0 +1,8 @@
+# Keep the SHA-pinned third-party actions (codecov, JamesIves) current.
+# r-lib actions float on @v2 and rarely need a bump.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

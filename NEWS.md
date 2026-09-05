@@ -6,8 +6,12 @@
   `middle_agreement()`; absence or an unmapped code is `"uninformative"`,
   numeric conventions are refused rather than guessed, and there is no
   name-based gender inference.
-* Continuous integration: `R CMD check` now runs on GitHub Actions across
-  Linux (devel/release/oldrel), macOS and Windows.
+* Continuous integration: `R CMD check` runs on GitHub Actions across Linux
+  (devel/release/oldrel), macOS and Windows, on every push and PR and weekly
+  on a schedule to catch dependency drift. Test coverage is measured with covr
+  and reported to Codecov; the pkgdown site builds on every PR (the build is
+  the test) and deploys to <https://mufflyt.github.io/mysterynpi/> on push.
+  Dependabot keeps the pinned actions current.
 
 # mysterynpi 0.1.0
 

@@ -1,18 +1,33 @@
 # Standard R CMD check across the platforms CRAN cares about.
 # Workflow shape follows r-lib/actions `check-standard`:
-# https://github.com/r-lib/actions/tree/v2/examples
+# https://github.com/r-lib/actions/tree/v2-branch/examples
+#
+# The weekly cron exists to catch breakage this repo did not cause: an R-devel
+# change or a dependency update between pushes. Without it, a quiet month means
+# the first person to learn stringi broke us is whoever pushes next.
 on:
   push:
     branches: [main, master]
   pull_request:
+  schedule:
+    - cron: '17 6 * * 1' # weekly, Monday 06:17 UTC
+  workflow_dispatch:
 
 name: R-CMD-check.yaml
 
 permissions: read-all
 
+# A superseded PR run proves nothing about the code that replaced it; cancel
+# it. Push and scheduled runs are never cancelled -- run_id keeps their groups
+# unique -- because a red run on master must stay visible, not vanish.
+concurrency:
+  group: R-CMD-check-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 60
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
@@ -31,7 +46,7 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-pandoc@v2
 

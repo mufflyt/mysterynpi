@@ -1,5 +1,10 @@
 # mysterynpi
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/mufflyt/mysterynpi/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mufflyt/mysterynpi/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/mufflyt/mysterynpi/graph/badge.svg)](https://app.codecov.io/gh/mufflyt/mysterynpi)
+<!-- badges: end -->
+
 One definition of the name handling a provider linkage needs: transliterating
 join keys, given/middle/surname tokenisation, and the rules that decide whether
 two records name the same person.
@@ -59,10 +64,10 @@ packaging:
 |---|---|
 | keys | `name_key()`, `blank_na()`, `has_name_information()`, `first_initial()`, `strip_parenthetical()`, `split_given()` |
 | tokens | `middle_tokens()`, `given_tokens()`, `surname_tokens()` |
-| agreement | `middle_agreement()`, `person_matches()` |
+| agreement | `middle_agreement()`, `person_matches()`, `gender_agreement()`, `normalize_gender()` |
 | ordered classes | `resolve_ordered_classes()` and its parts |
 | one-to-one | `award_contested()`, `count_rivals()` |
-| contract | `assert_middle_agreement_contract()` |
+| contracts | `assert_middle_agreement_contract()`, `assert_gender_agreement_contract()` |
 
 See `vignette("resolving-a-roster")`.
 
@@ -78,8 +83,12 @@ fuzzy surname, surname component — and which class each earns, is where a stud
 declares what it will claim from a name. That belongs in your pipeline, in code
 a reviewer can read.
 
-**Scoring gates.** Gender and credential gates encode claims about identity, not
-facts about strings.
+**Scoring gates.** Credential gates encode claims about identity, not facts
+about strings. Gender is the partial exception: `gender_agreement()` ships the
+*verdict* — do two recorded codes agree, disagree, or decide nothing — because
+comparing recorded codes is a fact about fields. Whether a `"conflicts"`
+verdict vetoes outright or routes to quarantine is still a claim about the
+study, and stays with you.
 
 **A method-priority lookup keyed on strategy names.** One existed upstream; it
 contained none of the calling pipeline's method names, so every row missed the

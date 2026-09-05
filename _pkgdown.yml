@@ -1,0 +1,58 @@
+url: https://mufflyt.github.io/mysterynpi/
+
+template:
+  bootstrap: 5
+
+reference:
+- title: Join keys
+  desc: Keys where absence is never read as a value.
+  contents:
+  - name_key
+  - blank_na
+  - has_name_information
+  - first_initial
+  - strip_parenthetical
+  - split_given
+- title: The normalisation surface
+  desc: Drop-in replacements for the pipelines this was extracted from.
+  contents:
+  - normalize_string
+  - normalize_name_columns
+  - normalize_physician_names
+  - sql_npi_name
+  - needs_normalization
+  - extract_first_initial
+  - strip_name_noise
+  - NAME_NOISE
+- title: Parsing and tokens
+  contents:
+  - parse_person
+  - middle_tokens
+  - given_tokens
+  - surname_tokens
+  - surname_token_table
+  - SURNAME_PARTICLES
+  - MIN_SURNAME_TOKEN
+- title: Agreement rules
+  desc: Three verdicts; "uninformative" is load-bearing and is not agreement.
+  contents:
+  - middle_agreement
+  - person_matches
+  - gender_agreement
+  - normalize_gender
+- title: Ordered classes and the one-to-one constraint
+  contents:
+  - collapse_candidates
+  - pool_stats
+  - resolve_best_class
+  - resolve_ordered_classes
+  - count_rivals
+  - award_contested
+- title: NPI
+  contents:
+  - npi_luhn_ok
+- title: Contracts
+  desc: Assertions a caller runs in its own suite.
+  contents:
+  - assert_middle_agreement_contract
+  - assert_gender_agreement_contract

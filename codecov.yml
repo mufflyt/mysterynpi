@@ -1,0 +1,13 @@
+# Project coverage may drift down 1% before it gates; patch coverage is
+# informational -- a rule whose test IS the product should not be blocked from
+# shipping a one-line fix by a coverage percentage, but a real slide fails.
+comment: false
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        informational: true

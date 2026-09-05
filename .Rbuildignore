@@ -4,3 +4,7 @@
 \.RData
 ^\.github$
 \.DS_Store
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^codecov\.yml$

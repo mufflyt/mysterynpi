@@ -8,9 +8,12 @@ Description: One definition of the name-handling a provider linkage needs:
     agreement rules that decide whether two records name the same person.
     Every rule here encodes a defect that has already shipped in a real
     pipeline, and each ships with the test that catches its return. The
-    package deliberately stops short of blocking, scoring and bijection:
-    those are pipeline science, not shared machinery.
+    package deliberately stops short of candidate generation and blended
+    scoring: which candidates to compare and what a study claims from the
+    evidence is pipeline science, not shared machinery.
 License: MIT + file LICENSE
+URL: https://mufflyt.github.io/mysterynpi/, https://github.com/mufflyt/mysterynpi
+BugReports: https://github.com/mufflyt/mysterynpi/issues
 Encoding: UTF-8
 Depends: R (>= 4.1)
 Imports: stringi, stats

@@ -1,5 +1,25 @@
 # mysterynpi (development version)
 
+* `NICKNAME_EDGES`, `nickname_agreement()` — the carltonnorthern/nicknames
+  corpus (Apache-2.0, vendored at a pinned commit) with a one-hop rule over
+  it: a recorded edge or a shared formal name corroborates; a shared nickname
+  never merges two formal names; no transitive closure, no edit distance.
+* `extract_suffix()`, `normalize_suffix()`, `suffix_agreement()` — the
+  generational suffix parsed out before the noise strip deletes it, and the
+  father/son veto: SR vs JR conflicts, JR vs II corroborates (both a
+  second-of-name), absence decides nothing.
+* `normalize_license()`, `license_agreement()` — same state plus same
+  normalised number corroborates; everything else is uninformative, and there
+  is deliberately no conflicts verdict (the registry's license field is
+  partial and a quarter of NPIs carry more than one license).
+* `clerical_sample()`, `clerical_precision()` — a blinded, evidence-class-
+  stratified review sample (seed required, class never shown, ids assigned
+  after shuffling) and per-class precision with exact binomial intervals.
+* Contracts for each new agreement rule:
+  `assert_nickname_agreement_contract()`,
+  `assert_suffix_agreement_contract()`,
+  `assert_license_agreement_contract()`.
+
 * `gender_agreement()`, `normalize_gender()`,
   `assert_gender_agreement_contract()` — gender as a blocking signal: it may
   veto a candidate pair, never identify one. Same three-verdict contract as

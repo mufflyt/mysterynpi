@@ -106,3 +106,109 @@ assert_gender_agreement_contract <- function(fn = gender_agreement) {
   }
   invisible(TRUE)
 }
+
+#' Assert that nickname agreement still behaves as this caller relies on.
+#'
+#' Pins the one-hop semantics: a recorded edge admits, a shared formal name
+#' admits, and a shared NICKNAME does not -- AL must never merge ALBERT with
+#' ALEXANDER. A table update that flips any of these is a breaking change.
+#'
+#' @param fn the function to test; defaults to [nickname_agreement()].
+#' @return `TRUE` invisibly, or `stop()` naming the property that failed.
+#' @export
+assert_nickname_agreement_contract <- function(fn = nickname_agreement) {
+  expect <- list(
+    # a recorded edge admits, in either direction
+    list("BETH", "ELIZABETH",     "corroborates"),
+    list("ELIZABETH", "LIZ",      "corroborates"),
+    # a shared formal name admits
+    list("BOB", "BOBBY",          "corroborates"),
+    # a shared nickname does NOT: one hop, no transitive closure
+    list("ALBERT", "ALEXANDER",   "conflicts"),
+    list("AL", "ALBERT",          "corroborates"),
+    # no edit-distance tolerance -- only recorded edges admit
+    list("ELISABETH", "ELIZABETH", "conflicts"),
+    list("JANE", "JOAN",          "conflicts"),
+    # absence decides nothing
+    list("", "MARY",              "uninformative"),
+    list(NA_character_, "MARY",   "uninformative"))
+  for (e in expect) {
+    got <- fn(e[[1]], e[[2]])
+    if (!identical(got, e[[3]])) {
+      stop(sprintf("nickname_agreement contract: %s vs %s gave '%s', expected '%s'",
+                   if (is.na(e[[1]])) "NA" else e[[1]], e[[2]], got, e[[3]]),
+           call. = FALSE)
+    }
+  }
+  if (!inherits(try(fn(c("A", "B"), "A"), silent = TRUE), "try-error")) {
+    stop("nickname_agreement contract: mismatched lengths must error, not recycle",
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+#' Assert that suffix agreement still behaves as this caller relies on.
+#'
+#' Pins the father/son veto and the generation semantics: SR vs JR conflicts,
+#' JR vs II corroborates (both a second-of-name), absence decides nothing.
+#'
+#' @param fn the function to test; defaults to [suffix_agreement()].
+#' @return `TRUE` invisibly, or `stop()` naming the property that failed.
+#' @export
+assert_suffix_agreement_contract <- function(fn = suffix_agreement) {
+  expect <- list(
+    list("JR", "SR",              "conflicts"),      # the veto itself
+    list("II", "III",             "conflicts"),
+    list("JR", "II",              "corroborates"),   # both second-of-name
+    list("Jr.", "JUNIOR",         "corroborates"),
+    list(NA_character_, "JR",     "uninformative"),
+    list("", "SR",                "uninformative"),
+    list("V", "IV",               "uninformative"))  # V is an initial, not a suffix
+  for (e in expect) {
+    got <- fn(e[[1]], e[[2]])
+    if (!identical(got, e[[3]])) {
+      stop(sprintf("suffix_agreement contract: %s vs %s gave '%s', expected '%s'",
+                   if (is.na(e[[1]])) "NA" else e[[1]], e[[2]], got, e[[3]]),
+           call. = FALSE)
+    }
+  }
+  if (!inherits(try(fn(c("JR", "SR"), "JR"), silent = TRUE), "try-error")) {
+    stop("suffix_agreement contract: mismatched lengths must error, not recycle",
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+#' Assert that license agreement still behaves as this caller relies on.
+#'
+#' Pins the two-verdict design: same state and same normalised number
+#' corroborates; everything else -- including a same-state mismatch, which
+#' a quarter of multi-licensed NPIs make ordinary -- is uninformative, and
+#' no input can produce a conflict.
+#'
+#' @param fn the function to test; defaults to [license_agreement()].
+#' @return `TRUE` invisibly, or `stop()` naming the property that failed.
+#' @export
+assert_license_agreement_contract <- function(fn = license_agreement) {
+  expect <- list(
+    list("MD-12345", "CO", "md 12345", "co", "corroborates"),
+    list("12345", "CO", "12345", "TX",       "uninformative"),  # states differ
+    list("12345", "CO", "99999", "CO",       "uninformative"),  # NOT a conflict
+    list("0052", "CO", "52", "CO",           "uninformative"),  # zeros are kept
+    list("12345", "CO", NA, "CO",            "uninformative"),
+    list("12345", NA, "12345", "CO",         "uninformative"))  # no state, no license
+  for (e in expect) {
+    got <- fn(e[[1]], e[[2]], e[[3]], e[[4]])
+    if (!identical(got, e[[5]])) {
+      stop(sprintf("license_agreement contract: (%s,%s) vs (%s,%s) gave '%s', expected '%s'",
+                   e[[1]], e[[2]], e[[3]], e[[4]], got, e[[5]]),
+           call. = FALSE)
+    }
+  }
+  if (!inherits(try(fn(c("1", "2"), "CO", "1", "CO"), silent = TRUE),
+                "try-error")) {
+    stop("license_agreement contract: mismatched lengths must error, not recycle",
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}

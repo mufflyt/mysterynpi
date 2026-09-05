@@ -64,10 +64,12 @@ packaging:
 |---|---|
 | keys | `name_key()`, `blank_na()`, `has_name_information()`, `first_initial()`, `strip_parenthetical()`, `split_given()` |
 | tokens | `middle_tokens()`, `given_tokens()`, `surname_tokens()` |
-| agreement | `middle_agreement()`, `person_matches()`, `gender_agreement()`, `normalize_gender()` |
+| suffixes | `extract_suffix()`, `normalize_suffix()` — parse the suffix out *before* the noise strip deletes it |
+| agreement | `middle_agreement()`, `person_matches()`, `gender_agreement()`, `nickname_agreement()`, `suffix_agreement()`, `license_agreement()` |
 | ordered classes | `resolve_ordered_classes()` and its parts |
 | one-to-one | `award_contested()`, `count_rivals()` |
-| contracts | `assert_middle_agreement_contract()`, `assert_gender_agreement_contract()` |
+| clerical review | `clerical_sample()`, `clerical_precision()` — blinded, class-stratified, seed-pinned |
+| contracts | `assert_middle_agreement_contract()` and one per agreement rule |
 
 See `vignette("resolving-a-roster")`.
 
@@ -109,8 +111,16 @@ Two specific exclusions worth naming:
   *surname* blocking, which generates a candidate that is then ranked below
   exact evidence; this suppressed a veto with no tier recording that it
   happened.
-- **No nickname dictionary.** It belongs to the caller, because whether `BETH`
-  may stand for `ELIZABETH` is a claim about the study, not about strings.
+- **The nickname table is vendored; the decision to use it is not.** An
+  earlier version of this README refused a nickname dictionary outright. The
+  refusal was aimed at the *decision* — whether `BETH` may stand for
+  `ELIZABETH` in a given study, and which evidence class that pairing earns —
+  and that decision still stays with the caller. The *table* is different:
+  every pipeline curating its own copy is how two pipelines quietly disagree
+  about who matched whom, so one copy now ships (`NICKNAME_EDGES`, vendored at
+  a pinned commit), with a one-hop rule (`nickname_agreement()`) that never
+  closes the relation transitively — `AL` may stand for `ALBERT` or
+  `ALEXANDER` without ever welding `ALBERT` to `ALEXANDER`.
 
 ## Versioning
 

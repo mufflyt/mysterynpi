@@ -132,6 +132,10 @@ A blinded, class-stratified sample, and the precision it buys.
   : Award a contested candidate, or refuse to
 - [`duplicate_differences()`](https://mufflyt.github.io/mysterynpi/reference/duplicate_differences.md)
   : Which columns differ between rows that share a key?
+- [`ledgered_join()`](https://mufflyt.github.io/mysterynpi/reference/ledgered_join.md)
+  : Join with the cardinality declared, verified, and ledgered
+- [`join_ledger_entry()`](https://mufflyt.github.io/mysterynpi/reference/join_ledger_entry.md)
+  : The accounting for one join, from its inputs and its output
 
 ## Evaluation corpora
 

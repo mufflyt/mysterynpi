@@ -10,6 +10,13 @@
   There is deliberately no birth-year column: NPPES does not publish one.
   The parser is pure and fixture-tested; only `npi_search()` touches the
   network, and no test does.
+* `license_anatomy()`, `license_conformance()` — for state medical board
+  files, where the license number is about to become a blocking variable:
+  decompose each number into prefix / digits / suffix and a `#`-shape, then
+  flag rows whose shape fits nothing else their state's board issues. The
+  format table is learned from the column, never vendored, so a board whose
+  real format carries a prefix keeps it and a stray `MD` on a bare-number
+  board gets flagged for review — flagged, not rewritten.
 
 # mysterynpi 0.2.0
 

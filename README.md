@@ -70,6 +70,7 @@ packaging:
 | one-to-one | `award_contested()`, `count_rivals()` |
 | clerical review | `clerical_sample()`, `clerical_precision()` — blinded, class-stratified, seed-pinned |
 | NPI | `npi_luhn_ok()`, `npi_search()` + `parse_npi_search()` — the registry's answers, with its absences kept honest (no birth year; years-enumerated is a lower bound) |
+| board licenses | `license_anatomy()`, `license_conformance()` — prefix/digits/suffix shapes, with each state's format learned from its own column and misfits flagged for review, never rewritten |
 | contracts | `assert_middle_agreement_contract()` and one per agreement rule |
 
 See `vignette("resolving-a-roster")`.

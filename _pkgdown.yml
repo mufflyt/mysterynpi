@@ -47,6 +47,8 @@ reference:
   - normalize_suffix
   - license_agreement
   - normalize_license
+  - license_anatomy
+  - license_conformance
   - surname_agreement
 - title: Clerical review
   desc: A blinded, class-stratified sample, and the precision it buys.

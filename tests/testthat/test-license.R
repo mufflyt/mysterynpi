@@ -48,3 +48,42 @@ test_that("the shipped contract passes, and can fail", {
   eager <- function(a, sa, b, sb) rep("corroborates", length(a))
   expect_error(assert_license_agreement_contract(eager))
 })
+
+test_that("license_anatomy decomposes prefix, digits, suffix, shape", {
+  a <- license_anatomy(c("MD.0012345", "12345a", "A12B34", "DOC", "", NA))
+  expect_identical(a$prefix,  c("MD", "", "A", "DOC", NA, NA))
+  expect_identical(a$digits,  c("0012345", "12345", "12B34", NA, NA, NA))
+  expect_identical(a$suffix,  c("", "A", "", "", NA, NA))
+  expect_identical(a$shape,   c("MD#######", "#####A", "A##B##", "DOC", NA, NA))
+  expect_identical(a$n_digits, c(7L, 5L, 4L, 0L, NA, NA))
+})
+
+test_that("conformance learns each state's shape from its own column", {
+  lic <- c(rep("10001", 6), "MD10001", "20002A",
+           rep("C 3-141", 4), "141")
+  st  <- c(rep("CO", 8), rep("CA", 5))
+  got <- license_conformance(lic, st, min_share = 0.25)
+  # CO: modal is #####; the stray prefix and suffix rows are flagged
+  expect_identical(got$state_modal_shape[1], "#####")
+  expect_identical(got$flagged[1:8],
+                   c(rep(FALSE, 6), TRUE, TRUE))
+  # CA: a board whose REAL format carries a prefix is the modal shape,
+  # so its prefix is never flagged -- and the bare number is
+  expect_identical(got$state_modal_shape[9], "C####")
+  expect_identical(got$flagged[9:13], c(FALSE, FALSE, FALSE, FALSE, TRUE))
+})
+
+test_that("a state's several common formats all survive", {
+  lic <- c(rep("10001", 5), rep("A2345", 5), "XX999")
+  got <- license_conformance(lic, rep("TX", 11), min_share = 0.2)
+  expect_identical(sum(got$flagged), 1L)
+  expect_true(got$flagged[11])
+})
+
+test_that("unusable rows are NA and appear in no denominator", {
+  got <- license_conformance(c("123", NA, "123", "4567"),
+                             c(NA, "CO", "CO", "CO"))
+  expect_identical(got$flagged[1:2], c(NA, NA))
+  expect_identical(got$shape_share[3], 0.5)   # of the two usable CO rows
+  expect_error(license_conformance(c("1", "2"), "CO"), "same length")
+})

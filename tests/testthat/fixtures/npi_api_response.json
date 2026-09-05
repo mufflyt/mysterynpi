@@ -1,0 +1,59 @@
+{
+  "_provenance": "Provenance: hand-written SYNTHETIC response modelled on the NPPES API v2.1 shape observed 2026-09-05 (fields: basic.sex, missing-vs-empty-vs'--' name parts, 9-digit postal_code, MAILING/LOCATION addresses). No real provider; the NPIs are the documented test numbers with valid Luhn check digits.",
+  "result_count": 2,
+  "results": [
+    {
+      "number": "1234567893",
+      "enumeration_type": "NPI-1",
+      "basic": {
+        "name_prefix": "DR.",
+        "first_name": "JANE",
+        "middle_name": "QUINN",
+        "last_name": "EXAMPLESON",
+        "name_suffix": "--",
+        "credential": "M.D.",
+        "sex": "F",
+        "enumeration_date": "2006-07-01",
+        "last_updated": "2025-01-14",
+        "status": "A"
+      },
+      "addresses": [
+        {
+          "address_purpose": "MAILING",
+          "address_1": "PO BOX 1",
+          "city": "DENVER",
+          "state": "CO",
+          "postal_code": "802010001"
+        },
+        {
+          "address_purpose": "LOCATION",
+          "address_1": "1 EXAMPLE WAY",
+          "city": "DENVER",
+          "state": "CO",
+          "postal_code": "802044597"
+        }
+      ]
+    },
+    {
+      "number": "1234567901",
+      "enumeration_type": "NPI-1",
+      "basic": {
+        "first_name": "SAM",
+        "last_name": "TESTCASE",
+        "sex": "X",
+        "enumeration_date": "2019-03-10",
+        "last_updated": "2024-06-30",
+        "status": "A"
+      },
+      "addresses": [
+        {
+          "address_purpose": "MAILING",
+          "address_1": "PO BOX 2",
+          "city": "AURORA",
+          "state": "CO",
+          "postal_code": "80011"
+        }
+      ]
+    }
+  ]
+}

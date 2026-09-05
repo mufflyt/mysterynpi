@@ -10,7 +10,9 @@ fixture_provenance <- c(
   "humaniformat_boundary.csv" =
     "recorded humaniformat::parse_names() outputs, 2026-09-05; vendor-boundary tripwire",
   "golden/snapshot.csv" =
-    "generated verdict snapshot; regenerate only deliberately via data-raw/verdict_snapshot.R")
+    "generated verdict snapshot; regenerate only deliberately via data-raw/verdict_snapshot.R",
+  "npi_api_response.json" =
+    "hand-written synthetic NPPES API v2.1 response; shape observed live 2026-09-05, no real provider")
 
 fixture_dir <- testthat::test_path("fixtures")
 
@@ -22,15 +24,19 @@ test_that("every fixture file is registered, and every registration exists", {
 test_that("every fixture opens with a provenance header", {
   for (f in names(fixture_provenance)) {
     head <- readLines(file.path(fixture_dir, f), n = 20, warn = FALSE)
-    expect_true(startsWith(head[1], "##"),
-                label = sprintf("%s starts with a header comment", f))
+    if (grepl("[.]csv$", f)) {
+      expect_true(startsWith(head[1], "##"),
+                  label = sprintf("%s starts with a header comment", f))
+    }
+    # JSON cannot carry comments, so its provenance lives in a top-level
+    # "_provenance" key the parsers ignore; both forms must say Provenance:
     expect_true(any(grepl("Provenance:", head)),
                 label = sprintf("%s names its provenance", f))
   }
 })
 
 test_that("fixtures are non-empty, character-clean, and duplicate-free", {
-  for (f in names(fixture_provenance)) {
+  for (f in grep("[.]csv$", names(fixture_provenance), value = TRUE)) {
     d <- read.csv(file.path(fixture_dir, f), comment.char = "#",
                   colClasses = "character")
     expect_gt(nrow(d), 0)

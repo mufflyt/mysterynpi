@@ -64,6 +64,8 @@ reference:
 - title: NPI
   contents:
   - npi_luhn_ok
+  - npi_search
+  - parse_npi_search
 - title: Contracts
   desc: Assertions a caller runs in its own suite.
   contents:

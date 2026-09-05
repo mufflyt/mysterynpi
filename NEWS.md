@@ -1,3 +1,16 @@
+# mysterynpi (development version)
+
+* `npi_search()` and `parse_npi_search()` — query the public NPPES registry
+  for the fields a linkage wants: names, honorific, suffix, credential,
+  gender (normalised, raw code kept), practice ZIP and state, enumeration
+  date with `years_enumerated` (a lower bound on years in practice — NPI
+  enumeration began in 2005), and vintage as `last_updated` plus
+  `retrieved`. NPPES's three spellings of absence (missing key, empty,
+  `"--"`) all become `NA`, so a sentinel can never fake a suffix veto.
+  There is deliberately no birth-year column: NPPES does not publish one.
+  The parser is pure and fixture-tested; only `npi_search()` touches the
+  network, and no test does.
+
 # mysterynpi 0.2.0
 
 * `surname_agreement()`, `assert_surname_agreement_contract()` — the axis

@@ -52,12 +52,13 @@ jobs:
           covr::to_cobertura(cov)
         shell: Rscript {0}
 
-      # The repo went public on 2026-09-05; OIDC replaces the token secret
-      # (pattern from howardjp/phonics, BSD-2-Clause, test-coverage.yaml).
+      # Token auth with the CODECOV_TOKEN secret (set 2026-09-05). The
+      # fail_ci_if_error guard is the r-lib example's: a fork PR has no
+      # secrets, and its upload failure must not fail the fork's CI.
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
-          fail_ci_if_error: true
-          use_oidc: true
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./cobertura.xml
           plugins: noop
           disable_search: true

@@ -31,6 +31,7 @@ reference:
   - given_tokens
   - surname_tokens
   - surname_token_table
+  - extract_suffix
   - SURNAME_PARTICLES
   - MIN_SURNAME_TOKEN
 - title: Agreement rules
@@ -40,6 +41,17 @@ reference:
   - person_matches
   - gender_agreement
   - normalize_gender
+  - nickname_agreement
+  - NICKNAME_EDGES
+  - suffix_agreement
+  - normalize_suffix
+  - license_agreement
+  - normalize_license
+- title: Clerical review
+  desc: A blinded, class-stratified sample, and the precision it buys.
+  contents:
+  - clerical_sample
+  - clerical_precision
 - title: Ordered classes and the one-to-one constraint
   contents:
   - collapse_candidates
@@ -56,3 +68,6 @@ reference:
   contents:
   - assert_middle_agreement_contract
   - assert_gender_agreement_contract
+  - assert_nickname_agreement_contract
+  - assert_suffix_agreement_contract
+  - assert_license_agreement_contract

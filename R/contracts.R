@@ -260,3 +260,47 @@ assert_surname_agreement_contract <- function(fn = surname_agreement) {
   }
   invisible(TRUE)
 }
+
+#' Assert that license-status normalisation still refuses the 4x inflation.
+#'
+#' Pins the landmines by name: death is not retirement, discipline is not
+#' retirement, a lapse is not retirement, and an unmapped status decides
+#' nothing. A change that lets any of these drift into "retired" multiplies
+#' a retirement signal roughly fourfold and is a breaking change.
+#'
+#' @param fn the function to test; defaults to [normalize_license_status()].
+#' @return `TRUE` invisibly, or `stop()` naming the property that failed.
+#' @export
+assert_license_status_contract <- function(fn = normalize_license_status) {
+  expect <- list(
+    # the FL/IL landmine: death is death
+    list("Deceased",              "deceased"),
+    list("DECEASED",              "deceased"),
+    # the OPMC landmine: a disciplinary exit is not a chosen one
+    list("Surrendered",           "disciplinary"),
+    list("Revoked",               "disciplinary"),
+    list("Voluntary Surrender",   "disciplinary"),
+    # the CO/DE/WI landmine: a lapse is an exit of unknown cause
+    list("Expired",               "lapsed"),
+    list("Inactive",              "lapsed"),
+    # what retirement actually is
+    list("Retired",               "retired"),
+    list("EMERITUS",              "retired"),
+    # still practicing is never an exit
+    list("Active",                "active"),
+    list("Probation",             "restricted"),
+    # unmapped decides nothing -- never defaults into any exit class
+    list("Status 47",             NA_character_),
+    list("",                      NA_character_),
+    list(NA_character_,           NA_character_))
+  for (e in expect) {
+    got <- fn(e[[1]])
+    if (!identical(got, e[[2]])) {
+      stop(sprintf("license_status contract: %s gave '%s', expected '%s'",
+                   if (is.na(e[[1]])) "NA" else e[[1]], got,
+                   if (is.na(e[[2]])) "NA" else e[[2]]),
+           call. = FALSE)
+    }
+  }
+  invisible(TRUE)
+}

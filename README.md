@@ -72,6 +72,7 @@ packaging:
 | NPI | `npi_luhn_ok()`, `npi_search()` + `parse_npi_search()` — the registry's answers, with its absences kept honest (no birth year; years-enumerated is a lower bound) |
 | board licenses | `license_anatomy()`, `license_conformance()` — prefix/digits/suffix shapes, with each state's format learned from its own column and misfits flagged for review, never rewritten |
 | duplicates | `duplicate_differences()` — for rows sharing a key: which columns disagree, with differ-by-absence distinguished from differ-by-value |
+| board statuses | `normalize_license_status()` — six exit classes; death, discipline and lapses can never read as "retired", and unmapped decides nothing |
 | corpora | `ROSTER_BENCHMARK` (190 labeled synthetic pairs; see `vignette("roster-benchmark")`), `WINKLER_CENSUS`, `SURNAME_FREQUENCIES`, `NICKNAME_EDGES` — licenses in `inst/COPYRIGHTS` |
 | contracts | `assert_middle_agreement_contract()` and one per agreement rule |
 

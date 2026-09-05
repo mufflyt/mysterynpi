@@ -49,6 +49,8 @@ reference:
   - normalize_license
   - license_anatomy
   - license_conformance
+  - normalize_license_status
+  - LICENSE_STATUS_LEVELS
   - surname_agreement
 - title: Clerical review
   desc: A blinded, class-stratified sample, and the precision it buys.
@@ -84,3 +86,4 @@ reference:
   - assert_suffix_agreement_contract
   - assert_license_agreement_contract
   - assert_surname_agreement_contract
+  - assert_license_status_contract

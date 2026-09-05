@@ -69,6 +69,8 @@ point of packaging:
 | ordered classes | [`resolve_ordered_classes()`](https://mufflyt.github.io/mysterynpi/reference/resolve_ordered_classes.md) and its parts |
 | one-to-one | [`award_contested()`](https://mufflyt.github.io/mysterynpi/reference/award_contested.md), [`count_rivals()`](https://mufflyt.github.io/mysterynpi/reference/count_rivals.md) |
 | clerical review | [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md), [`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md) — blinded, class-stratified, seed-pinned |
+| NPI | [`npi_luhn_ok()`](https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.md), [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md) + [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md) — the registry’s answers, with its absences kept honest (no birth year; years-enumerated is a lower bound) |
+| board licenses | [`license_anatomy()`](https://mufflyt.github.io/mysterynpi/reference/license_anatomy.md), [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md) — prefix/digits/suffix shapes, with each state’s format learned from its own column and misfits flagged for review, never rewritten |
 | contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md) and one per agreement rule |
 
 See

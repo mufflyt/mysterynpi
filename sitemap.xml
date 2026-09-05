@@ -31,6 +31,8 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/has_name_information.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_agreement.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/license_anatomy.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/license_conformance.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_tokens.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/name_key.html</loc></url>
@@ -43,6 +45,8 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_string.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_search.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_person.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/person_matches.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/pool_stats.html</loc></url>

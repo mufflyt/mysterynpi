@@ -89,6 +89,10 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Do two recorded licenses corroborate? (This rule cannot veto.)
 - [`normalize_license()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license.md)
   : Normalise a recorded license number for comparison
+- [`license_anatomy()`](https://mufflyt.github.io/mysterynpi/reference/license_anatomy.md)
+  : Decompose a license number into prefix, digits, and suffix
+- [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md)
+  : Does each license fit the shape its state's board actually issues?
 - [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
   : Do two surnames agree, disagree, or decide nothing?
 
@@ -122,6 +126,10 @@ A blinded, class-stratified sample, and the precision it buys.
 
 - [`npi_luhn_ok()`](https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.md)
   : Is this a structurally valid NPI?
+- [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
+  : Search the NPPES registry for providers
+- [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md)
+  : Parse an NPPES API response into one row per provider
 
 ## Contracts
 

@@ -1,5 +1,31 @@
 # Changelog
 
+## mysterynpi (development version)
+
+- [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
+  and
+  [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md)
+  — query the public NPPES registry for the fields a linkage wants:
+  names, honorific, suffix, credential, gender (normalised, raw code
+  kept), practice ZIP and state, enumeration date with
+  `years_enumerated` (a lower bound on years in practice — NPI
+  enumeration began in 2005), and vintage as `last_updated` plus
+  `retrieved`. NPPES’s three spellings of absence (missing key, empty,
+  `"--"`) all become `NA`, so a sentinel can never fake a suffix veto.
+  There is deliberately no birth-year column: NPPES does not publish
+  one. The parser is pure and fixture-tested; only
+  [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
+  touches the network, and no test does.
+- [`license_anatomy()`](https://mufflyt.github.io/mysterynpi/reference/license_anatomy.md),
+  [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md)
+  — for state medical board files, where the license number is about to
+  become a blocking variable: decompose each number into prefix / digits
+  / suffix and a `#`-shape, then flag rows whose shape fits nothing else
+  their state’s board issues. The format table is learned from the
+  column, never vendored, so a board whose real format carries a prefix
+  keeps it and a stray `MD` on a bare-number board gets flagged for
+  review — flagged, not rewritten.
+
 ## mysterynpi 0.2.0
 
 - [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md),

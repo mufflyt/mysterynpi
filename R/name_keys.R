@@ -109,9 +109,9 @@ name_key <- function(x, strip_alternates = TRUE) {
   # German romanisation BEFORE the Latin-ASCII strip, which would otherwise
   # degrade the umlauts to bare vowels and lose parity with sources that
   # romanise them.
-  for (p in list(c("ü", "UE"), c("Ü", "UE"), c("ö", "OE"),
-                 c("Ö", "OE"), c("ä", "AE"), c("Ä", "AE"),
-                 c("ß", "SS"))) {
+  for (p in list(c("\u00fc", "UE"), c("\u00dc", "UE"), c("\u00f6", "OE"),
+                 c("\u00d6", "OE"), c("\u00e4", "AE"), c("\u00c4", "AE"),
+                 c("\u00df", "SS"))) {
     out <- gsub(p[1], p[2], out, fixed = TRUE)
   }
   out <- stringi::stri_trans_general(out, "Latin-ASCII")

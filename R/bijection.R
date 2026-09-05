@@ -19,6 +19,7 @@
 #' @param won data.frame with `id` and `candidate`: what actually won, one row
 #'   per id. `NA` candidate means the person matched nothing, so every vetoed
 #'   alternative is a genuine rival.
+#' @param id the identifier column name in both frames.
 #' @return data.frame(id, n_rivals).
 #' @export
 count_rivals <- function(vetoed, won, id = "id") {

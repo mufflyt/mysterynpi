@@ -2,3 +2,5 @@
 ^\.git$
 \.Rhistory
 \.RData
+^\.github$
+\.DS_Store

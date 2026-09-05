@@ -6,6 +6,8 @@
   `middle_agreement()`; absence or an unmapped code is `"uninformative"`,
   numeric conventions are refused rather than guessed, and there is no
   name-based gender inference.
+* Continuous integration: `R CMD check` now runs on GitHub Actions across
+  Linux (devel/release/oldrel), macOS and Windows.
 
 # mysterynpi 0.1.0
 

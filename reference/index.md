@@ -101,6 +101,9 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : The mapping that was applied, per source, as a document
 - [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
   : Do two surnames agree, disagree, or decide nothing?
+- [`surname_rarity()`](https://mufflyt.github.io/mysterynpi/reference/surname_rarity.md)
+  : How common is this surname? Census facts, for ordered-class
+  refinement
 
 ## Clerical review
 
@@ -149,6 +152,8 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
   : Search the NPPES registry for providers
 - [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md)
   : Parse an NPPES API response into one row per provider
+- [`parse_npi_licenses()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_licenses.md)
+  : The licenses inside an NPPES response, one row per (NPI, license)
 
 ## Contracts
 

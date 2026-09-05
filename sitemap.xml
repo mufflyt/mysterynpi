@@ -56,6 +56,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_search.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_npi_licenses.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_person.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/person_matches.html</loc></url>
@@ -68,6 +69,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_parenthetical.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_agreement.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_rarity.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_token_table.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_tokens.html</loc></url>
 </urlset>

@@ -147,6 +147,59 @@ reviewer, not from stored truth; here the stored truth stands in to show
 the workflow. The class-4 row is the payoff to notice: quarantine turned
 six would-be deletions into six reviewed true matches.
 
+## The harder corpus, and the honest number
+
+`WINKLER_CENSUS` measures a failure mode the roster benchmark
+deliberately does not: TYPOS. Winkler built his synthetic census pairs
+by injecting spelling corruption – `BELL`/`VELL`,
+`SCCHWARTZ`/`SCHWARTZ`, `CHARLS`/`CHARLES` – which is precisely the
+corruption class this package’s rules refuse to bridge, because every
+edit-distance tolerance they ever tried admitted genuinely different
+people. So run the same policy over his 327 labeled matches and 582
+same-household hard negatives, and publish what happens:
+
+``` r
+
+w <- WINKLER_CENSUS
+a <- w[w$relation == "A", ]; a <- a[!duplicated(a$id), ]
+b <- w[w$relation == "B", ]; b <- b[!duplicated(b$id), ]
+m <- merge(a, b, by = "id", suffixes = c("_a", "_b"))
+
+verdicts <- function(d) {
+  ax <- data.frame(
+    surname = surname_agreement(d$surname_a, d$surname_b),
+    given   = nickname_agreement(d$given_a, d$given_b),
+    middle  = middle_agreement(middle_tokens(d$middle_a),
+                               middle_tokens(d$middle_b)))
+  conflict <- ax$surname == "conflicts" | ax$given == "conflicts" |
+    ax$middle == "conflicts"
+  name_ok <- ax$surname == "corroborates" & ax$given == "corroborates"
+  ifelse(conflict, "reject", ifelse(name_ok, "accept", "review"))
+}
+table(true_pairs = verdicts(m))
+#> true_pairs
+#> accept reject 
+#>      4    323
+
+hn <- merge(a, b, by = c("house", "street"), suffixes = c("_a", "_b"))
+hn <- hn[hn$id_a != hn$id_b, ]
+table(household_negatives = verdicts(hn))
+#> household_negatives
+#> reject 
+#>    582
+```
+
+Recall 1.2% on true pairs; zero false accepts on the household
+negatives. That is not a bug to fix – it is the trade this package
+makes, stated as a measurement instead of a shrug. Typo-corrupted true
+matches are recovered, in the pipelines this package serves, at the
+BLOCKING layer (a fuzzy surname pass that *generates* a candidate ranked
+below exact evidence) and by non-name fields – license, address, birth
+facts – never by loosening what a name agreement means. Note what did
+NOT fail: `TRICIA`/`PATRICIA` is a recorded nickname edge and
+corroborated; that pair died on its `SCCHWARTZ` surname typo, which no
+nickname table should rescue.
+
 The benchmark ships as plain CSV for use outside R:
 
 ``` r

@@ -60,7 +60,8 @@ the 2005 start of enumeration).</p>
 <span>  state <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  postal_code <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  npi <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  limit <span class="op">=</span> <span class="fl">10L</span></span>
+<span>  limit <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>  licenses <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -78,10 +79,18 @@ wildcard on names of two or more characters.</p></dd>
 <dt id="arg-limit">limit<a class="anchor" aria-label="anchor" href="#arg-limit"></a></dt>
 <dd><p>maximum results, 1 to 200.</p></dd>
 
+
+<dt id="arg-licenses">licenses<a class="anchor" aria-label="anchor" href="#arg-licenses"></a></dt>
+<dd><p>when `TRUE`, one fetch returns BOTH frames as
+`list(providers, licenses)` – the licenses via
+[parse_npi_licenses()], ready for [license_agreement()]. Default
+`FALSE` keeps the plain provider frame.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>see [parse_npi_search()].</p>
+    <p>see [parse_npi_search()]; with `licenses = TRUE`, a list of two
+  data.frames, `providers` and `licenses`.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -1,0 +1,14 @@
+citHeader("To cite mysterynpi in publications use:")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "mysterynpi: Name Keys and Agreement Rules for Linking Person Rosters to NPI",
+  author   = person("Tyler", "Muffly"),
+  year     = "2026",
+  note     = "R package version 0.2.0",
+  url      = "https://github.com/mufflyt/mysterynpi",
+  textVersion = paste(
+    "Muffly, T. (2026). mysterynpi: Name Keys and Agreement Rules for",
+    "Linking Person Rosters to NPI. R package version 0.2.0.",
+    "https://github.com/mufflyt/mysterynpi")
+)

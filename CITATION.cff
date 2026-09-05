@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "mysterynpi: Name Keys and Agreement Rules for Linking Person Rosters to NPI"
+version: 0.2.0
+date-released: "2026-09-05"
+authors:
+  - family-names: Muffly
+    given-names: Tyler
+repository-code: "https://github.com/mufflyt/mysterynpi"
+url: "https://mufflyt.github.io/mysterynpi/"
+license: MIT
+keywords:
+  - record-linkage
+  - name-matching
+  - NPI
+  - NPPES
+  - health-services-research

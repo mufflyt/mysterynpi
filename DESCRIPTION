@@ -1,6 +1,6 @@
 Package: mysterynpi
 Title: Name Keys and Agreement Rules for Linking Person Rosters to NPI
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Tyler", "Muffly", email = "tyler.muffly@dhha.org",
                   role = c("aut", "cre"))
 Description: One definition of the name-handling a provider linkage needs:

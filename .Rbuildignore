@@ -10,3 +10,4 @@
 ^codecov\.yml$
 ^data-raw$
 ^tools$
+^CITATION\.cff$

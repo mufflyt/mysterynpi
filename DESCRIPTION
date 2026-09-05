@@ -21,4 +21,4 @@ Suggests: testthat (>= 3.0.0), knitr, rmarkdown, humaniformat
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true
-RoxygenNote: 7.3.3
+Config/roxygen2/version: 8.1.0

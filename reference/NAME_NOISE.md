@@ -8,7 +8,3 @@ not a middle name.
 ``` r
 NAME_NOISE
 ```
-
-## Format
-
-An object of class `character` of length 50.

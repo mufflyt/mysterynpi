@@ -9,7 +9,3 @@ to every \`DE LEON\` sharing a given name.
 ``` r
 SURNAME_PARTICLES
 ```
-
-## Format
-
-An object of class `character` of length 33.

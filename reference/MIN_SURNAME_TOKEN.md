@@ -10,7 +10,3 @@ widening every candidate pool.
 ``` r
 MIN_SURNAME_TOKEN
 ```
-
-## Format
-
-An object of class `integer` of length 1.

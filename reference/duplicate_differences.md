@@ -1,0 +1,56 @@
+# Which columns differ between rows that share a key?
+
+FOR THE MOMENT A FILE ARRIVES with two rows per NPI, or per (state,
+license), or per board id – and the question is never just "are there
+duplicates" but "WHAT is duplicated": the same person recorded twice
+with a name variant, two snapshots straddling an address change, or two
+people welded together by a reused id. The temporal-registry defect in
+\[count_rivals()\] started exactly here: one person's two snapshot rows,
+read as two candidates, vetoed their own match.
+
+## Usage
+
+``` r
+duplicate_differences(df, key, ignore = character(0))
+```
+
+## Arguments
+
+- df:
+
+  a data.frame.
+
+- key:
+
+  character: the column(s) that should identify one entity – \`"npi"\`,
+  or \`c("state", "license")\`.
+
+- ignore:
+
+  character: columns to exclude from comparison (row ids, load
+  timestamps – columns EXPECTED to differ).
+
+## Value
+
+data.frame, sorted by key: the key column(s), then \`column\`,
+\`n_rows\` (rows sharing the key), \`n_values\` (distinct recorded,
+non-\`NA\` values in that column), \`values\` (those values, \`" \| "\`
+separated), \`has_absence\` (any row records nothing), \`absence_only\`.
+Zero rows when no key value repeats.
+
+## Details
+
+For every key value carried by more than one row, this reports one
+output row per column WHOSE VALUES DISAGREE within the group: how many
+rows, the distinct recorded values, and – the distinction this package
+will not collapse – whether the rows differ by VALUE or only by ABSENCE.
+\`absence_only = TRUE\` means at most one distinct value is actually
+recorded and the disagreement is that some rows record nothing: a
+snapshot pair like (\`JR\`, \`NA\`) is one person incompletely
+transcribed, while (\`JR\`, \`SR\`) is two people. A downstream rule fed
+the first must see uninformative, not conflict.
+
+A key whose rows are IDENTICAL in every compared column still appears,
+once, with \`column = "\<identical\>"\` – pure duplicate rows are a
+finding, and a report that silently omits them reads as "no duplicates"
+when it means "no differences".

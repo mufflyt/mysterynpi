@@ -71,6 +71,8 @@ point of packaging:
 | clerical review | [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md), [`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md) — blinded, class-stratified, seed-pinned |
 | NPI | [`npi_luhn_ok()`](https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.md), [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md) + [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md) — the registry’s answers, with its absences kept honest (no birth year; years-enumerated is a lower bound) |
 | board licenses | [`license_anatomy()`](https://mufflyt.github.io/mysterynpi/reference/license_anatomy.md), [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md) — prefix/digits/suffix shapes, with each state’s format learned from its own column and misfits flagged for review, never rewritten |
+| duplicates | [`duplicate_differences()`](https://mufflyt.github.io/mysterynpi/reference/duplicate_differences.md) — for rows sharing a key: which columns disagree, with differ-by-absence distinguished from differ-by-value |
+| corpora | `ROSTER_BENCHMARK` (190 labeled synthetic pairs; see [`vignette("roster-benchmark")`](https://mufflyt.github.io/mysterynpi/articles/roster-benchmark.md)), `WINKLER_CENSUS`, `SURNAME_FREQUENCIES`, `NICKNAME_EDGES` — licenses in `inst/COPYRIGHTS` |
 | contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md) and one per agreement rule |
 
 See

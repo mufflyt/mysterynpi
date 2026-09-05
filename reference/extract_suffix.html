@@ -25,6 +25,7 @@ the same reason – a regex alternation can match inside an accented name."></he
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
+    <li><a class="dropdown-item" href="../articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
     <li><a class="dropdown-item" href="../articles/vetoes-and-quarantine.html">Vetoes and quarantine: using conflicts without deleting people</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -67,12 +68,20 @@ the same reason – a regex alternation can match inside an accented name.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>data.frame with `name` (the string with suffix tokens removed,
-  whitespace normalised) and `suffix` (canonical label or `NA`).</p>
+  whitespace normalised, commas preserved) and `suffix` (canonical label
+  or `NA`).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>When a string carries more than one recognised suffix token the LAST one
 wins (suffixes trail), and all of them are removed from the name.</p>
+<p>COMMAS SURVIVE. The returned name keeps its commas (minus any left
+dangling at the end), because [parse_person()]'s "Last, First" reversal
+NEEDS them: an earlier version of this function split on commas and
+rejoined with spaces, which silently turned `"Thomas, William"` into
+`"Thomas William"` and handed the parser the surname as a given name.
+The roster benchmark caught it – three formatting-family pairs rejected
+on a comma this function had eaten.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

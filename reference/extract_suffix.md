@@ -21,9 +21,18 @@ extract_suffix(x)
 ## Value
 
 data.frame with \`name\` (the string with suffix tokens removed,
-whitespace normalised) and \`suffix\` (canonical label or \`NA\`).
+whitespace normalised, commas preserved) and \`suffix\` (canonical label
+or \`NA\`).
 
 ## Details
 
 When a string carries more than one recognised suffix token the LAST one
 wins (suffixes trail), and all of them are removed from the name.
+
+COMMAS SURVIVE. The returned name keeps its commas (minus any left
+dangling at the end), because \[parse_person()\]'s "Last, First"
+reversal NEEDS them: an earlier version of this function split on commas
+and rejoined with spaces, which silently turned \`"Thomas, William"\`
+into \`"Thomas William"\` and handed the parser the surname as a given
+name. The roster benchmark caught it – three formatting-family pairs
+rejected on a comma this function had eaten.

@@ -36,6 +36,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
+    <li><a class="dropdown-item" href="articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
     <li><a class="dropdown-item" href="articles/vetoes-and-quarantine.html">Vetoes and quarantine: using conflicts without deleting people</a></li>
   </ul>
 </li>
@@ -183,6 +184,17 @@
 <td>board licenses</td>
 <td>
 <code><a href="reference/license_anatomy.html">license_anatomy()</a></code>, <code><a href="reference/license_conformance.html">license_conformance()</a></code> — prefix/digits/suffix shapes, with each state’s format learned from its own column and misfits flagged for review, never rewritten</td>
+</tr>
+<tr>
+<td>duplicates</td>
+<td>
+<code><a href="reference/duplicate_differences.html">duplicate_differences()</a></code> — for rows sharing a key: which columns disagree, with differ-by-absence distinguished from differ-by-value</td>
+</tr>
+<tr>
+<td>corpora</td>
+<td>
+<code>ROSTER_BENCHMARK</code> (190 labeled synthetic pairs; see <code><a href="articles/roster-benchmark.html">vignette("roster-benchmark")</a></code>), <code>WINKLER_CENSUS</code>, <code>SURNAME_FREQUENCIES</code>, <code>NICKNAME_EDGES</code> — licenses in <code>inst/COPYRIGHTS</code>
+</td>
 </tr>
 <tr>
 <td>contracts</td>

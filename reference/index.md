@@ -121,6 +121,19 @@ A blinded, class-stratified sample, and the precision it buys.
   : Count RIVAL ids: alternative claimants who are a different PERSON
 - [`award_contested()`](https://mufflyt.github.io/mysterynpi/reference/award_contested.md)
   : Award a contested candidate, or refuse to
+- [`duplicate_differences()`](https://mufflyt.github.io/mysterynpi/reference/duplicate_differences.md)
+  : Which columns differ between rows that share a key?
+
+## Evaluation corpora
+
+Vendored and authored data; licenses in inst/COPYRIGHTS.
+
+- [`ROSTER_BENCHMARK`](https://mufflyt.github.io/mysterynpi/reference/ROSTER_BENCHMARK.md)
+  : A labeled, fully synthetic roster-to-registry matching benchmark
+- [`WINKLER_CENSUS`](https://mufflyt.github.io/mysterynpi/reference/WINKLER_CENSUS.md)
+  : Winkler's synthetic census pairs, via the SecondString project
+- [`SURNAME_FREQUENCIES`](https://mufflyt.github.io/mysterynpi/reference/SURNAME_FREQUENCIES.md)
+  : The 1,000 most frequent U.S. surnames, Census 2010
 
 ## NPI
 

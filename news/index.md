@@ -2,6 +2,35 @@
 
 ## mysterynpi (development version)
 
+- `ROSTER_BENCHMARK` — the labeled roster-to-registry benchmark nobody
+  had: 190 fully synthetic pairs, truth by construction, one defect
+  family per block, shipped as data and as plain CSV. The reference
+  policy in
+  [`vignette("roster-benchmark")`](https://mufflyt.github.io/mysterynpi/articles/roster-benchmark.md)
+  separates it perfectly (126 accepts and 58 rejects all correct; 6
+  stale-gender true matches quarantined for review, as designed).
+  Building it caught a real defect:
+  [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md)
+  was eating the comma that
+  [`parse_person()`](https://mufflyt.github.io/mysterynpi/reference/parse_person.md)’s
+  “Last, First” reversal needs — fixed and pinned.
+
+- Two evaluation corpora vendored with full attribution
+  (`inst/COPYRIGHTS`): `WINKLER_CENSUS` (Winkler’s synthetic census
+  pairs via the SecondString project, CMU license, 327 labeled matches
+  with the household-duplicate pathology kept) and `SURNAME_FREQUENCIES`
+  (Census 2010 top 1,000, public domain, ties kept as Census assigned
+  them).
+
+- [`duplicate_differences()`](https://mufflyt.github.io/mysterynpi/reference/duplicate_differences.md)
+  — for rows sharing an NPI, license, or id: which columns disagree,
+  with differ-by-absence (`JR` vs nothing — one person incompletely
+  transcribed) distinguished from differ-by-value (`JR` vs `SR` — two
+  people), and fully identical duplicates reported rather than silently
+  vanishing.
+
+- A draft JOSS paper (`paper.md`) accompanies the package.
+
 - [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
   and
   [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md)
@@ -16,6 +45,7 @@
   one. The parser is pure and fixture-tested; only
   [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
   touches the network, and no test does.
+
 - [`license_anatomy()`](https://mufflyt.github.io/mysterynpi/reference/license_anatomy.md),
   [`license_conformance()`](https://mufflyt.github.io/mysterynpi/reference/license_conformance.md)
   — for state medical board files, where the license number is about to

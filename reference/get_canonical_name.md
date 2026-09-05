@@ -1,6 +1,10 @@
-# Resolve a name, possibly a nickname, to its canonical formal form
+# Resolve a name, possibly a nickname, to a canonical formal form
 
-Resolve a name, possibly a nickname, to its canonical formal form
+A hub nickname has SEVERAL formal roots (\`AL\` records dozens); this
+returns the lexicographically first as a stable display value. Ranking
+and equivalence never rely on it – \[are_nickname_equivalents()\] uses
+ALL roots. Unknown names return normalised; NULL and length-one NA
+return as given.
 
 ## Usage
 
@@ -12,7 +16,7 @@ get_canonical_name(name, nickname_dict)
 
 - name:
 
-  a name; NULL and length-one NA return as given.
+  a name.
 
 - nickname_dict:
 
@@ -20,4 +24,4 @@ get_canonical_name(name, nickname_dict)
 
 ## Value
 
-the formal name, or the normalised input when unknown.
+one formal name, or the normalised input when unknown.

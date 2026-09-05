@@ -1,6 +1,10 @@
-# Do two names share a canonical formal root?
+# Are two names one-hop equivalent under the corpus?
 
-Do two names share a canonical formal root?
+THE SAME RELATION \[nickname_agreement()\] corroborates on: equal after
+normalisation, a recorded edge in either direction, or a shared formal
+root. One hop, never transitive closure – a shared NICKNAME does not
+equate two formal names, so \`AL\` pairs with \`ALBERT\` and with
+\`ALEXANDER\` while \`ALBERT\` and \`ALEXANDER\` stay distinct.
 
 ## Usage
 

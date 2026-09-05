@@ -1,12 +1,9 @@
-# Build the bidirectional nickname dictionary used by the similarity score
+# The nickname dictionary, derived from the one corpus
 
-~125 formal first names mapped to their common variants, extracted
-verbatim from isochrones' nickname system (quirks pinned – see the file
-header). Distinct from \[NICKNAME_EDGES\] on purpose: that corpus feeds
-the three-verdict \[nickname_agreement()\] rule; this dictionary feeds a
-SIMILARITY SCORE for candidate ranking, and the two must never be
-silently merged, because a table change here moves scores while a table
-change there moves verdicts.
+Derived entirely from \[NICKNAME_EDGES\] – the same pinned corpus
+\[nickname_agreement()\] reads – so verdicts and scores share ONE truth
+about what a name may stand for. \`nickname_to_formal\` is multi-valued:
+a hub nickname like \`AL\` carries every formal root the corpus records.
 
 ## Usage
 

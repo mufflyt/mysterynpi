@@ -65,3 +65,44 @@ assert_middle_agreement_contract <- function(fn = middle_agreement,
   }
   invisible(TRUE)
 }
+
+#' Assert that gender blocking still behaves as this caller relies on.
+#'
+#' Call from your own test suite. The properties pinned here are the ones a
+#' blocking caller silently depends on: encoding differences must not
+#' manufacture a veto, absence must never be read as a conflict, and numeric
+#' codes must not be guessed at.
+#'
+#' @param fn the function to test; defaults to [gender_agreement()] so a
+#'   caller can also run it against a stand-in to prove the assertion can fail.
+#' @return `TRUE` invisibly, or `stop()` naming the property that failed.
+#' @export
+assert_gender_agreement_contract <- function(fn = gender_agreement) {
+  expect <- list(
+    # encoding differences must not manufacture a veto
+    list("Female", "F",          "corroborates"),
+    list(" male ", "M",          "corroborates"),
+    # the veto must keep working
+    list("M", "F",               "conflicts"),
+    list("FEMALE", "MALE",       "conflicts"),
+    # absence -- or a code this rule cannot map -- decides nothing
+    list("U", "F",               "uninformative"),
+    list("", "M",                "uninformative"),
+    list(NA_character_, "F",     "uninformative"),
+    # numeric conventions are not guessed at
+    list("1", "M",               "uninformative"),
+    list("2", "F",               "uninformative"))
+  for (e in expect) {
+    got <- fn(e[[1]], e[[2]])
+    if (!identical(got, e[[3]])) {
+      stop(sprintf("gender_agreement contract: %s vs %s gave '%s', expected '%s'",
+                   if (is.na(e[[1]])) "NA" else e[[1]], e[[2]], got, e[[3]]),
+           call. = FALSE)
+    }
+  }
+  if (!inherits(try(fn(c("M", "F"), "M"), silent = TRUE), "try-error")) {
+    stop("gender_agreement contract: mismatched lengths must error, not recycle",
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}

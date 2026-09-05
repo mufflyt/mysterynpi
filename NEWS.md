@@ -1,3 +1,12 @@
+# mysterynpi (development version)
+
+* `gender_agreement()`, `normalize_gender()`,
+  `assert_gender_agreement_contract()` — gender as a blocking signal: it may
+  veto a candidate pair, never identify one. Same three-verdict contract as
+  `middle_agreement()`; absence or an unmapped code is `"uninformative"`,
+  numeric conventions are refused rather than guessed, and there is no
+  name-based gender inference.
+
 # mysterynpi 0.1.0
 
 Initial extraction. Nothing depends on this yet.

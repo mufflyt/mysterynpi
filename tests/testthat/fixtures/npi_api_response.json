@@ -1,5 +1,5 @@
 {
-  "_provenance": "Provenance: hand-written SYNTHETIC response modelled on the NPPES API v2.1 shape observed 2026-09-05 (fields: basic.sex, missing-vs-empty-vs'--' name parts, 9-digit postal_code, MAILING/LOCATION addresses). No real provider; the NPIs are the documented test numbers with valid Luhn check digits.",
+  "_provenance": "Provenance: hand-written SYNTHETIC response modelled on the NPPES API v2.1 shape observed 2026-09-05 (fields: basic.sex, missing-vs-empty-vs'--' name parts, 9-digit postal_code, MAILING/LOCATION addresses, taxonomies with state+license including the '--' sentinel and a licenseless entry). No real provider; the NPIs are the documented test numbers with valid Luhn check digits.",
   "result_count": 2,
   "results": [
     {
@@ -31,6 +31,29 @@
           "city": "DENVER",
           "state": "CO",
           "postal_code": "802044597"
+        }
+      ],
+      "taxonomies": [
+        {
+          "code": "207V00000X",
+          "desc": "Obstetrics & Gynecology",
+          "primary": true,
+          "state": "CO",
+          "license": "MD.0012345"
+        },
+        {
+          "code": "207VM0101X",
+          "desc": "Obstetrics & Gynecology, Maternal & Fetal Medicine",
+          "primary": false,
+          "state": "TX",
+          "license": "Q9876"
+        },
+        {
+          "code": "208000000X",
+          "desc": "Pediatrics",
+          "primary": false,
+          "state": "--",
+          "license": "--"
         }
       ]
     },

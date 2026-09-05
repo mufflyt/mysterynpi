@@ -10,7 +10,8 @@ npi_search(
   state = NULL,
   postal_code = NULL,
   npi = NULL,
-  limit = 10L
+  limit = 10L,
+  licenses = FALSE
 )
 }
 \arguments{
@@ -20,9 +21,15 @@ and `last_name` as case-insensitive and supports a trailing `*`
 wildcard on names of two or more characters.}
 
 \item{limit}{maximum results, 1 to 200.}
+
+\item{licenses}{when `TRUE`, one fetch returns BOTH frames as
+`list(providers, licenses)` -- the licenses via
+[parse_npi_licenses()], ready for [license_agreement()]. Default
+`FALSE` keeps the plain provider frame.}
 }
 \value{
-see [parse_npi_search()].
+see [parse_npi_search()]; with `licenses = TRUE`, a list of two
+  data.frames, `providers` and `licenses`.
 }
 \description{
 A thin fetch over [parse_npi_search()], which documents every column and

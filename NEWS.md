@@ -1,5 +1,23 @@
 # mysterynpi (development version)
 
+* `parse_npi_licenses()` and `npi_search(licenses = TRUE)` — NPPES's
+  taxonomies carry state license numbers with their issuing states, the
+  strongest deterministic key after the NPI itself; one fetch now returns
+  them long, one row per (NPI, license), ready for `license_agreement()`'s
+  best-verdict-across-rows use. Licenseless taxonomy entries are dropped
+  rows, never NA rows.
+* `surname_rarity()` — Census rank and carriers-per-100k for a surname,
+  the deterministic analogue of a term-frequency adjustment: it refines
+  which CLASS a pair earns, in reviewable policy code, and has no code
+  path into any verdict. Absence from the top 1,000 is `NA`: probably
+  rare, possibly misspelled, never a value.
+* The Winkler evaluation, published and PINNED: over `WINKLER_CENSUS`'s
+  327 typo-corrupted true pairs the reference policy accepts 4 (1.2%
+  recall) and rejects every one of 582 same-household hard negatives —
+  the no-edit-distance trade stated as a measurement. The pinning test
+  means recall going UP is how an edit-distance tolerance would announce
+  itself.
+
 * `normalize_license_status()`, `LICENSE_STATUS_LEVELS`,
   `assert_license_status_contract()` — state boards do not share a
   vocabulary for not-practicing, and reading theirs naively inflates a

@@ -104,6 +104,76 @@ parse_npi_search <- function(txt, retrieved) {
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
+#' The licenses inside an NPPES response, one row per (NPI, license)
+#'
+#' NPPES's `taxonomies` array carries STATE LICENSE NUMBERS with their
+#' issuing states -- after the NPI itself the strongest deterministic key a
+#' candidate pair can share, and exactly the input [license_agreement()]
+#' wants. This is the long companion to [parse_npi_search()]: same JSON
+#' text in, one row per recorded (NPI, license) out, taxonomy entries
+#' without a usable license dropped (a taxonomy code alone says what a
+#' record is for, not which licenses its person holds).
+#'
+#' THE INTENDED USE closes the search-to-agreement loop: a roster license
+#' is compared against EVERY row its candidate NPI carries here, and the
+#' best verdict stands -- one `"corroborates"` outweighs any number of
+#' `"uninformative"`, which is [license_agreement()]'s design (a quarter of
+#' NPIs carry more than one license; disagreement between two of them is
+#' two glimpses of one career).
+#'
+#' \preformatted{
+#'   lic <- parse_npi_licenses(txt)
+#'   v <- license_agreement(rep(roster_num, nrow(lic)),
+#'                          rep(roster_state, nrow(lic)),
+#'                          lic$license, lic$state)
+#'   any(v == "corroborates")
+#' }
+#'
+#' @param txt character: the JSON text of an NPPES API v2.1 response.
+#' @return data.frame: `npi`, `state`, `license`, `taxonomy_code`,
+#'   `taxonomy_desc`, `primary`; zero rows when no result carries one.
+#'   NPPES's absence sentinels (missing, empty, `"--"`) are dropped rows
+#'   here, never `NA` rows -- a licenseless taxonomy is not a license.
+#' @export
+parse_npi_licenses <- function(txt) {
+  if (!requireNamespace("jsonlite", quietly = TRUE)) {
+    stop("parse_npi_licenses() requires the jsonlite package.", call. = FALSE)
+  }
+  res <- jsonlite::fromJSON(paste(txt, collapse = "\n"),
+                            simplifyVector = FALSE)
+  if (!is.null(res$Errors)) {
+    stop("NPPES API error: ",
+         paste(vapply(res$Errors, function(e) e$description %||% "unknown",
+                      character(1)), collapse = "; "),
+         call. = FALSE)
+  }
+  fld <- function(l, k) {
+    v <- l[[k]]
+    if (is.null(v) || !nzchar(v) || identical(v, "--")) NA_character_
+    else as.character(v)
+  }
+  rows <- list()
+  for (r in res$results) {
+    npi <- fld(r, "number")
+    for (tx in r$taxonomies) {
+      lic <- fld(tx, "license")
+      st  <- fld(tx, "state")
+      if (is.na(lic)) next
+      rows[[length(rows) + 1L]] <- data.frame(
+        npi = npi, state = st, license = lic,
+        taxonomy_code = fld(tx, "code"), taxonomy_desc = fld(tx, "desc"),
+        primary = isTRUE(tx$primary), stringsAsFactors = FALSE)
+    }
+  }
+  out <- if (length(rows)) do.call(rbind, rows) else
+    data.frame(npi = character(0), state = character(0),
+               license = character(0), taxonomy_code = character(0),
+               taxonomy_desc = character(0), primary = logical(0),
+               stringsAsFactors = FALSE)
+  rownames(out) <- NULL
+  out
+}
+
 #' Search the NPPES registry for providers
 #'
 #' A thin fetch over [parse_npi_search()], which documents every column and
@@ -121,10 +191,16 @@ parse_npi_search <- function(txt, retrieved) {
 #'   and `last_name` as case-insensitive and supports a trailing `*`
 #'   wildcard on names of two or more characters.
 #' @param limit maximum results, 1 to 200.
-#' @return see [parse_npi_search()].
+#' @param licenses when `TRUE`, one fetch returns BOTH frames as
+#'   `list(providers, licenses)` -- the licenses via
+#'   [parse_npi_licenses()], ready for [license_agreement()]. Default
+#'   `FALSE` keeps the plain provider frame.
+#' @return see [parse_npi_search()]; with `licenses = TRUE`, a list of two
+#'   data.frames, `providers` and `licenses`.
 #' @export
 npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
-                       postal_code = NULL, npi = NULL, limit = 10L) {
+                       postal_code = NULL, npi = NULL, limit = 10L,
+                       licenses = FALSE) {
   limit <- as.integer(limit)
   if (is.na(limit) || limit < 1L || limit > 200L) {
     stop("limit must be between 1 and 200", call. = FALSE)
@@ -142,5 +218,7 @@ npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
   con <- url(u)
   on.exit(try(close(con), silent = TRUE))
   txt <- readLines(con, warn = FALSE)
-  parse_npi_search(txt, retrieved = Sys.Date())
+  providers <- parse_npi_search(txt, retrieved = Sys.Date())
+  if (!isTRUE(licenses)) return(providers)
+  list(providers = providers, licenses = parse_npi_licenses(txt))
 }

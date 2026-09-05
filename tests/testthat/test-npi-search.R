@@ -87,6 +87,40 @@ test_that("the parse is reproducible because retrieved is explicit", {
                "single date")
 })
 
+test_that("licenses come out long, state-scoped, sentinels dropped", {
+  skip_if_not_installed("jsonlite")
+  lic <- parse_npi_licenses(read_fixture())
+  # provider 1 carries CO + TX licenses; its '--' taxonomy and the whole
+  # licenseless provider 2 contribute NOTHING -- a dropped row, not an NA row
+  expect_identical(nrow(lic), 2L)
+  expect_identical(lic$npi, rep("1234567893", 2))
+  expect_identical(lic$state, c("CO", "TX"))
+  expect_identical(lic$license, c("MD.0012345", "Q9876"))
+  expect_identical(lic$primary, c(TRUE, FALSE))
+  expect_false(anyNA(lic$license))
+})
+
+test_that("the extracted rows close the loop into license_agreement()", {
+  skip_if_not_installed("jsonlite")
+  lic <- parse_npi_licenses(read_fixture())
+  # a roster carrying the CO license: best verdict across the NPI's rows
+  v <- license_agreement(rep("MD-0012345", nrow(lic)), rep("CO", nrow(lic)),
+                         lic$license, lic$state)
+  expect_identical(v, c("corroborates", "uninformative"))
+  # a roster in a third state corroborates nothing and vetoes nothing
+  v2 <- license_agreement(rep("555", nrow(lic)), rep("WY", nrow(lic)),
+                          lic$license, lic$state)
+  expect_true(all(v2 == "uninformative"))
+})
+
+test_that("an empty result set yields the empty license frame", {
+  skip_if_not_installed("jsonlite")
+  lic <- parse_npi_licenses('{"result_count":0, "results":[]}')
+  expect_identical(nrow(lic), 0L)
+  expect_identical(names(lic), c("npi", "state", "license", "taxonomy_code",
+                                 "taxonomy_desc", "primary"))
+})
+
 test_that("npi_search refuses bad arguments before touching the network", {
   expect_error(npi_search(), "at least one search criterion")
   expect_error(npi_search(last_name = "SMITH", limit = 0), "between 1 and 200")

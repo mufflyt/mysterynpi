@@ -53,6 +53,7 @@ reference:
   - LICENSE_STATUS_LEVELS
   - license_status_audit
   - surname_agreement
+  - surname_rarity
 - title: Clerical review
   desc: A blinded, class-stratified sample, and the precision it buys.
   contents:
@@ -78,6 +79,7 @@ reference:
   - npi_luhn_ok
   - npi_search
   - parse_npi_search
+  - parse_npi_licenses
 - title: Contracts
   desc: Assertions a caller runs in its own suite.
   contents:

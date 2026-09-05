@@ -2,6 +2,24 @@
 
 ## mysterynpi (development version)
 
+- Testing patterns imported from the public name-matching ecosystem,
+  each credited in the file that carries it: a golden verdict corpus
+  where every row must reproduce exactly and every new hard case joins
+  the corpus in the PR that fixes it (datamade/probablepeople, MIT);
+  fixture provenance headers enforced by a meta-test, and a declarative
+  rule registry whose generic contract battery every agreement rule
+  inherits (howardjp/phonics, BSD-2-Clause); a 6,728-verdict frozen
+  snapshot that refactors must reproduce bit-for-bit
+  (moj-analytical-services/splink, MIT); a vendored-data drift gate
+  regenerating `NICKNAME_EDGES` from its pinned commit
+  (opensanctions/rigour, MIT; carltonnorthern/nicknames, Apache-2.0)
+  plus semantic invariants on the table itself; a vendor-boundary
+  fixture pinning the dormant humaniformat’s raw outputs; an always-on
+  namespace walk backing the no-fuzzy guard so it cannot green-skip
+  under R CMD check (loudness rule from derek73/python-nameparser); and
+  workflow refinements – R-devel as advisory, generated docs must diff
+  clean (howardjp/phonics).
+
 - `NICKNAME_EDGES`,
   [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
   — the carltonnorthern/nicknames corpus (Apache-2.0, vendored at a

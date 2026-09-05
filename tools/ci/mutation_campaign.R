@@ -106,6 +106,20 @@ CATALOGUE <- list(
        find = "deceased = c(\"DECEASED\", \"DEATH\",",
        repl = "deceased = c(\"XDECEASED\", \"DEATH\",",
        why  = "FL/IL Deceased stops mapping; death drifts wherever the caller defaults it"),
+  # NOTE: an earlier version of this mutant bypassed only the x-side holdout
+  # and SURVIVED -- correctly, it turns out: either side's holdout alone
+  # blocks every NA-NA pairing, so the single-sided bypass is behaviour-
+  # preserving defense-in-depth. The defect needs BOTH sides bypassed.
+  list(id = "join-absence-becomes-key",
+       file = "R/join_ledger.R",
+       find = "  xn <- x[is.na(kx), , drop = FALSE]; xc <- x[!is.na(kx), , drop = FALSE]\n  yn <- y[is.na(ky), , drop = FALSE]; yc <- y[!is.na(ky), , drop = FALSE]",
+       repl = "  xn <- x[0, , drop = FALSE]; xc <- x\n  yn <- y[0, , drop = FALSE]; yc <- y",
+       why  = "NA keys reach the engine and match each other; shared absence becomes a join"),
+  list(id = "join-match-rate-toothless",
+       file = "R/join_ledger.R",
+       find = "if (min_match_rate > 0 && !is.na(ledger$match_rate_x) &&",
+       repl = "if (min_match_rate > 1 && !is.na(ledger$match_rate_x) &&",
+       why  = "the coverage contract silently checks nothing; the deprecated safe_join defect returns"),
   list(id = "resolve-keeps-weakest",
        file = "R/resolve.R",
        find = "as.integer(stats::ave(d[[class]], key, FUN = min))[keep]",

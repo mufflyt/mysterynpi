@@ -102,6 +102,14 @@ pool_stats <- function(per_candidate, id = "id", class = "evidence_class",
 #' @export
 resolve_best_class <- function(per_candidate, stats, id = "id",
                                class = "evidence_class", confidence = NULL) {
+  # The merge below is many-to-one BY CONTRACT: pool_stats() emits one row
+  # per id. A caller supplying its own stats with a duplicated id would fan
+  # the merge out and resolve people against manufactured rows -- the silent
+  # row explosion the join ledger exists to catch. Refuse it here.
+  if (anyDuplicated(stats[[id]])) {
+    stop("stats must hold one row per ", id,
+         "; a duplicated id would fan the merge out", call. = FALSE)
+  }
   m <- merge(per_candidate, stats[, c(id, "best_class", "n_at_best")],
              by = id, all.x = TRUE)
   out <- m[m[[class]] == m$best_class & m$n_at_best == 1L, , drop = FALSE]

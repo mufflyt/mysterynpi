@@ -1,5 +1,19 @@
 # mysterynpi (development version)
 
+* The join ledger: `ledgered_join()` and `join_ledger_entry()` — row-count
+  reconciliation as a shipped artifact, one row per join per step. The
+  vocabulary is borrowed, not coined: dplyr 1.1's `relationship` values
+  verified rather than assumed (no default — declaring what a join may do
+  to the row count is the point), dplyr's `unmatched = "error"` semantics,
+  the ledger fields of midwifery's Safe Join Standard, and a
+  `min_match_rate` contract carrying the lesson of the deprecated
+  isochrones safe_join, whose zero lower bound let total data loss pass.
+  Absence is not a join key: NA keys never match — base merge's NA-matches-
+  NA default is the nzchar(NA) defect wearing a join, and the entry's
+  `conserved` arithmetic catches engines that do it. `resolve_best_class()`
+  now refuses caller-supplied stats that would fan its own merge out. Two
+  new mutants guard the ledger's teeth.
+
 * `parse_npi_licenses()` and `npi_search(licenses = TRUE)` — NPPES's
   taxonomies carry state license numbers with their issuing states, the
   strongest deterministic key after the NPI itself; one fetch now returns

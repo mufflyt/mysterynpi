@@ -68,6 +68,8 @@ reference:
   - count_rivals
   - award_contested
   - duplicate_differences
+  - ledgered_join
+  - join_ledger_entry
 - title: Evaluation corpora
   desc: Vendored and authored data; licenses in inst/COPYRIGHTS.
   contents:

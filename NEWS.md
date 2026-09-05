@@ -15,6 +15,16 @@
 * `clerical_sample()`, `clerical_precision()` — a blinded, evidence-class-
   stratified review sample (seed required, class never shown, ids assigned
   after shuffling) and per-class precision with exact binomial intervals.
+* The matching gate: a mutation campaign (`tools/ci/mutation_campaign.R`,
+  run in CI by `matching-gate.yaml`) proves the tests can FAIL -- eleven
+  catalogued mutants each reintroduce a shipped defect (the token floor
+  lowered, a veto loosened, absence read as evidence, blinding lost) and the
+  suite must go red under every one. Control-first with an assertion floor,
+  exactly-once anchors, byte-for-byte restore. A permutation attack over a
+  deliberately tied fixture pins order-invariance of the resolver, and a
+  parse-tree capability guard keeps approximate matching from arriving under
+  an alias. Patterns imported from the CI of mufflyt/midwifery,
+  mufflyt/twostep and mufflyt/mysterymaps.
 * Contracts for each new agreement rule:
   `assert_nickname_agreement_contract()`,
   `assert_suffix_agreement_contract()`,

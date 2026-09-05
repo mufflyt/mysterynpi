@@ -1,0 +1,51 @@
+# The name-matching gate: a mutation campaign over the agreement rules.
+#
+# R-CMD-check proves the tests pass; this proves the tests can FAIL. Each
+# catalogued mutant reintroduces a defect the package exists to prevent
+# (the surname-token floor lowered, a veto loosened, absence read as
+# evidence), and the suite must go red under every one of them. A surviving
+# mutant is a hole in the tests and fails this gate. Pattern imported from
+# the mutation harnesses in mufflyt/midwifery and mufflyt/twostep.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+name: matching-gate.yaml
+
+permissions: read-all
+
+concurrency:
+  group: matching-gate-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  mutation-campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgload, any::testthat, any::humaniformat
+          needs: check
+
+      - name: Run the mutation campaign
+        run: Rscript tools/ci/mutation_campaign.R
+
+      - name: Working tree must be byte-identical after the campaign
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo '::error::the campaign left mutations in the working tree'
+            git status --porcelain
+            git diff
+            exit 1
+          fi

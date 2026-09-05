@@ -17,6 +17,53 @@ test_that("no approximate string matching is called anywhere in the package", {
   }
 })
 
+# The grep above reads lines; this walks the parse tree, so aliasing evades
+# nothing: `sd <- stringdist::stringdist` is caught at the `::` reference and
+# a renamed wrapper is caught at its own call site when it calls the real
+# thing. Pattern from the capability guard in mufflyt/mysterymaps: fuzzy
+# machinery may not arrive without this file noticing.
+test_that("the parse tree references no approximate-matching capability", {
+  files <- list.files("../../R", pattern = "[.]R$", full.names = TRUE)
+  if (!length(files)) skip("source not reachable from the installed package")
+  banned_fns <- c("adist", "agrep", "agrepl", "stringdist", "stringsim",
+                  "amatch", "stringdistmatrix", "jarowinkler", "soundex",
+                  "nysiis", "metaphone", "phonetic", "fastLink",
+                  "compare.dedup", "pair_blocking")
+  banned_pkgs <- c("stringdist", "phonics", "RecordLinkage", "fastLink",
+                   "reclin", "reclin2", "fuzzyjoin")
+  refs <- new.env(parent = emptyenv())
+  walk <- function(e) {
+    if (is.call(e)) {
+      h <- e[[1]]
+      if (is.symbol(h)) assign(as.character(h), TRUE, refs)
+      if (is.call(h) && is.symbol(h[[1]]) &&
+          as.character(h[[1]]) %in% c("::", ":::")) {
+        assign(as.character(h[[2]]), TRUE, refs)          # the package
+        assign(as.character(h[[3]]), TRUE, refs)          # the function
+      }
+      if (is.symbol(h) && as.character(h) %in% c("::", ":::")) {
+        assign(as.character(e[[2]]), TRUE, refs)
+        assign(as.character(e[[3]]), TRUE, refs)
+      }
+      # empty args (x[, 1]) must be tested by INDEX, never bound to a loop
+      # variable -- evaluating a name bound to the empty symbol is itself the
+      # missing-argument error
+      args <- as.list(e)[-1]
+      for (i in seq_along(args)) {
+        if (!identical(args[[i]], quote(expr = ))) walk(args[[i]])
+      }
+    } else if (is.function(e)) {
+      walk(body(e))
+    } else if (is.pairlist(e) || is.expression(e)) {
+      for (i in seq_along(e)) walk(e[[i]])
+    }
+  }
+  for (f in files) walk(parse(f, keep.source = FALSE))
+  seen <- ls(refs)
+  expect_identical(intersect(seen, banned_fns), character(0))
+  expect_identical(intersect(seen, banned_pkgs), character(0))
+})
+
 test_that("the package declares no approximate-matching dependency", {
   d <- read.dcf(system.file("DESCRIPTION", package = "mysterynpi"))
   deps <- paste(d[, intersect(colnames(d), c("Imports", "Depends", "LinkingTo"))],

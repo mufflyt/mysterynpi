@@ -198,6 +198,13 @@
 
         <dt>
 
+          <code><a href="extract_suffix.html">extract_suffix()</a></code>
+
+        </dt>
+        <dd>Pull the generational suffix out of a raw name string, keeping both parts</dd>
+
+        <dt>
+
           <code><a href="SURNAME_PARTICLES.html">SURNAME_PARTICLES</a></code>
 
         </dt>
@@ -246,6 +253,71 @@
 
         </dt>
         <dd>Normalise recorded gender codes to `"M"`, `"F"`, or `NA`</dd>
+
+        <dt>
+
+          <code><a href="nickname_agreement.html">nickname_agreement()</a></code>
+
+        </dt>
+        <dd>Do two given-name tokens agree once recorded nicknames are admitted?</dd>
+
+        <dt>
+
+          <code><a href="NICKNAME_EDGES.html">NICKNAME_EDGES</a></code>
+
+        </dt>
+        <dd>Formal-name / nickname edges, vendored from carltonnorthern/nicknames</dd>
+
+        <dt>
+
+          <code><a href="suffix_agreement.html">suffix_agreement()</a></code>
+
+        </dt>
+        <dd>Do two recorded generational suffixes agree, disagree, or decide nothing?</dd>
+
+        <dt>
+
+          <code><a href="normalize_suffix.html">normalize_suffix()</a></code>
+
+        </dt>
+        <dd>Normalise a recorded generational suffix to `JR`/`SR`/`II`/`III`/`IV`, or `NA`</dd>
+
+        <dt>
+
+          <code><a href="license_agreement.html">license_agreement()</a></code>
+
+        </dt>
+        <dd>Do two recorded licenses corroborate? (This rule cannot veto.)</dd>
+
+        <dt>
+
+          <code><a href="normalize_license.html">normalize_license()</a></code>
+
+        </dt>
+        <dd>Normalise a recorded license number for comparison</dd>
+      </dl></div><div class="section level2">
+      <h2 id="clerical-review">Clerical review<a class="anchor" aria-label="anchor" href="#clerical-review"></a></h2>
+
+      <div class="section-desc"><p>A blinded, class-stratified sample, and the precision it buys.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="clerical_sample.html">clerical_sample()</a></code>
+
+        </dt>
+        <dd>Draw a blinded, class-stratified sample of candidate pairs for review</dd>
+
+        <dt>
+
+          <code><a href="clerical_precision.html">clerical_precision()</a></code>
+
+        </dt>
+        <dd>Per-class precision from a completed clerical review</dd>
       </dl></div><div class="section level2">
       <h2 id="ordered-classes-and-the-one-to-one-constraint">Ordered classes and the one-to-one constraint<a class="anchor" aria-label="anchor" href="#ordered-classes-and-the-one-to-one-constraint"></a></h2>
 
@@ -336,6 +408,27 @@
 
         </dt>
         <dd>Assert that gender blocking still behaves as this caller relies on.</dd>
+
+        <dt>
+
+          <code><a href="assert_nickname_agreement_contract.html">assert_nickname_agreement_contract()</a></code>
+
+        </dt>
+        <dd>Assert that nickname agreement still behaves as this caller relies on.</dd>
+
+        <dt>
+
+          <code><a href="assert_suffix_agreement_contract.html">assert_suffix_agreement_contract()</a></code>
+
+        </dt>
+        <dd>Assert that suffix agreement still behaves as this caller relies on.</dd>
+
+        <dt>
+
+          <code><a href="assert_license_agreement_contract.html">assert_license_agreement_contract()</a></code>
+
+        </dt>
+        <dd>Assert that license agreement still behaves as this caller relies on.</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

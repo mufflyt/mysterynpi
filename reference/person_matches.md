@@ -25,3 +25,13 @@ person_matches(last_a, given_a, last_b, given_b)
 ## Value
 
 logical vector.
+
+## Details
+
+THIS IS THE EXACT TIER, DELIBERATELY. \`BOB\` does not match \`ROBERT\`
+here, and the logical return collapses "no given name" with "different
+given name" – both acceptable only because this rule's job is the
+strictest pass. The nickname tier, with the three-verdict contract that
+keeps absence uninformative, is \[nickname_agreement()\]; a pipeline's
+weaker blocking passes should rank on its verdicts rather than loosen
+this one.

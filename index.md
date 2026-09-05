@@ -64,10 +64,12 @@ point of packaging:
 |----|----|
 | keys | [`name_key()`](https://mufflyt.github.io/mysterynpi/reference/name_key.md), [`blank_na()`](https://mufflyt.github.io/mysterynpi/reference/blank_na.md), [`has_name_information()`](https://mufflyt.github.io/mysterynpi/reference/has_name_information.md), [`first_initial()`](https://mufflyt.github.io/mysterynpi/reference/first_initial.md), [`strip_parenthetical()`](https://mufflyt.github.io/mysterynpi/reference/strip_parenthetical.md), [`split_given()`](https://mufflyt.github.io/mysterynpi/reference/split_given.md) |
 | tokens | [`middle_tokens()`](https://mufflyt.github.io/mysterynpi/reference/middle_tokens.md), [`given_tokens()`](https://mufflyt.github.io/mysterynpi/reference/given_tokens.md), [`surname_tokens()`](https://mufflyt.github.io/mysterynpi/reference/surname_tokens.md) |
-| agreement | [`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md), [`person_matches()`](https://mufflyt.github.io/mysterynpi/reference/person_matches.md), [`gender_agreement()`](https://mufflyt.github.io/mysterynpi/reference/gender_agreement.md), [`normalize_gender()`](https://mufflyt.github.io/mysterynpi/reference/normalize_gender.md) |
+| suffixes | [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md), [`normalize_suffix()`](https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.md) — parse the suffix out *before* the noise strip deletes it |
+| agreement | [`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md), [`person_matches()`](https://mufflyt.github.io/mysterynpi/reference/person_matches.md), [`gender_agreement()`](https://mufflyt.github.io/mysterynpi/reference/gender_agreement.md), [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md), [`suffix_agreement()`](https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.md), [`license_agreement()`](https://mufflyt.github.io/mysterynpi/reference/license_agreement.md) |
 | ordered classes | [`resolve_ordered_classes()`](https://mufflyt.github.io/mysterynpi/reference/resolve_ordered_classes.md) and its parts |
 | one-to-one | [`award_contested()`](https://mufflyt.github.io/mysterynpi/reference/award_contested.md), [`count_rivals()`](https://mufflyt.github.io/mysterynpi/reference/count_rivals.md) |
-| contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md), [`assert_gender_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.md) |
+| clerical review | [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md), [`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md) — blinded, class-stratified, seed-pinned |
+| contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md) and one per agreement rule |
 
 See
 [`vignette("resolving-a-roster")`](https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.md).
@@ -112,9 +114,17 @@ Two specific exclusions worth naming:
   `ANN`/`ANNE`). It is not symmetric with fuzzy *surname* blocking,
   which generates a candidate that is then ranked below exact evidence;
   this suppressed a veto with no tier recording that it happened.
-- **No nickname dictionary.** It belongs to the caller, because whether
-  `BETH` may stand for `ELIZABETH` is a claim about the study, not about
-  strings.
+- **The nickname table is vendored; the decision to use it is not.** An
+  earlier version of this README refused a nickname dictionary outright.
+  The refusal was aimed at the *decision* — whether `BETH` may stand for
+  `ELIZABETH` in a given study, and which evidence class that pairing
+  earns — and that decision still stays with the caller. The *table* is
+  different: every pipeline curating its own copy is how two pipelines
+  quietly disagree about who matched whom, so one copy now ships
+  (`NICKNAME_EDGES`, vendored at a pinned commit), with a one-hop rule
+  ([`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md))
+  that never closes the relation transitively — `AL` may stand for
+  `ALBERT` or `ALEXANDER` without ever welding `ALBERT` to `ALEXANDER`.
 
 ## Versioning
 

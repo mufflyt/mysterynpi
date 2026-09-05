@@ -74,6 +74,15 @@ identify, since `"W."` matches every W.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>logical vector.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>THIS IS THE EXACT TIER, DELIBERATELY. `BOB` does not match `ROBERT` here,
+and the logical return collapses "no given name" with "different given
+name" – both acceptable only because this rule's job is the strictest
+pass. The nickname tier, with the three-verdict contract that keeps
+absence uninformative, is [nickname_agreement()]; a pipeline's weaker
+blocking passes should rank on its verdicts rather than loosen this one.</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

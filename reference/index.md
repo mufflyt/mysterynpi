@@ -53,6 +53,9 @@ Drop-in replacements for the pipelines this was extracted from.
   : Split a normalised surname into its components.
 - [`surname_token_table()`](https://mufflyt.github.io/mysterynpi/reference/surname_token_table.md)
   : Surname components as a long (id, token) data frame
+- [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md)
+  : Pull the generational suffix out of a raw name string, keeping both
+  parts
 - [`SURNAME_PARTICLES`](https://mufflyt.github.io/mysterynpi/reference/SURNAME_PARTICLES.md)
   : Surname particles that are naming convention, not identity.
 - [`MIN_SURNAME_TOKEN`](https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.md)
@@ -71,6 +74,31 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Do two recorded genders agree, disagree, or decide nothing?
 - [`normalize_gender()`](https://mufflyt.github.io/mysterynpi/reference/normalize_gender.md)
   : Normalise recorded gender codes to \`"M"\`, \`"F"\`, or \`NA\`
+- [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
+  : Do two given-name tokens agree once recorded nicknames are admitted?
+- [`NICKNAME_EDGES`](https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.md)
+  : Formal-name / nickname edges, vendored from
+  carltonnorthern/nicknames
+- [`suffix_agreement()`](https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.md)
+  : Do two recorded generational suffixes agree, disagree, or decide
+  nothing?
+- [`normalize_suffix()`](https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.md)
+  : Normalise a recorded generational suffix to
+  \`JR\`/\`SR\`/\`II\`/\`III\`/\`IV\`, or \`NA\`
+- [`license_agreement()`](https://mufflyt.github.io/mysterynpi/reference/license_agreement.md)
+  : Do two recorded licenses corroborate? (This rule cannot veto.)
+- [`normalize_license()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license.md)
+  : Normalise a recorded license number for comparison
+
+## Clerical review
+
+A blinded, class-stratified sample, and the precision it buys.
+
+- [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md)
+  : Draw a blinded, class-stratified sample of candidate pairs for
+  review
+- [`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md)
+  : Per-class precision from a completed clerical review
 
 ## Ordered classes and the one-to-one constraint
 
@@ -102,3 +130,11 @@ Assertions a caller runs in its own suite.
   relies on.
 - [`assert_gender_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.md)
   : Assert that gender blocking still behaves as this caller relies on.
+- [`assert_nickname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.md)
+  : Assert that nickname agreement still behaves as this caller relies
+  on.
+- [`assert_suffix_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.md)
+  : Assert that suffix agreement still behaves as this caller relies on.
+- [`assert_license_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_agreement_contract.md)
+  : Assert that license agreement still behaves as this caller relies
+  on.

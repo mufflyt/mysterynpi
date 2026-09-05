@@ -147,9 +147,14 @@
 </td>
 </tr>
 <tr>
+<td>suffixes</td>
+<td>
+<code><a href="reference/extract_suffix.html">extract_suffix()</a></code>, <code><a href="reference/normalize_suffix.html">normalize_suffix()</a></code> — parse the suffix out <em>before</em> the noise strip deletes it</td>
+</tr>
+<tr>
 <td>agreement</td>
 <td>
-<code><a href="reference/middle_agreement.html">middle_agreement()</a></code>, <code><a href="reference/person_matches.html">person_matches()</a></code>, <code><a href="reference/gender_agreement.html">gender_agreement()</a></code>, <code><a href="reference/normalize_gender.html">normalize_gender()</a></code>
+<code><a href="reference/middle_agreement.html">middle_agreement()</a></code>, <code><a href="reference/person_matches.html">person_matches()</a></code>, <code><a href="reference/gender_agreement.html">gender_agreement()</a></code>, <code><a href="reference/nickname_agreement.html">nickname_agreement()</a></code>, <code><a href="reference/suffix_agreement.html">suffix_agreement()</a></code>, <code><a href="reference/license_agreement.html">license_agreement()</a></code>
 </td>
 </tr>
 <tr>
@@ -164,10 +169,14 @@
 </td>
 </tr>
 <tr>
+<td>clerical review</td>
+<td>
+<code><a href="reference/clerical_sample.html">clerical_sample()</a></code>, <code><a href="reference/clerical_precision.html">clerical_precision()</a></code> — blinded, class-stratified, seed-pinned</td>
+</tr>
+<tr>
 <td>contracts</td>
 <td>
-<code><a href="reference/assert_middle_agreement_contract.html">assert_middle_agreement_contract()</a></code>, <code><a href="reference/assert_gender_agreement_contract.html">assert_gender_agreement_contract()</a></code>
-</td>
+<code><a href="reference/assert_middle_agreement_contract.html">assert_middle_agreement_contract()</a></code> and one per agreement rule</td>
 </tr>
 </tbody>
 </table>
@@ -186,7 +195,7 @@
 <li>
 <strong>No edit-distance tolerance on the middle name.</strong> One was added and removed the same day. Measured: it changed 64 of 30,740 candidate pairs and was worth 22 records, while admitting pairs that are genuinely different given names (<code>JULIA</code>/<code>JULIE</code>, <code>LEE</code>/<code>LEA</code>, <code>ANN</code>/<code>ANNE</code>). It is not symmetric with fuzzy <em>surname</em> blocking, which generates a candidate that is then ranked below exact evidence; this suppressed a veto with no tier recording that it happened.</li>
 <li>
-<strong>No nickname dictionary.</strong> It belongs to the caller, because whether <code>BETH</code> may stand for <code>ELIZABETH</code> is a claim about the study, not about strings.</li>
+<strong>The nickname table is vendored; the decision to use it is not.</strong> An earlier version of this README refused a nickname dictionary outright. The refusal was aimed at the <em>decision</em> — whether <code>BETH</code> may stand for <code>ELIZABETH</code> in a given study, and which evidence class that pairing earns — and that decision still stays with the caller. The <em>table</em> is different: every pipeline curating its own copy is how two pipelines quietly disagree about who matched whom, so one copy now ships (<code>NICKNAME_EDGES</code>, vendored at a pinned commit), with a one-hop rule (<code><a href="reference/nickname_agreement.html">nickname_agreement()</a></code>) that never closes the relation transitively — <code>AL</code> may stand for <code>ALBERT</code> or <code>ALEXANDER</code> without ever welding <code>ALBERT</code> to <code>ALEXANDER</code>.</li>
 </ul>
 </div>
 <div class="section level2">

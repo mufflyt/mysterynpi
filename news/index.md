@@ -2,6 +2,50 @@
 
 ## mysterynpi (development version)
 
+- `NICKNAME_EDGES`,
+  [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
+  — the carltonnorthern/nicknames corpus (Apache-2.0, vendored at a
+  pinned commit) with a one-hop rule over it: a recorded edge or a
+  shared formal name corroborates; a shared nickname never merges two
+  formal names; no transitive closure, no edit distance.
+
+- [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md),
+  [`normalize_suffix()`](https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.md),
+  [`suffix_agreement()`](https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.md)
+  — the generational suffix parsed out before the noise strip deletes
+  it, and the father/son veto: SR vs JR conflicts, JR vs II corroborates
+  (both a second-of-name), absence decides nothing.
+
+- [`normalize_license()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license.md),
+  [`license_agreement()`](https://mufflyt.github.io/mysterynpi/reference/license_agreement.md)
+  — same state plus same normalised number corroborates; everything else
+  is uninformative, and there is deliberately no conflicts verdict (the
+  registry’s license field is partial and a quarter of NPIs carry more
+  than one license).
+
+- [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md),
+  [`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md)
+  — a blinded, evidence-class- stratified review sample (seed required,
+  class never shown, ids assigned after shuffling) and per-class
+  precision with exact binomial intervals.
+
+- The matching gate: a mutation campaign
+  (`tools/ci/mutation_campaign.R`, run in CI by `matching-gate.yaml`)
+  proves the tests can FAIL – eleven catalogued mutants each reintroduce
+  a shipped defect (the token floor lowered, a veto loosened, absence
+  read as evidence, blinding lost) and the suite must go red under every
+  one. Control-first with an assertion floor, exactly-once anchors,
+  byte-for-byte restore. A permutation attack over a deliberately tied
+  fixture pins order-invariance of the resolver, and a parse-tree
+  capability guard keeps approximate matching from arriving under an
+  alias. Patterns imported from the CI of mufflyt/midwifery,
+  mufflyt/twostep and mufflyt/mysterymaps.
+
+- Contracts for each new agreement rule:
+  [`assert_nickname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.md),
+  [`assert_suffix_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.md),
+  [`assert_license_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_agreement_contract.md).
+
 - [`gender_agreement()`](https://mufflyt.github.io/mysterynpi/reference/gender_agreement.md),
   [`normalize_gender()`](https://mufflyt.github.io/mysterynpi/reference/normalize_gender.md),
   [`assert_gender_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.md)
@@ -11,6 +55,7 @@
   absence or an unmapped code is `"uninformative"`, numeric conventions
   are refused rather than guessed, and there is no name-based gender
   inference.
+
 - Continuous integration: `R CMD check` runs on GitHub Actions across
   Linux (devel/release/oldrel), macOS and Windows, on every push and PR
   and weekly on a schedule to catch dependency drift. Test coverage is

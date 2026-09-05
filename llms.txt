@@ -64,10 +64,12 @@ point of packaging:
 |----|----|
 | keys | [`name_key()`](https://mufflyt.github.io/mysterynpi/reference/name_key.md), [`blank_na()`](https://mufflyt.github.io/mysterynpi/reference/blank_na.md), [`has_name_information()`](https://mufflyt.github.io/mysterynpi/reference/has_name_information.md), [`first_initial()`](https://mufflyt.github.io/mysterynpi/reference/first_initial.md), [`strip_parenthetical()`](https://mufflyt.github.io/mysterynpi/reference/strip_parenthetical.md), [`split_given()`](https://mufflyt.github.io/mysterynpi/reference/split_given.md) |
 | tokens | [`middle_tokens()`](https://mufflyt.github.io/mysterynpi/reference/middle_tokens.md), [`given_tokens()`](https://mufflyt.github.io/mysterynpi/reference/given_tokens.md), [`surname_tokens()`](https://mufflyt.github.io/mysterynpi/reference/surname_tokens.md) |
-| agreement | [`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md), [`person_matches()`](https://mufflyt.github.io/mysterynpi/reference/person_matches.md), [`gender_agreement()`](https://mufflyt.github.io/mysterynpi/reference/gender_agreement.md), [`normalize_gender()`](https://mufflyt.github.io/mysterynpi/reference/normalize_gender.md) |
+| suffixes | [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md), [`normalize_suffix()`](https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.md) — parse the suffix out *before* the noise strip deletes it |
+| agreement | [`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md), [`person_matches()`](https://mufflyt.github.io/mysterynpi/reference/person_matches.md), [`gender_agreement()`](https://mufflyt.github.io/mysterynpi/reference/gender_agreement.md), [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md), [`suffix_agreement()`](https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.md), [`license_agreement()`](https://mufflyt.github.io/mysterynpi/reference/license_agreement.md) |
 | ordered classes | [`resolve_ordered_classes()`](https://mufflyt.github.io/mysterynpi/reference/resolve_ordered_classes.md) and its parts |
 | one-to-one | [`award_contested()`](https://mufflyt.github.io/mysterynpi/reference/award_contested.md), [`count_rivals()`](https://mufflyt.github.io/mysterynpi/reference/count_rivals.md) |
-| contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md), [`assert_gender_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.md) |
+| clerical review | [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md), [`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md) — blinded, class-stratified, seed-pinned |
+| contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md) and one per agreement rule |
 
 See
 [`vignette("resolving-a-roster")`](https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.md).
@@ -112,9 +114,17 @@ Two specific exclusions worth naming:
   `ANN`/`ANNE`). It is not symmetric with fuzzy *surname* blocking,
   which generates a candidate that is then ranked below exact evidence;
   this suppressed a veto with no tier recording that it happened.
-- **No nickname dictionary.** It belongs to the caller, because whether
-  `BETH` may stand for `ELIZABETH` is a claim about the study, not about
-  strings.
+- **The nickname table is vendored; the decision to use it is not.** An
+  earlier version of this README refused a nickname dictionary outright.
+  The refusal was aimed at the *decision* — whether `BETH` may stand for
+  `ELIZABETH` in a given study, and which evidence class that pairing
+  earns — and that decision still stays with the caller. The *table* is
+  different: every pipeline curating its own copy is how two pipelines
+  quietly disagree about who matched whom, so one copy now ships
+  (`NICKNAME_EDGES`, vendored at a pinned commit), with a one-hop rule
+  ([`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md))
+  that never closes the relation transitively — `AL` may stand for
+  `ALBERT` or `ALEXANDER` without ever welding `ALBERT` to `ALEXANDER`.
 
 ## Versioning
 
@@ -187,6 +197,9 @@ Drop-in replacements for the pipelines this was extracted from.
   : Split a normalised surname into its components.
 - [`surname_token_table()`](https://mufflyt.github.io/mysterynpi/reference/surname_token_table.md)
   : Surname components as a long (id, token) data frame
+- [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md)
+  : Pull the generational suffix out of a raw name string, keeping both
+  parts
 - [`SURNAME_PARTICLES`](https://mufflyt.github.io/mysterynpi/reference/SURNAME_PARTICLES.md)
   : Surname particles that are naming convention, not identity.
 - [`MIN_SURNAME_TOKEN`](https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.md)
@@ -205,6 +218,31 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Do two recorded genders agree, disagree, or decide nothing?
 - [`normalize_gender()`](https://mufflyt.github.io/mysterynpi/reference/normalize_gender.md)
   : Normalise recorded gender codes to \`"M"\`, \`"F"\`, or \`NA\`
+- [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
+  : Do two given-name tokens agree once recorded nicknames are admitted?
+- [`NICKNAME_EDGES`](https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.md)
+  : Formal-name / nickname edges, vendored from
+  carltonnorthern/nicknames
+- [`suffix_agreement()`](https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.md)
+  : Do two recorded generational suffixes agree, disagree, or decide
+  nothing?
+- [`normalize_suffix()`](https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.md)
+  : Normalise a recorded generational suffix to
+  \`JR\`/\`SR\`/\`II\`/\`III\`/\`IV\`, or \`NA\`
+- [`license_agreement()`](https://mufflyt.github.io/mysterynpi/reference/license_agreement.md)
+  : Do two recorded licenses corroborate? (This rule cannot veto.)
+- [`normalize_license()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license.md)
+  : Normalise a recorded license number for comparison
+
+## Clerical review
+
+A blinded, class-stratified sample, and the precision it buys.
+
+- [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md)
+  : Draw a blinded, class-stratified sample of candidate pairs for
+  review
+- [`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md)
+  : Per-class precision from a completed clerical review
 
 ## Ordered classes and the one-to-one constraint
 
@@ -236,6 +274,14 @@ Assertions a caller runs in its own suite.
   relies on.
 - [`assert_gender_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.md)
   : Assert that gender blocking still behaves as this caller relies on.
+- [`assert_nickname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.md)
+  : Assert that nickname agreement still behaves as this caller relies
+  on.
+- [`assert_suffix_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.md)
+  : Assert that suffix agreement still behaves as this caller relies on.
+- [`assert_license_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_agreement_contract.md)
+  : Assert that license agreement still behaves as this caller relies
+  on.
 
 # Articles
 

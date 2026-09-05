@@ -17,7 +17,8 @@ BugReports: https://github.com/mufflyt/mysterynpi/issues
 Encoding: UTF-8
 Depends: R (>= 4.1)
 Imports: stringi, stats
-Suggests: testthat (>= 3.0.0), knitr, rmarkdown, humaniformat, jsonlite
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown, humaniformat, jsonlite,
+    stringdist
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true

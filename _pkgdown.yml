@@ -54,6 +54,16 @@ reference:
   - license_status_audit
   - surname_agreement
   - surname_rarity
+- title: Similarity scoring (candidate ranking, never verdicts)
+  desc: The fenced exception; extracted from isochrones, quirks pinned.
+  contents:
+  - create_nickname_dictionary
+  - get_nickname_dictionary
+  - get_canonical_name
+  - are_nickname_equivalents
+  - get_nicknames_for_name
+  - calculate_enhanced_first_name_similarity
+  - create_nickname_aware_similarity
 - title: Clerical review
   desc: A blinded, class-stratified sample, and the precision it buys.
   contents:

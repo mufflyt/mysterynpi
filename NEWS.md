@@ -1,5 +1,25 @@
 # mysterynpi (development version)
 
+* Similarity scoring, the fenced exception: `create_nickname_dictionary()`,
+  `get_nickname_dictionary()`, `get_canonical_name()`,
+  `are_nickname_equivalents()`, `get_nicknames_for_name()`,
+  `calculate_enhanced_first_name_similarity()`,
+  `create_nickname_aware_similarity()` — extracted verbatim from
+  isochrones' nickname system and proven byte-identical over 4,000 real
+  ABOG name pairs. This is candidate-RANKING machinery, deliberately
+  distinct from `NICKNAME_EDGES`/`nickname_agreement()` (which move
+  verdicts): scores rank, only agreement rules decide, and the no-fuzzy
+  guard evolved to say precisely that — fuzzy machinery may exist ONLY in
+  the fenced module, nothing outside references it, and no verdict can
+  REACH it through any call chain (asserted by call-graph walk over the
+  installed namespace; an eighteenth mutant smuggles the score into
+  middle_agreement() and the guard kills it). Extraction quirks are
+  pinned, not repaired — RICK resolves to ERIC, JULIE-as-formal shadows
+  its nickname role — because a behaviour-preserving extraction must
+  preserve behaviour it would not have written; repairs are versioned
+  decisions for another day. stringdist joins Suggests, loaded at the
+  point of use only.
+
 * The join ledger: `ledgered_join()` and `join_ledger_entry()` — row-count
   reconciliation as a shipped artifact, one row per join per step. The
   vocabulary is borrowed, not coined: dplyr 1.1's `relationship` values

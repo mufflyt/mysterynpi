@@ -1,91 +1,89 @@
-# The package makes exact claims about identity. An approximate-matching call
-# anywhere in it is a defect, not a feature -- one was added and removed inside
-# a single day, and it admitted JULIA/JULIE, LEE/LEA and ANN/ANNE as
-# non-conflicts. This test is the reason it cannot come back quietly.
+# The package makes exact claims about identity, and an approximate-matching
+# call in the VERDICT path is a defect, not a feature -- one was added and
+# removed inside a single day, and it admitted JULIA/JULIE, LEE/LEA and
+# ANN/ANNE as non-conflicts.
+#
+# Since 2026-09 the package also ships R/similarity_scoring.R: candidate-
+# RANKING machinery (extracted from isochrones) that legitimately uses
+# Jaro-Winkler, exactly as the README always allowed for the blocking stage.
+# So the guard evolved from "no fuzzy anywhere" to the claim that actually
+# matters, stated three ways below: fuzzy machinery exists ONLY inside the
+# fenced scoring module, nothing outside the module references it, and no
+# agreement verdict can REACH it through any call chain. A mutation in the
+# campaign (middle-agreement-smuggles-similarity) proves the reachability
+# guard fires on exactly the smuggling it exists for.
 
-test_that("no approximate string matching is called anywhere in the package", {
-  src <- unlist(lapply(list.files("../../R", pattern = "[.]R$", full.names = TRUE),
-                       readLines, warn = FALSE))
-  if (!length(src)) skip("source not reachable from the installed package")
-  code <- grep("^\\s*#", src, value = TRUE, invert = TRUE)
-  banned <- c("adist", "agrep", "stringdist", "stringsim",
-              "jarowinkler", "levenshtein", "soundex", "metaphone")
-  for (fn in banned) {
-    hits <- grep(paste0("\\b", fn, "\\s*\\("), code, value = TRUE)
-    expect_identical(hits, character(0),
-                     info = sprintf("%s() is called in package source", fn))
-  }
-})
+SCORING_MODULE <- "similarity_scoring.R"
+BANNED_FNS <- c("adist", "agrep", "agrepl", "stringdist", "stringsim",
+                "amatch", "stringdistmatrix", "jarowinkler", "soundex",
+                "nysiis", "metaphone", "phonetic", "fastLink",
+                "compare.dedup", "pair_blocking")
+BANNED_PKGS <- c("stringdist", "phonics", "RecordLinkage", "fastLink",
+                 "reclin", "reclin2", "fuzzyjoin")
+SCORING_FNS <- c("create_nickname_dictionary", "get_nickname_dictionary",
+                 "get_canonical_name", "are_nickname_equivalents",
+                 "get_nicknames_for_name",
+                 "calculate_enhanced_first_name_similarity",
+                 "create_nickname_aware_similarity")
 
-# The grep above reads lines; this walks the parse tree, so aliasing evades
-# nothing: `sd <- stringdist::stringdist` is caught at the `::` reference and
-# a renamed wrapper is caught at its own call site when it calls the real
-# thing. Pattern from the capability guard in mufflyt/mysterymaps: fuzzy
-# machinery may not arrive without this file noticing.
-test_that("the parse tree references no approximate-matching capability", {
+test_that("outside the fence, no source file touches approximate matching", {
   files <- list.files("../../R", pattern = "[.]R$", full.names = TRUE)
   if (!length(files)) skip("source not reachable from the installed package")
-  banned_fns <- c("adist", "agrep", "agrepl", "stringdist", "stringsim",
-                  "amatch", "stringdistmatrix", "jarowinkler", "soundex",
-                  "nysiis", "metaphone", "phonetic", "fastLink",
-                  "compare.dedup", "pair_blocking")
-  banned_pkgs <- c("stringdist", "phonics", "RecordLinkage", "fastLink",
-                   "reclin", "reclin2", "fuzzyjoin")
-  refs <- new.env(parent = emptyenv())
-  walk <- function(e) {
-    if (is.call(e)) {
-      h <- e[[1]]
-      if (is.symbol(h)) assign(as.character(h), TRUE, refs)
-      if (is.call(h) && is.symbol(h[[1]]) &&
-          as.character(h[[1]]) %in% c("::", ":::")) {
-        assign(as.character(h[[2]]), TRUE, refs)          # the package
-        assign(as.character(h[[3]]), TRUE, refs)          # the function
-      }
-      if (is.symbol(h) && as.character(h) %in% c("::", ":::")) {
-        assign(as.character(e[[2]]), TRUE, refs)
-        assign(as.character(e[[3]]), TRUE, refs)
-      }
-      # empty args (x[, 1]) must be tested by INDEX, never bound to a loop
-      # variable -- evaluating a name bound to the empty symbol is itself the
-      # missing-argument error
-      args <- as.list(e)[-1]
-      for (i in seq_along(args)) {
-        if (!identical(args[[i]], quote(expr = ))) walk(args[[i]])
-      }
-    } else if (is.function(e)) {
-      walk(body(e))
-    } else if (is.pairlist(e) || is.expression(e)) {
-      for (i in seq_along(e)) walk(e[[i]])
-    }
+  files <- files[basename(files) != SCORING_MODULE]
+  src <- unlist(lapply(files, readLines, warn = FALSE))
+  code <- grep("^\\s*#", src, value = TRUE, invert = TRUE)
+  for (fn in BANNED_FNS) {
+    hits <- grep(paste0("\\b", fn, "\\s*\\("), code, value = TRUE)
+    expect_identical(hits, character(0),
+                     info = sprintf("%s() called outside %s", fn,
+                                    SCORING_MODULE))
   }
-  for (f in files) walk(parse(f, keep.source = FALSE))
-  seen <- ls(refs)
-  expect_identical(intersect(seen, banned_fns), character(0))
-  expect_identical(intersect(seen, banned_pkgs), character(0))
 })
 
-# The two guards above read SOURCE files, which are absent when tests run
-# against the installed package under R CMD check -- there they skip, and a
-# skipped guard proves nothing on the day it matters (loudness rule from
-# derek73/python-nameparser's ja-extra CI job). This walk inspects the
-# INSTALLED namespace's function bodies, so it runs everywhere, always.
-test_that("no function in the installed namespace references fuzzy machinery", {
+test_that("outside the fence, no parse tree references fuzzy capability", {
+  files <- list.files("../../R", pattern = "[.]R$", full.names = TRUE)
+  if (!length(files)) skip("source not reachable from the installed package")
+  files <- files[basename(files) != SCORING_MODULE]
+  seen <- unique(unlist(lapply(files, function(f)
+    referenced_symbols(parse(f, keep.source = FALSE)))))
+  expect_identical(intersect(seen, BANNED_FNS), character(0))
+  expect_identical(intersect(seen, BANNED_PKGS), character(0))
+  # the fence has one gate: nothing outside the module calls into it
+  expect_identical(intersect(seen, SCORING_FNS), character(0))
+})
+
+# The reachability guard: from every verdict function, walk the call graph
+# through the installed namespace and assert no banned symbol is reachable.
+# This runs against the INSTALLED package (never skips under R CMD check),
+# and it is the guard the smuggling mutant must trip.
+test_that("no agreement verdict can reach fuzzy machinery, transitively", {
   ns <- asNamespace("mysterynpi")
   fns <- Filter(is.function, mget(ls(ns, all.names = TRUE), envir = ns,
                                   ifnotfound = list(NULL)))
-  seen <- unique(unlist(lapply(fns, referenced_symbols)))
-  banned <- c("adist", "agrep", "agrepl", "stringdist", "stringsim",
-              "amatch", "stringdistmatrix", "jarowinkler", "soundex",
-              "nysiis", "metaphone", "phonetic", "fastLink",
-              "compare.dedup", "pair_blocking",
-              "phonics", "RecordLinkage", "reclin", "reclin2", "fuzzyjoin")
-  expect_identical(intersect(seen, banned), character(0))
-  expect_gt(length(fns), 30)     # the guard must actually be seeing the package
+  refs <- lapply(fns, referenced_symbols)
+  roots <- setdiff(names(fns), SCORING_FNS)
+  reachable <- character(0)
+  frontier <- roots
+  while (length(frontier)) {
+    new_syms <- setdiff(unique(unlist(refs[frontier])), reachable)
+    reachable <- c(reachable, new_syms)
+    frontier <- intersect(new_syms, names(fns))
+  }
+  expect_identical(intersect(reachable, BANNED_FNS), character(0))
+  expect_identical(intersect(reachable, BANNED_PKGS), character(0))
+  expect_identical(intersect(reachable, SCORING_FNS), character(0))
+  # and the guard is looking at something: the scoring module itself DOES
+  # reach stringdist, so an empty banned list would mean a broken walker
+  expect_true("stringdist" %in%
+                referenced_symbols(fns[["calculate_enhanced_first_name_similarity"]]))
+  expect_gt(length(fns), 40)
 })
 
-test_that("the package declares no approximate-matching dependency", {
+test_that("verdict machinery declares no approximate-matching dependency", {
   d <- read.dcf(system.file("DESCRIPTION", package = "mysterynpi"))
   deps <- paste(d[, intersect(colnames(d), c("Imports", "Depends", "LinkingTo"))],
                 collapse = " ")
   expect_false(grepl("stringdist|fuzzyjoin|RecordLinkage|reclin", deps))
+  # scoring's engine lives in Suggests, loaded at its point of use only
+  expect_true(grepl("stringdist", d[, "Suggests"]))
 })

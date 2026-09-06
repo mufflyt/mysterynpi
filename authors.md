@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/mufflyt/mysterynpi/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/mufflyt/mysterynpi/blob/v0.3.1/inst/CITATION)
 
 Muffly, T. (2026). mysterynpi: Name Keys and Agreement Rules for Linking
 Person Rosters to NPI. R package version 0.3.0.

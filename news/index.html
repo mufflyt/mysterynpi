@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,9 +35,16 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/v0.3.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="mysterynpi-031">mysterynpi 0.3.1<a class="anchor" aria-label="anchor" href="#mysterynpi-031"></a></h2>
+<ul><li>
+<strong>Verdict fix (issue <a href="https://github.com/mufflyt/mysterynpi/issues/4" class="external-link">#4</a>)</strong>: reverse-direction corpus rows could turn a nickname into a shared root and weld two distinct formal names – <code>nickname_agreement("ROBERT", "WILLIAM")</code> corroborated. Exhaustive audit found 15 indirectly welded pairs; the 13 loose rows behind the genuinely false six (ROBERT/WILLIAM, HAROLD/HENRY, CAROLINE/CHARLOTTE, ADELAIDE/DELILAH, ARABELLA/ISABELLA, HELOISE/LOUISE, CATHERINE/CATHLEEN) are dropped in the vendoring script with per-row reasons; the defensible spelling-variant welds stay. ROBERT/WILLIAM and HAROLD/HENRY are pinned in the golden corpus and the nickname contract.</li>
+<li>
+<strong>Corpus supplement</strong>: 32 adjudicated real nicknames the corpus lacked, surfaced by auditing isochrones’ two remaining hand-rolled maps (KATE/KATIE/KITTY under CATHERINE, BARB, SUZY, ROBBIE, KIMMY, LEXIE, spelling variants STEVEN/STEPHEN and PHILLIP/PHILIP, and more). The rejects – AMY-&gt;AMANDA, EMILY-&gt;EMMA, NATHAN-&gt;JONATHAN – are recorded in the script as deliberately refused. NICKNAME_EDGES: 2,827 -&gt; 2,846 rows; the verdict snapshot regenerated deliberately (7,539 verdicts).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="mysterynpi-030">mysterynpi 0.3.0<a class="anchor" aria-label="anchor" href="#mysterynpi-030"></a></h2>
 <ul><li><p>ONE nickname system, similarity scoring dark by default. The scoring API extracted from isochrones (<code><a href="../reference/create_nickname_dictionary.html">create_nickname_dictionary()</a></code>, <code><a href="../reference/get_canonical_name.html">get_canonical_name()</a></code>, <code><a href="../reference/are_nickname_equivalents.html">are_nickname_equivalents()</a></code>, <code><a href="../reference/get_nicknames_for_name.html">get_nicknames_for_name()</a></code>, <code><a href="../reference/calculate_enhanced_first_name_similarity.html">calculate_enhanced_first_name_similarity()</a></code>, <code><a href="../reference/create_nickname_aware_similarity.html">create_nickname_aware_similarity()</a></code>, <code><a href="../reference/get_nickname_dictionary.html">get_nickname_dictionary()</a></code>) was first proven byte-identical over 4,000 real ABOG pairs, then CONSOLIDATED onto <code>NICKNAME_EDGES</code> – the same pinned corpus the verdict rule reads – by owner decision: two nickname tables is how two layers quietly disagree about what a name may stand for. Consolidation is a deliberate score change that repairs the old dictionary’s quirks (RICK now resolves to RICHARD; JULIA/JULIE scores 0.98 via its recorded edge) and collapses the dead 0.96/0.94 sub-tiers into 0.98; equivalence is now the verdict rule’s own one-hop relation, so AL pairs with ALBERT and ALEXANDER while ALBERT and ALEXANDER stay distinct – in scores exactly as in verdicts. The Jaro-Winkler path is OFF BY DEFAULT: <code>options(mysterynpi.enable_similarity_scoring = TRUE)</code> is the reviewable opt-in, and a mutant that removes the gate is killed alongside the one that smuggles the score into a verdict. The no-fuzzy guard holds all of it: fuzzy symbols only inside the fenced module, nothing outside references it, no verdict can reach it. stringdist in Suggests only.</p></li>

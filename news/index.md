@@ -1,5 +1,28 @@
 # Changelog
 
+## mysterynpi 0.3.1
+
+- **Verdict fix (issue
+  [\#4](https://github.com/mufflyt/mysterynpi/issues/4))**:
+  reverse-direction corpus rows could turn a nickname into a shared root
+  and weld two distinct formal names –
+  `nickname_agreement("ROBERT", "WILLIAM")` corroborated. Exhaustive
+  audit found 15 indirectly welded pairs; the 13 loose rows behind the
+  genuinely false six (ROBERT/WILLIAM, HAROLD/HENRY, CAROLINE/CHARLOTTE,
+  ADELAIDE/DELILAH, ARABELLA/ISABELLA, HELOISE/LOUISE,
+  CATHERINE/CATHLEEN) are dropped in the vendoring script with per-row
+  reasons; the defensible spelling-variant welds stay. ROBERT/WILLIAM
+  and HAROLD/HENRY are pinned in the golden corpus and the nickname
+  contract.
+- **Corpus supplement**: 32 adjudicated real nicknames the corpus
+  lacked, surfaced by auditing isochrones’ two remaining hand-rolled
+  maps (KATE/KATIE/KITTY under CATHERINE, BARB, SUZY, ROBBIE, KIMMY,
+  LEXIE, spelling variants STEVEN/STEPHEN and PHILLIP/PHILIP, and more).
+  The rejects – AMY-\>AMANDA, EMILY-\>EMMA, NATHAN-\>JONATHAN – are
+  recorded in the script as deliberately refused. NICKNAME_EDGES: 2,827
+  -\> 2,846 rows; the verdict snapshot regenerated deliberately (7,539
+  verdicts).
+
 ## mysterynpi 0.3.0
 
 - ONE nickname system, similarity scoring dark by default. The scoring

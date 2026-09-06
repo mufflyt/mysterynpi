@@ -41,7 +41,7 @@ the 2005 start of enumeration)."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Search the NPPES registry for providers</h1>
-      <small class="dont-index">Source: <a href="https://github.com/mufflyt/mysterynpi/blob/v0.3.1/R/npi_search.R" class="external-link"><code>R/npi_search.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/R/npi_search.R" class="external-link"><code>R/npi_search.R</code></a></small>
       <div class="d-none name"><code>npi_search.Rd</code></div>
     </div>
 
@@ -61,7 +61,8 @@ the 2005 start of enumeration).</p>
 <span>  postal_code <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  npi <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  limit <span class="op">=</span> <span class="fl">10L</span>,</span>
-<span>  licenses <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  licenses <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  expand_nicknames <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -77,7 +78,16 @@ wildcard on names of two or more characters.</p></dd>
 
 
 <dt id="arg-limit">limit<a class="anchor" aria-label="anchor" href="#arg-limit"></a></dt>
-<dd><p>maximum results, 1 to 200.</p></dd>
+<dd><p>maximum results, 1 to 200.
+NPPES ALIAS MATCHING IS ALWAYS OFF. The API silently expands first
+names against an internal alias list by default – measured live:
+searching `bill` returned five providers all legally named WILLIAM.
+Every query this function sends carries `use_first_name_alias=False`,
+and nickname recall is recovered in daylight instead: with
+`expand_nicknames = TRUE`, the first name fans out over its
+[nickname_variants()] (one fetch per variant), and each returned row
+carries `queried_as` – which spelling found it. Every expansion is a
+reviewable corpus edge, not a registry black box.</p></dd>
 
 
 <dt id="arg-licenses">licenses<a class="anchor" aria-label="anchor" href="#arg-licenses"></a></dt>
@@ -85,6 +95,12 @@ wildcard on names of two or more characters.</p></dd>
 `list(providers, licenses)` – the licenses via
 [parse_npi_licenses()], ready for [license_agreement()]. Default
 `FALSE` keeps the plain provider frame.</p></dd>
+
+
+<dt id="arg-expand-nicknames">expand_nicknames<a class="anchor" aria-label="anchor" href="#arg-expand-nicknames"></a></dt>
+<dd><p>fan the first name out over its one-hop
+[nickname_variants()]; results are deduplicated by NPI with a
+`queried_as` provenance column.</p></dd>
 
 </dl></div>
     <div class="section level2">

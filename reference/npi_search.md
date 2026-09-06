@@ -15,7 +15,8 @@ npi_search(
   postal_code = NULL,
   npi = NULL,
   limit = 10L,
-  licenses = FALSE
+  licenses = FALSE,
+  expand_nicknames = FALSE
 )
 ```
 
@@ -30,7 +31,15 @@ npi_search(
 
 - limit:
 
-  maximum results, 1 to 200.
+  maximum results, 1 to 200. NPPES ALIAS MATCHING IS ALWAYS OFF. The API
+  silently expands first names against an internal alias list by default
+  – measured live: searching \`bill\` returned five providers all
+  legally named WILLIAM. Every query this function sends carries
+  \`use_first_name_alias=False\`, and nickname recall is recovered in
+  daylight instead: with \`expand_nicknames = TRUE\`, the first name
+  fans out over its \[nickname_variants()\] (one fetch per variant), and
+  each returned row carries \`queried_as\` – which spelling found it.
+  Every expansion is a reviewable corpus edge, not a registry black box.
 
 - licenses:
 
@@ -38,6 +47,12 @@ npi_search(
   licenses)\` – the licenses via \[parse_npi_licenses()\], ready for
   \[license_agreement()\]. Default \`FALSE\` keeps the plain provider
   frame.
+
+- expand_nicknames:
+
+  fan the first name out over its one-hop \[nickname_variants()\];
+  results are deduplicated by NPI with a \`queried_as\` provenance
+  column.
 
 ## Value
 

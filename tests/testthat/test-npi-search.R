@@ -126,3 +126,31 @@ test_that("npi_search refuses bad arguments before touching the network", {
   expect_error(npi_search(last_name = "SMITH", limit = 0), "between 1 and 200")
   expect_error(npi_search(last_name = "SMITH", limit = 500), "between 1 and 200")
 })
+
+test_that("nickname_variants is the auditable expansion set, one hop", {
+  v <- nickname_variants("BILL")
+  expect_identical(v[1], "BILL")               # the query leads
+  expect_true(all(c("WILLIAM", "BILLY") %in% v))
+  expect_true("BILL" %in% nickname_variants("WILLIAM"))
+  a <- nickname_variants("ALBERT")
+  expect_true("AL" %in% a)
+  expect_false("ALEXANDER" %in% a)             # one hop, never closure
+  expect_false("WILLIAM" %in% nickname_variants("ROBERT"))  # issue-4 fix holds
+  expect_identical(nickname_variants("XZQK"), "XZQK")
+  expect_identical(nickname_variants(NA), character(0))
+  expect_identical(nickname_variants(""), character(0))
+  custom <- data.frame(name = "XZQK", nickname = "XQ", stringsAsFactors = FALSE)
+  expect_identical(nickname_variants("XZQK", edges = custom), c("XZQK", "XQ"))
+})
+
+test_that("NPPES's opaque alias matching is forced off in every name query", {
+  # measured live 2026-09-05: first_name=bill returned five providers all
+  # legally named WILLIAM under the API default. The flag must be in the
+  # query builder; expansion happens in daylight via nickname_variants().
+  de <- deparse(body(npi_search))
+  expect_true(any(grepl("use_first_name_alias", de)))
+  # and it must be REACHABLE: the first campaign run of the alias-back-on
+  # mutant survived because this test only checked presence, and
+  # `if (FALSE) <flag>` still contains the string
+  expect_false(any(grepl("if (FALSE)", de, fixed = TRUE)))
+})

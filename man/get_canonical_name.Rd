@@ -13,12 +13,15 @@ get_canonical_name(name, nickname_dict)
 the input.}
 }
 \value{
-one formal name, or the normalised input when unknown.
+one stable label; the normalised input when the corpus records
+  no root for it.
 }
 \description{
-A hub nickname has SEVERAL formal roots (`AL` records dozens); this
-returns the lexicographically first as a stable display value. Ranking
-and equivalence never rely on it -- [are_nickname_equivalents()] uses
-ALL roots. Unknown names return normalised; NULL and length-one NA
-return as given.
+A DISPLAY LABEL, arbitrary-but-stable, and documented as such: the
+corpus records SUBSTITUTABILITY, not hierarchy -- it contains cycles
+(`BOB` and `ROBERT` each list the other) and hub nicknames with dozens
+of roots -- so no true canonical exists. This returns the
+lexicographically first recorded root when the name has any, else the
+normalised name itself. Nothing ranks or decides on it;
+[are_nickname_equivalents()] carries the meaning, over ALL roots.
 }

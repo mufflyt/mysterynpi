@@ -174,6 +174,34 @@ parse_npi_licenses <- function(txt) {
   out
 }
 
+#' One-hop name variants, for auditable search expansion
+#'
+#' The set a nickname-aware search should fan out over: the name itself,
+#' every recorded nickname of it, and every formal name it is recorded as a
+#' nickname of -- one hop over [NICKNAME_EDGES], both directions, never
+#' transitive closure. `nickname_variants("BILL")` includes `WILLIAM`;
+#' `nickname_variants("ALBERT")` includes `AL` but never `ALEXANDER`.
+#'
+#' This exists because NPPES's API does its own first-name alias expansion
+#' BY DEFAULT, against a list nobody outside CMS can read, cite or test --
+#' searching `bill` returns providers legally named WILLIAM with nothing in
+#' the response saying why. [npi_search()] turns that off unconditionally
+#' and offers this corpus as the daylight replacement: every expansion is a
+#' reviewable edge in a pinned, weld-audited table.
+#'
+#' @param x a single name token.
+#' @param edges the corpus; defaults to [NICKNAME_EDGES].
+#' @return character vector of variants, the (normalised) input first, the
+#'   rest sorted -- a stable, auditable query plan.
+#' @export
+nickname_variants <- function(x, edges = mysterynpi::NICKNAME_EDGES) {
+  k <- gsub("[.]", "", name_key(x))
+  if (length(k) != 1L || is.na(k) || !nzchar(k)) return(character(0))
+  v <- unique(c(edges$nickname[edges$name == k],
+                edges$name[edges$nickname == k]))
+  c(k, sort(setdiff(v, k)))
+}
+
 #' Search the NPPES registry for providers
 #'
 #' A thin fetch over [parse_npi_search()], which documents every column and
@@ -191,6 +219,19 @@ parse_npi_licenses <- function(txt) {
 #'   and `last_name` as case-insensitive and supports a trailing `*`
 #'   wildcard on names of two or more characters.
 #' @param limit maximum results, 1 to 200.
+#' NPPES ALIAS MATCHING IS ALWAYS OFF. The API silently expands first
+#' names against an internal alias list by default -- measured live:
+#' searching `bill` returned five providers all legally named WILLIAM.
+#' Every query this function sends carries `use_first_name_alias=False`,
+#' and nickname recall is recovered in daylight instead: with
+#' `expand_nicknames = TRUE`, the first name fans out over its
+#' [nickname_variants()] (one fetch per variant), and each returned row
+#' carries `queried_as` -- which spelling found it. Every expansion is a
+#' reviewable corpus edge, not a registry black box.
+#'
+#' @param expand_nicknames fan the first name out over its one-hop
+#'   [nickname_variants()]; results are deduplicated by NPI with a
+#'   `queried_as` provenance column.
 #' @param licenses when `TRUE`, one fetch returns BOTH frames as
 #'   `list(providers, licenses)` -- the licenses via
 #'   [parse_npi_licenses()], ready for [license_agreement()]. Default
@@ -200,25 +241,50 @@ parse_npi_licenses <- function(txt) {
 #' @export
 npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
                        postal_code = NULL, npi = NULL, limit = 10L,
-                       licenses = FALSE) {
+                       licenses = FALSE, expand_nicknames = FALSE) {
   limit <- as.integer(limit)
   if (is.na(limit) || limit < 1L || limit > 200L) {
     stop("limit must be between 1 and 200", call. = FALSE)
   }
-  params <- c(version = "2.1", limit = limit,
-              first_name = first_name, last_name = last_name,
-              state = state, postal_code = postal_code, number = npi)
-  if (length(params) == 2L) {
-    stop("give at least one search criterion", call. = FALSE)
+  firsts <- if (isTRUE(expand_nicknames) && !is.null(first_name)) {
+    v <- nickname_variants(first_name)
+    if (length(v)) v else first_name
+  } else first_name
+  fetch <- function(fn) {
+    params <- c(version = "2.1", limit = limit,
+                first_name = fn, last_name = last_name,
+                state = state, postal_code = postal_code, number = npi)
+    if (length(params) == 2L) {
+      stop("give at least one search criterion", call. = FALSE)
+    }
+    # NPPES alias-expands first names BY DEFAULT against a list nobody can
+    # audit; searching "bill" returns WILLIAMs with nothing saying why.
+    # Always off: expansion happens in daylight via nickname_variants().
+    if (!is.null(fn)) params <- c(params, use_first_name_alias = "False")
+    q <- paste(names(params),
+               vapply(params, utils::URLencode, character(1), reserved = TRUE),
+               sep = "=", collapse = "&")
+    u <- paste0("https://npiregistry.cms.hhs.gov/api/?", q)
+    con <- url(u)
+    on.exit(try(close(con), silent = TRUE))
+    readLines(con, warn = FALSE)
   }
-  q <- paste(names(params),
-             vapply(params, utils::URLencode, character(1), reserved = TRUE),
-             sep = "=", collapse = "&")
-  u <- paste0("https://npiregistry.cms.hhs.gov/api/?", q)
-  con <- url(u)
-  on.exit(try(close(con), silent = TRUE))
-  txt <- readLines(con, warn = FALSE)
-  providers <- parse_npi_search(txt, retrieved = Sys.Date())
+  if (is.null(firsts)) firsts <- list(NULL)
+  texts <- lapply(firsts, fetch)
+  queried <- if (is.null(firsts[[1]])) rep(NA_character_, length(texts)) else
+    unlist(firsts)
+  provs <- lapply(seq_along(texts), function(i) {
+    p <- parse_npi_search(texts[[i]], retrieved = Sys.Date())
+    if (nrow(p)) p$queried_as <- queried[i] else p$queried_as <- character(0)
+    p
+  })
+  providers <- do.call(rbind, provs)
+  # one row per provider: the variant order above (query first, then
+  # sorted) makes the retained queried_as deterministic
+  providers <- providers[!duplicated(providers$npi), , drop = FALSE]
+  rownames(providers) <- NULL
   if (!isTRUE(licenses)) return(providers)
-  list(providers = providers, licenses = parse_npi_licenses(txt))
+  lics <- unique(do.call(rbind, lapply(texts, parse_npi_licenses)))
+  rownames(lics) <- NULL
+  list(providers = providers, licenses = lics)
 }

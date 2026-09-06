@@ -1,3 +1,16 @@
+# mysterynpi (development version)
+
+* `npi_search()` stops letting NPPES fuzzy-match in the dark. Measured
+  live: the API alias-expands first names BY DEFAULT against an internal
+  list nobody can read -- searching `bill` returned five providers all
+  legally named WILLIAM, with nothing in the response saying why. Every
+  query now carries `use_first_name_alias=False`, and recall is recovered
+  in daylight: `expand_nicknames = TRUE` fans the first name out over its
+  one-hop `nickname_variants()` (new, exported, corpus-backed and
+  weld-audited), one fetch per variant, results deduplicated by NPI with a
+  `queried_as` column recording which spelling found each provider. A
+  twentieth mutant turns the alias flag back on and dies.
+
 # mysterynpi 0.3.1
 
 * **Verdict fix (issue #4)**: reverse-direction corpus rows could turn a

@@ -78,3 +78,7 @@ surname,LEE,,SMITH,,conflicts,recorded difference conflicts
 surname,,,SMITH,,uninformative,absence decides nothing
 nickname,J,,JAMES,,corroborates,issue-3 residual: an initial is compatibility not a nickname
 nickname,J,,ROBERT,,conflicts,issue-3 residual: an incompatible initial still vetoes
+nickname,ROBERT,,WILLIAM,,conflicts,issue-4: reverse corpus edges must not weld distinct formals
+nickname,HAROLD,,HENRY,,conflicts,issue-4: a shared HARRY does not equate them
+nickname,KATE,,CATHERINE,,corroborates,issue-4 supplement: adjudicated from the isochrones hand maps
+nickname,BARB,,BARBARA,,corroborates,issue-4 supplement: adjudicated from the isochrones hand maps

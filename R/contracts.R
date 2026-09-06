@@ -132,6 +132,9 @@ assert_nickname_agreement_contract <- function(fn = nickname_agreement) {
     # an initial is compatibility, not a nickname (issue #3 residual)
     list("J", "JAMES",            "corroborates"),
     list("J", "ROBERT",           "conflicts"),
+    # reverse corpus edges must not weld distinct formals (issue #4)
+    list("ROBERT", "WILLIAM",     "conflicts"),
+    list("HAROLD", "HENRY",       "conflicts"),
     # absence decides nothing
     list("", "MARY",              "uninformative"),
     list(NA_character_, "MARY",   "uninformative"))

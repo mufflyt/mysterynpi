@@ -20,12 +20,15 @@ test_that("the table's semantics hold: no self-edges, canonical form", {
     stringsAsFactors = FALSE)
   rebuilt <- rebuilt[order(rebuilt$name, rebuilt$nickname), ]
   rownames(rebuilt) <- NULL
-  expect_identical(rebuilt, NICKNAME_EDGES)
+  expect_identical(rebuilt, NICKNAME_EDGES[c("name", "nickname")])
+  # and the id layer is a pure function of the relation just reconstructed
+  expect_identical(NICKNAME_EDGES$edge_id,
+                   paste0(rebuilt$name, ">", rebuilt$nickname))
   expect_identical(sort(unique(names(fwd))), unique(NICKNAME_EDGES$name))
 })
 
 test_that("the vendored table is what the build script promises", {
-  expect_identical(names(NICKNAME_EDGES), c("name", "nickname"))
+  expect_identical(names(NICKNAME_EDGES), c("name", "nickname", "edge_id"))
   expect_gt(nrow(NICKNAME_EDGES), 2500)
   expect_false(anyNA(NICKNAME_EDGES))
   expect_true(all(grepl("^[A-Z]+$", NICKNAME_EDGES$name)))

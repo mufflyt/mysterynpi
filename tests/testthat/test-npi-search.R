@@ -127,30 +127,170 @@ test_that("npi_search refuses bad arguments before touching the network", {
   expect_error(npi_search(last_name = "SMITH", limit = 500), "between 1 and 200")
 })
 
-test_that("nickname_variants is the auditable expansion set, one hop", {
+test_that("nickname_variants is the auditable expansion PLAN, one hop", {
   v <- nickname_variants("BILL")
-  expect_identical(v[1], "BILL")               # the query leads
-  expect_true(all(c("WILLIAM", "BILLY") %in% v))
-  expect_true("BILL" %in% nickname_variants("WILLIAM"))
-  a <- nickname_variants("ALBERT")
+  expect_identical(names(v), c("input_first_name", "queried_first_name",
+                               "alias_edge_id", "alias_dictionary_version"))
+  expect_identical(v$queried_first_name[1], "BILL")   # the query leads
+  expect_true(is.na(v$alias_edge_id[1]))              # identity row: no edge
+  expect_true(all(v$input_first_name == "BILL"))
+  expect_true(all(c("WILLIAM", "BILLY") %in% v$queried_first_name))
+  # every fan-out row is attributable to one real row of the dictionary,
+  # at the version the plan was computed against
+  fanned <- v[-1, ]
+  expect_true(all(fanned$alias_edge_id %in% mysterynpi::NICKNAME_EDGES$edge_id))
+  # BILL~WILLIAM is recorded in both directions; the FORWARD edge is credited
+  expect_identical(v$alias_edge_id[v$queried_first_name == "WILLIAM"],
+                   "BILL>WILLIAM")
+  expect_identical(unique(v$alias_dictionary_version),
+                   attr(mysterynpi::NICKNAME_EDGES, "version"))
+  a <- nickname_variants("ALBERT")$queried_first_name
   expect_true("AL" %in% a)
-  expect_false("ALEXANDER" %in% a)             # one hop, never closure
-  expect_false("WILLIAM" %in% nickname_variants("ROBERT"))  # issue-4 fix holds
-  expect_identical(nickname_variants("XZQK"), "XZQK")
-  expect_identical(nickname_variants(NA), character(0))
-  expect_identical(nickname_variants(""), character(0))
+  expect_false("ALEXANDER" %in% a)                    # one hop, never closure
+  expect_false("WILLIAM" %in%                          # issue-4 fix holds
+                 nickname_variants("ROBERT")$queried_first_name)
+  expect_identical(nickname_variants("XZQK")$queried_first_name, "XZQK")
+  expect_identical(nrow(nickname_variants(NA)), 0L)
+  expect_identical(nrow(nickname_variants("")), 0L)
   custom <- data.frame(name = "XZQK", nickname = "XQ", stringsAsFactors = FALSE)
-  expect_identical(nickname_variants("XZQK", edges = custom), c("XZQK", "XQ"))
+  vc <- nickname_variants("XZQK", edges = custom)
+  expect_identical(vc$queried_first_name, c("XZQK", "XQ"))
+  expect_identical(vc$alias_edge_id, c(NA, "XZQK>XQ"))
+  expect_true(is.na(vc$alias_dictionary_version[1]))  # unversioned table: NA
 })
 
-test_that("NPPES's opaque alias matching is forced off in every name query", {
-  # measured live 2026-09-05: first_name=bill returned five providers all
-  # legally named WILLIAM under the API default. The flag must be in the
-  # query builder; expansion happens in daylight via nickname_variants().
-  de <- deparse(body(npi_search))
-  expect_true(any(grepl("use_first_name_alias", de)))
-  # and it must be REACHABLE: the first campaign run of the alias-back-on
-  # mutant survived because this test only checked presence, and
-  # `if (FALSE) <flag>` still contains the string
-  expect_false(any(grepl("if (FALSE)", de, fixed = TRUE)))
+test_that("a second hop is reachable in the corpus but never traversed", {
+  # real-corpus fixture: BILL reaches FRED in one hop, FRED reaches
+  # FREDERICK in one hop -- so a refactor that closed the graph WOULD
+  # surface FREDERICK under BILL, and this test would catch it
+  expect_true("FRED" %in% nickname_variants("BILL")$queried_first_name)
+  expect_true("FREDERICK" %in% nickname_variants("FRED")$queried_first_name)
+  expect_false("FREDERICK" %in% nickname_variants("BILL")$queried_first_name)
+  # synthetic chain: A-B recorded, B-C recorded, A never reaches C
+  chain <- data.frame(name = c("AAAA", "BBBB"), nickname = c("BBBB", "CCCC"),
+                      stringsAsFactors = FALSE)
+  expect_identical(nickname_variants("AAAA", edges = chain)$queried_first_name,
+                   c("AAAA", "BBBB"))
+  # synthetic 2-cycle: both directions recorded; terminates, no closure
+  cyc <- data.frame(name = c("AAAA", "BBBB"), nickname = c("BBBB", "AAAA"),
+                    stringsAsFactors = FALSE)
+  vc <- nickname_variants("AAAA", edges = cyc)
+  expect_identical(vc$queried_first_name, c("AAAA", "BBBB"))
+  expect_identical(vc$alias_edge_id, c(NA, "AAAA>BBBB"))  # forward credited
+})
+
+test_that("cardinality guard: fan-out above max_expansion stops, loudly", {
+  wide <- data.frame(name = "AAAA", nickname = paste0("B", LETTERS[1:26]),
+                     stringsAsFactors = FALSE)
+  expect_error(nickname_variants("AAAA", edges = wide),
+               "dictionary defect")
+  # raising the ceiling explicitly IS the review; no silent truncation
+  expect_identical(nrow(nickname_variants("AAAA", edges = wide,
+                                          max_expansion = 40L)), 27L)
+  # the shipped corpus's widest name (CHRIS, 18 variants) clears the default
+  expect_identical(nrow(nickname_variants("CHRIS")), 19L)
+  expect_error(nickname_variants("BILL", max_expansion = 0),
+               "positive integer")
+})
+
+test_that("name_expansion is an enum, and unknown modes are rejected", {
+  expect_error(npi_search(last_name = "SMITH", name_expansion = "fuzzy"))
+  expect_error(npi_search(last_name = "SMITH", name_expansion = TRUE))
+  expect_error(npi_search(last_name = "SMITH", name_expansion = "both"))
+})
+
+# -- BEHAVIORAL alias tests: mock the transport, assert on real URLs ----------
+# The first alias-back-on campaign run proved source-text inspection is not a
+# guard: `if (FALSE) <flag>` still contains the flag string. These tests
+# intercept npi_fetch_impl -- the single network seam -- and assert on what
+# would actually go over the wire.
+
+test_that("every outbound name query carries use_first_name_alias=False", {
+  skip_if_not_installed("jsonlite")
+  seen <- character(0)
+  testthat::local_mocked_bindings(
+    npi_fetch_impl = function(u) { seen[[length(seen) + 1L]] <<- u
+                                   read_fixture() })
+  got <- npi_search(first_name = "bill", last_name = "smith", state = "CO",
+                    name_expansion = "curated_one_hop")
+  plan <- nickname_variants("BILL")
+  expect_identical(length(seen), nrow(plan))          # one fetch per plan row
+  expect_true(all(grepl("use_first_name_alias=False", seen, fixed = TRUE)))
+  # the URLs execute the plan verbatim, in plan order
+  sent <- sub(".*[?&]first_name=([^&]*).*", "\\1", seen)
+  expect_identical(sent, plan$queried_first_name)
+  # dedup keeps the identity row's provenance (fixture repeats its NPIs)
+  expect_identical(nrow(got), 2L)
+  expect_identical(unique(got$input_first_name), "BILL")
+  expect_identical(unique(got$queried_first_name), "BILL")
+  expect_true(all(is.na(got$alias_edge_id)))
+  expect_identical(unique(got$alias_dictionary_version),
+                   attr(mysterynpi::NICKNAME_EDGES, "version"))
+})
+
+test_that("name_expansion='none' sends exactly one query, still alias-off", {
+  skip_if_not_installed("jsonlite")
+  seen <- character(0)
+  testthat::local_mocked_bindings(
+    npi_fetch_impl = function(u) { seen[[length(seen) + 1L]] <<- u
+                                   read_fixture() })
+  got <- npi_search(first_name = "bill", last_name = "smith")
+  expect_identical(length(seen), 1L)
+  expect_true(grepl("use_first_name_alias=False", seen, fixed = TRUE))
+  expect_true(grepl("first_name=bill", seen, fixed = TRUE))
+  # provenance columns are ALWAYS present, expansion or not
+  expect_identical(unique(got$input_first_name), "bill")
+  expect_identical(unique(got$queried_first_name), "bill")
+  expect_true(all(is.na(got$alias_edge_id)))
+})
+
+test_that("a query without a first name sends neither the name nor the flag", {
+  skip_if_not_installed("jsonlite")
+  seen <- character(0)
+  testthat::local_mocked_bindings(
+    npi_fetch_impl = function(u) { seen[[length(seen) + 1L]] <<- u
+                                   read_fixture() })
+  got <- npi_search(npi = "1234567893")
+  expect_identical(length(seen), 1L)
+  expect_false(grepl("first_name", seen, fixed = TRUE))
+  expect_false(grepl("use_first_name_alias", seen, fixed = TRUE))
+  expect_true(all(is.na(got$input_first_name)))
+  expect_true(all(is.na(got$queried_first_name)))
+})
+
+test_that("licenses=TRUE unions licenses across the expanded fetches", {
+  skip_if_not_installed("jsonlite")
+  testthat::local_mocked_bindings(npi_fetch_impl = function(u) read_fixture())
+  got <- npi_search(first_name = "bill", last_name = "smith",
+                    name_expansion = "curated_one_hop", licenses = TRUE)
+  expect_identical(names(got), c("providers", "licenses"))
+  expect_identical(nrow(got$licenses), 2L)            # unique(), not stacked
+  expect_true(all(c("input_first_name", "alias_edge_id") %in%
+                    names(got$providers)))
+})
+
+test_that("INVARIANT: exactly one route from input name to query variants", {
+  # No function outside the canonical module may read the dictionary to
+  # manufacture first-name variants, and only npi_search may execute the
+  # expansion. all.names() sees both bare and mysterynpi::-qualified uses.
+  ns <- asNamespace("mysterynpi")
+  fns <- Filter(function(n) is.function(get0(n, envir = ns)),
+                ls(ns, all.names = TRUE))
+  # scan the BODY and the FORMALS: `edges = mysterynpi::NICKNAME_EDGES`
+  # default arguments live in formals, not the body
+  uses <- function(f, sym) {
+    g <- get(f, envir = ns)
+    syms <- c(all.names(body(g)),
+              unlist(lapply(formals(g), function(d)
+                tryCatch(all.names(d), error = function(e) character(0)))))
+    sym %in% syms
+  }
+  edge_readers <- Filter(function(f) uses(f, "NICKNAME_EDGES"), fns)
+  expect_true(all(edge_readers %in% c("nickname_agreement",
+                                      "nickname_variants",
+                                      "create_nickname_dictionary")),
+              info = paste("unexpected NICKNAME_EDGES reader:",
+                           paste(edge_readers, collapse = ", ")))
+  expanders <- Filter(function(f) uses(f, "nickname_variants"), fns)
+  expect_identical(sort(expanders), "npi_search")
 })

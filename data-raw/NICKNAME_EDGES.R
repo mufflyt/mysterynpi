@@ -94,6 +94,20 @@ NICKNAME_EDGES <- NICKNAME_EDGES[order(NICKNAME_EDGES$name,
                                        NICKNAME_EDGES$nickname), ]
 rownames(NICKNAME_EDGES) <- NULL
 
+# -- STABLE EDGE IDS AND A DICTIONARY VERSION ---------------------------------
+# Every fan-out a search performs must be attributable to ONE row of this
+# table, so every row carries a stable id: the pair itself, "NAME>NICKNAME"
+# -- content-derived, so it survives reordering and insertion, and readable,
+# so an audit trail needs no lookup. The dictionary VERSION is bumped by
+# hand on any edge change; a test pins (version, row count, checksum), so
+# changing edges without bumping the version fails loudly.
+NICKNAME_EDGES$edge_id <- paste0(NICKNAME_EDGES$name, ">",
+                                 NICKNAME_EDGES$nickname)
+stopifnot(!anyDuplicated(NICKNAME_EDGES$edge_id))
+attr(NICKNAME_EDGES, "version") <- "2026-09-06.1"
+attr(NICKNAME_EDGES, "checksum") <-
+  sum(utf8ToInt(paste(NICKNAME_EDGES$edge_id, collapse = "|")))
+
 save(NICKNAME_EDGES, file = "data/NICKNAME_EDGES.rda", compress = "bzip2",
      version = 2)
 cat(nrow(NICKNAME_EDGES), "edges written to data/NICKNAME_EDGES.rda\n")

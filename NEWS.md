@@ -4,12 +4,32 @@
   live: the API alias-expands first names BY DEFAULT against an internal
   list nobody can read -- searching `bill` returned five providers all
   legally named WILLIAM, with nothing in the response saying why. Every
-  query now carries `use_first_name_alias=False`, and recall is recovered
-  in daylight: `expand_nicknames = TRUE` fans the first name out over its
-  one-hop `nickname_variants()` (new, exported, corpus-backed and
-  weld-audited), one fetch per variant, results deduplicated by NPI with a
-  `queried_as` column recording which spelling found each provider. A
-  twentieth mutant turns the alias flag back on and dies.
+  query now carries `use_first_name_alias=False`; there is no argument to
+  turn it back on.
+* Nickname expansion is now a fully explicit, versioned transformation
+  layer -- the repo's ONLY route from an input first name to additional
+  queried names, enforced by an invariant test. `NICKNAME_EDGES` rows
+  carry stable content-derived `edge_id`s (`NAME>NICKNAME`) and the table
+  carries a hand-bumped `version` attribute pinned in CI.
+  `nickname_variants()` (new, exported) returns the expansion PLAN as a
+  data.frame -- `input_first_name`, `queried_first_name`, `alias_edge_id`,
+  `alias_dictionary_version` -- one hop, both directions, never transitive
+  closure (BILL reaches FRED, FRED reaches FREDERICK, BILL never reaches
+  FREDERICK), with a hard `max_expansion` cardinality guard (default 25,
+  just above the corpus's widest hub, CHRIS at 18) that stops rather than
+  silently truncating.
+* `npi_search()` takes `name_expansion = "none" | "curated_one_hop"` -- an
+  enum, deliberately not a Boolean -- executes the plan one fetch per row,
+  dedupes by NPI (plan order makes retained provenance deterministic), and
+  stamps all four provenance columns on every returned row.
+* The alias-off guarantee is tested BEHAVIORALLY: all traffic flows
+  through one mockable transport seam (`npi_fetch_impl`), and tests assert
+  every outbound URL carries the flag -- replacing a source-text check the
+  mutation campaign proved insufficient (`if (FALSE) <flag>` still greps).
+  The dictionary gains its own integrity suite (version/checksum pins,
+  refused-weld pins for the 13 issue-4 drops, approved-edge preservation,
+  degree profile, cycle census), and the campaign gains three mutants:
+  alias-back-on, fan-out guard disabled, NPI dedup dropped -- all killed.
 
 # mysterynpi 0.3.1
 

@@ -2,6 +2,24 @@
 
 ## mysterynpi (development version)
 
+- THE NICKNAME POLICY IS LOCKED (`NICKNAME_POLICY`, decided 2026-09-07
+  from the frozen-matcher ablation; governing evidence recorded in the
+  object): verdict-layer nickname evidence retained globally; candidate
+  expansion retained REVIEW-ONLY and gated to informal-name-capable
+  source classes; auto-acceptance on nickname evidence alone impossible.
+  [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
+  gains `source_class` (“formal_record” refuses expansion;
+  “informal_capable” permits it), stamps `source_class`,
+  `candidate_expansion_used`, `review_only` and
+  `acceptance_contribution` on every row, and attaches a `run_manifest`
+  attribute naming the policy id, governing matcher SHA, and dictionary
+  version. New
+  [`assert_nickname_policy()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.md)
+  fails closed when an auto-accept set contains a nickname-only
+  candidate. Eight policy tests pin the ablation results (126/0/0 with
+  the table, 93/33/0 without, ten ghosts rejected); two new mutants
+  (gate removed, guard hollowed) bring the campaign to 28.
+
 - [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
   stops letting NPPES fuzzy-match in the dark. Measured live: the API
   alias-expands first names BY DEFAULT against an internal list nobody
@@ -9,6 +27,7 @@
   WILLIAM, with nothing in the response saying why. Every query now
   carries `use_first_name_alias=False`; there is no argument to turn it
   back on.
+
 - Nickname expansion is now a fully explicit, versioned transformation
   layer – the repo’s ONLY route from an input first name to additional
   queried names, enforced by an invariant test. `NICKNAME_EDGES` rows
@@ -22,11 +41,13 @@
   never reaches FREDERICK), with a hard `max_expansion` cardinality
   guard (default 25, just above the corpus’s widest hub, CHRIS at 18)
   that stops rather than silently truncating.
+
 - [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
   takes `name_expansion = "none" | "curated_one_hop"` – an enum,
   deliberately not a Boolean – executes the plan one fetch per row,
   dedupes by NPI (plan order makes retained provenance deterministic),
   and stamps all four provenance columns on every returned row.
+
 - The alias-off guarantee is tested BEHAVIORALLY: all traffic flows
   through one mockable transport seam (`npi_fetch_impl`), and tests
   assert every outbound URL carries the flag – replacing a source-text
@@ -36,6 +57,7 @@
   approved-edge preservation, degree profile, cycle census), and the
   campaign gains three mutants: alias-back-on, fan-out guard disabled,
   NPI dedup dropped – all killed.
+
 - Deduplication never discards lineage. The declared dedup key is the
   NPI – a physician found by two expansion paths is ONE candidate, so
   counts cannot inflate by fan-out – and every path is kept:

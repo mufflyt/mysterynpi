@@ -349,6 +349,10 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
   : The licenses inside an NPPES response, one row per (NPI, license)
 - [`nickname_variants()`](https://mufflyt.github.io/mysterynpi/reference/nickname_variants.md)
   : The one route from an input first name to additional queried names
+- [`NICKNAME_POLICY`](https://mufflyt.github.io/mysterynpi/reference/NICKNAME_POLICY.md)
+  : The locked nickname policy and its governing evidence
+- [`assert_nickname_policy()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.md)
+  : Fail closed: no nickname-only candidate may be auto-accepted
 
 ## Contracts
 

@@ -63,6 +63,7 @@ the 2005 start of enumeration).</p>
 <span>  limit <span class="op">=</span> <span class="fl">10L</span>,</span>
 <span>  licenses <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  name_expansion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"curated_one_hop"</span><span class="op">)</span>,</span>
+<span>  source_class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"formal_record"</span>, <span class="st">"informal_capable"</span><span class="op">)</span>,</span>
 <span>  max_expansion <span class="op">=</span> <span class="fl">25L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -96,6 +97,15 @@ Anything else is an error – deliberately an enum, not a Boolean, so a
 third behavior can never sneak in as a truthy value.</p></dd>
 
 
+<dt id="arg-source-class">source_class<a class="anchor" aria-label="anchor" href="#arg-source-class"></a></dt>
+<dd><p>what kind of source the queried name comes from:
+`"formal_record"` (default – legal/credentialing names; expansion is
+REFUSED, per [NICKNAME_POLICY]) or `"informal_capable"` (sources that
+plausibly record go-by names: scraped rosters, web profiles).
+Expansion-only candidates are stamped `review_only = TRUE` and
+[assert_nickname_policy()] refuses to auto-accept them.</p></dd>
+
+
 <dt id="arg-max-expansion">max_expansion<a class="anchor" aria-label="anchor" href="#arg-max-expansion"></a></dt>
 <dd><p>passed to [nickname_variants()]; the hard ceiling
 on fan-out.</p></dd>
@@ -103,8 +113,13 @@ on fan-out.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>see [parse_npi_search()], plus the four provenance columns and
-  the two lineage columns `found_by_queries` and `found_by_edges`;
+    <p>see [parse_npi_search()], plus the four provenance columns, the
+  two lineage columns `found_by_queries` and `found_by_edges`, and the
+  four policy columns `source_class`, `candidate_expansion_used`,
+  `review_only`, `acceptance_contribution`; the frame carries a
+  `run_manifest` attribute recording the package version, policy id,
+  governing matcher SHA, dictionary version, and the modes this run
+  used;
   results are deduplicated by NPI (the plan's order – input first, then
   sorted – makes the retained scalar provenance deterministic, and the
   lineage columns keep every path). With `licenses = TRUE`, a list of

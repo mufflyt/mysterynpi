@@ -13,6 +13,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_NOISE.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_POLICY.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ROSTER_BENCHMARK.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_FREQUENCIES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_PARTICLES.html</loc></url>
@@ -23,6 +24,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_license_status_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/award_contested.html</loc></url>

@@ -1,0 +1,42 @@
+# The locked nickname policy and its governing evidence
+
+The production rules decided from the 2026-09-07 ablation study,
+recorded as data so every consumer can cite WHY the machinery behaves as
+it does:
+
+## Usage
+
+``` r
+NICKNAME_POLICY
+```
+
+## Format
+
+A list with elements \`policy_id\`, \`decided\`, \`verdict_layer\`,
+\`candidate_expansion\`, \`auto_accept\`, \`source_class_gate\`,
+\`governing_matcher_sha\`, \`governing_dictionary_version\`,
+\`governing_evidence\`.
+
+## Details
+
+\* \*\*Verdict layer\*\* (\[nickname_agreement()\]): retained globally.
+\* \*\*Candidate expansion\*\* (\[npi_search()\] \`name_expansion =
+"curated_one_hop"\`): retained REVIEW-ONLY, and only for source classes
+that plausibly record informal go-by names. A formal legal-name roster
+(an AMCB-style certification roster) cannot invoke expansion at all. \*
+\*\*Auto-acceptance\*\*: a candidate reachable only through a nickname
+edge must never be auto-accepted; \[assert_nickname_policy()\] is the
+fail-closed guard an acceptance step calls. \* \*\*Dictionary
+governance\*\*: the versioned dictionary stands as tested, including
+\`ROBERT\>BILL\` – zero measured rescues anywhere, downside bounded by
+the review-only rule, retained as a governed, versioned data decision
+rather than silently edited.
+
+Column correspondence for the lineage contract: \`nickname_rule\` is
+carried as \`alias_edge_id\`, \`dictionary_version\` as
+\`alias_dictionary_version\`; \`source_class\`,
+\`candidate_expansion_used\`, \`review_only\` and
+\`acceptance_contribution\` are stamped by \[npi_search()\];
+\`verdict_layer_used\` is the downstream consumer's stamp when it
+applies \[nickname_agreement()\], and this policy object records the
+layer's standing (\`retain_global\`).

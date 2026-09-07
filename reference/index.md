@@ -178,7 +178,7 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
 - [`parse_npi_licenses()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_licenses.md)
   : The licenses inside an NPPES response, one row per (NPI, license)
 - [`nickname_variants()`](https://mufflyt.github.io/mysterynpi/reference/nickname_variants.md)
-  : One-hop name variants, for auditable search expansion
+  : The one route from an input first name to additional queried names
 
 ## Contracts
 

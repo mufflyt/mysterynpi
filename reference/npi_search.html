@@ -62,7 +62,8 @@ the 2005 start of enumeration).</p>
 <span>  npi <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  limit <span class="op">=</span> <span class="fl">10L</span>,</span>
 <span>  licenses <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  expand_nicknames <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  name_expansion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"curated_one_hop"</span><span class="op">)</span>,</span>
+<span>  max_expansion <span class="op">=</span> <span class="fl">25L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -78,35 +79,35 @@ wildcard on names of two or more characters.</p></dd>
 
 
 <dt id="arg-limit">limit<a class="anchor" aria-label="anchor" href="#arg-limit"></a></dt>
-<dd><p>maximum results, 1 to 200.
-NPPES ALIAS MATCHING IS ALWAYS OFF. The API silently expands first
-names against an internal alias list by default – measured live:
-searching `bill` returned five providers all legally named WILLIAM.
-Every query this function sends carries `use_first_name_alias=False`,
-and nickname recall is recovered in daylight instead: with
-`expand_nicknames = TRUE`, the first name fans out over its
-[nickname_variants()] (one fetch per variant), and each returned row
-carries `queried_as` – which spelling found it. Every expansion is a
-reviewable corpus edge, not a registry black box.</p></dd>
+<dd><p>maximum results per query, 1 to 200.</p></dd>
 
 
 <dt id="arg-licenses">licenses<a class="anchor" aria-label="anchor" href="#arg-licenses"></a></dt>
-<dd><p>when `TRUE`, one fetch returns BOTH frames as
-`list(providers, licenses)` – the licenses via
+<dd><p>when `TRUE`, the same fetches also return the license
+frame as `list(providers, licenses)` – the licenses via
 [parse_npi_licenses()], ready for [license_agreement()]. Default
 `FALSE` keeps the plain provider frame.</p></dd>
 
 
-<dt id="arg-expand-nicknames">expand_nicknames<a class="anchor" aria-label="anchor" href="#arg-expand-nicknames"></a></dt>
-<dd><p>fan the first name out over its one-hop
-[nickname_variants()]; results are deduplicated by NPI with a
-`queried_as` provenance column.</p></dd>
+<dt id="arg-name-expansion">name_expansion<a class="anchor" aria-label="anchor" href="#arg-name-expansion"></a></dt>
+<dd><p>`"none"` (default: query exactly the name given)
+or `"curated_one_hop"` (execute the [nickname_variants()] plan).
+Anything else is an error – deliberately an enum, not a Boolean, so a
+third behavior can never sneak in as a truthy value.</p></dd>
+
+
+<dt id="arg-max-expansion">max_expansion<a class="anchor" aria-label="anchor" href="#arg-max-expansion"></a></dt>
+<dd><p>passed to [nickname_variants()]; the hard ceiling
+on fan-out.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>see [parse_npi_search()]; with `licenses = TRUE`, a list of two
-  data.frames, `providers` and `licenses`.</p>
+    <p>see [parse_npi_search()], plus the four provenance columns;
+  results are deduplicated by NPI (the plan's order – input first, then
+  sorted – makes the retained provenance deterministic). With
+  `licenses = TRUE`, a list of two data.frames, `providers` and
+  `licenses`.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -114,6 +115,20 @@ reviewable corpus edge, not a registry black box.</p></dd>
 (`npiregistry.cms.hhs.gov`) and belongs in interactive exploration and
 pipeline candidate generation – never inside a test suite, which is why
 the parser is a separate, fixture-testable function.</p>
+<p>NPPES ALIAS MATCHING IS ALWAYS OFF. The API silently expands first names
+against an internal alias list by default – measured live: searching
+`bill` returned five providers all legally named WILLIAM. Every query
+this function sends carries `use_first_name_alias=False`; there is no
+argument to turn that back on. Nickname recall is recovered in daylight
+instead, through exactly one route: `name_expansion = "curated_one_hop"`
+executes the [nickname_variants()] plan (one fetch per plan row), and
+every returned row carries the plan's provenance.</p>
+<p>PROVENANCE COLUMNS, always present on the provider frame:
+`input_first_name` (the name you asked for), `queried_first_name` (the
+spelling that found this row), `alias_edge_id` (the [NICKNAME_EDGES] row
+that licensed the fan-out, `NA` when the row came from the input name
+itself), and `alias_dictionary_version`. All `NA` when no first name was
+given.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

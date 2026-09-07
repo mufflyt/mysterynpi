@@ -1,5 +1,13 @@
 # mysterynpi (development version)
 
+* Documentation for the decision: `vignette("nickname-policy")` -- the
+  appendix that recomputes the verdict-layer ablation on every build,
+  documents the candidate-layer result, the source-class gate, the
+  lineage contract, the ghost controls, and the ROBERT>BILL governance
+  record. The verdict-layer harness and per-edge ledger ship in
+  `tools/ablation/`; the README gains the two ablation figures and a
+  policy section.
+
 * The policy is now GOVERNED CONFIGURATION. `NICKNAME_POLICY` carries the
   full machine-readable contract (policy_id, verdict_layer,
   candidate_expansion, auto_accept_rule, governing_matcher_sha,

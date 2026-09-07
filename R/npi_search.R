@@ -317,14 +317,25 @@ npi_fetch_impl <- function(u) {
 #'   or `"curated_one_hop"` (execute the [nickname_variants()] plan).
 #'   Anything else is an error -- deliberately an enum, not a Boolean, so a
 #'   third behavior can never sneak in as a truthy value.
+#' @param source_class what kind of source the queried name comes from:
+#'   `"formal_record"` (default -- legal/credentialing names; expansion is
+#'   REFUSED, per [NICKNAME_POLICY]) or `"informal_capable"` (sources that
+#'   plausibly record go-by names: scraped rosters, web profiles).
+#'   Expansion-only candidates are stamped `review_only = TRUE` and
+#'   [assert_nickname_policy()] refuses to auto-accept them.
 #' @param max_expansion passed to [nickname_variants()]; the hard ceiling
 #'   on fan-out.
 #' @param licenses when `TRUE`, the same fetches also return the license
 #'   frame as `list(providers, licenses)` -- the licenses via
 #'   [parse_npi_licenses()], ready for [license_agreement()]. Default
 #'   `FALSE` keeps the plain provider frame.
-#' @return see [parse_npi_search()], plus the four provenance columns and
-#'   the two lineage columns `found_by_queries` and `found_by_edges`;
+#' @return see [parse_npi_search()], plus the four provenance columns, the
+#'   two lineage columns `found_by_queries` and `found_by_edges`, and the
+#'   four policy columns `source_class`, `candidate_expansion_used`,
+#'   `review_only`, `acceptance_contribution`; the frame carries a
+#'   `run_manifest` attribute recording the package version, policy id,
+#'   governing matcher SHA, dictionary version, and the modes this run
+#'   used;
 #'   results are deduplicated by NPI (the plan's order -- input first, then
 #'   sorted -- makes the retained scalar provenance deterministic, and the
 #'   lineage columns keep every path). With `licenses = TRUE`, a list of
@@ -334,8 +345,24 @@ npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
                        postal_code = NULL, npi = NULL, limit = 10L,
                        licenses = FALSE,
                        name_expansion = c("none", "curated_one_hop"),
+                       source_class = c("formal_record", "informal_capable"),
                        max_expansion = 25L) {
   name_expansion <- match.arg(name_expansion)
+  source_class <- match.arg(source_class)
+  # THE POLICY GATE (NICKNAME_POLICY, decided 2026-09-07 from the ablation):
+  # candidate expansion is review-only and permitted ONLY for sources that
+  # plausibly record informal go-by names. A formal legal-name roster gets
+  # no expansion; measured yield there was zero and collisions were not.
+  if (identical(name_expansion, "curated_one_hop") &&
+      identical(source_class, "formal_record")) {
+    stop("name_expansion = \"curated_one_hop\" is gated by ",
+         NICKNAME_POLICY$policy_id, ": a formal_record source class ",
+         "cannot invoke nickname candidate expansion.\n",
+         "  Declare source_class = \"informal_capable\" only if this ",
+         "source really records go-by names (scraped rosters, web ",
+         "profiles), and treat expansion-only candidates as review-only.",
+         call. = FALSE)
+  }
   limit <- as.integer(limit)
   if (is.na(limit) || limit < 1L || limit > 200L) {
     stop("limit must be between 1 and 200", call. = FALSE)
@@ -409,6 +436,25 @@ npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
       as.character(tapply(all_rows$queried_first_name, f, joinu))
     providers$found_by_edges <- as.character(tapply(path, f, joinu))
   }
+  # Policy lineage (NICKNAME_POLICY): a row is review_only when EVERY path
+  # that found it was a nickname edge -- no "input" path anywhere in its
+  # lineage. Such a row may enter clerical review; it may never be
+  # auto-accepted (assert_nickname_policy() is the guard).
+  providers$source_class <- rep(source_class, nrow(providers))
+  providers$candidate_expansion_used <-
+    rep(identical(name_expansion, "curated_one_hop"), nrow(providers))
+  providers$review_only <- !is.na(providers$found_by_edges) &
+    !grepl("(^|\\|)input($|\\|)", providers$found_by_edges)
+  providers$acceptance_contribution <-
+    ifelse(providers$review_only, "review_candidate", "direct_evidence")
+  attr(providers, "run_manifest") <- list(
+    package_version = as.character(utils::packageVersion("mysterynpi")),
+    nickname_policy = NICKNAME_POLICY$policy_id,
+    governing_matcher_sha = NICKNAME_POLICY$governing_matcher_sha,
+    dictionary_version = nickname_dictionary_version(),
+    name_expansion = name_expansion,
+    source_class = source_class,
+    verdict_layer = NICKNAME_POLICY$verdict_layer)
   if (!isTRUE(licenses)) return(providers)
   lics <- unique(do.call(rbind, lapply(texts, parse_npi_licenses)))
   rownames(lics) <- NULL

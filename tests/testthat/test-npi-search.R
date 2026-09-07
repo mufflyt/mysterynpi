@@ -212,7 +212,8 @@ test_that("every outbound name query carries use_first_name_alias=False", {
     npi_fetch_impl = function(u) { seen[[length(seen) + 1L]] <<- u
                                    read_fixture() })
   got <- npi_search(first_name = "bill", last_name = "smith", state = "CO",
-                    name_expansion = "curated_one_hop")
+                    name_expansion = "curated_one_hop",
+                    source_class = "informal_capable")
   plan <- nickname_variants("BILL")
   expect_identical(length(seen), nrow(plan))          # one fetch per plan row
   expect_true(all(grepl("use_first_name_alias=False", seen, fixed = TRUE)))
@@ -262,7 +263,8 @@ test_that("licenses=TRUE unions licenses across the expanded fetches", {
   skip_if_not_installed("jsonlite")
   testthat::local_mocked_bindings(npi_fetch_impl = function(u) read_fixture())
   got <- npi_search(first_name = "bill", last_name = "smith",
-                    name_expansion = "curated_one_hop", licenses = TRUE)
+                    name_expansion = "curated_one_hop",
+                    source_class = "informal_capable", licenses = TRUE)
   expect_identical(names(got), c("providers", "licenses"))
   expect_identical(nrow(got$licenses), 2L)            # unique(), not stacked
   expect_true(all(c("input_first_name", "alias_edge_id") %in%
@@ -288,6 +290,7 @@ test_that("INVARIANT: exactly one route from input name to query variants", {
   edge_readers <- Filter(function(f) uses(f, "NICKNAME_EDGES"), fns)
   expect_true(all(edge_readers %in% c("nickname_agreement",
                                       "nickname_variants",
+                                      "nickname_dictionary_version",
                                       "create_nickname_dictionary")),
               info = paste("unexpected NICKNAME_EDGES reader:",
                            paste(edge_readers, collapse = ", ")))
@@ -315,7 +318,8 @@ test_that("dedup key is the NPI, and no expansion path's lineage is lost", {
   }
   testthat::local_mocked_bindings(npi_fetch_impl = fake_response)
   got <- npi_search(first_name = "bill", last_name = "smith",
-                    name_expansion = "curated_one_hop")
+                    name_expansion = "curated_one_hop",
+                    source_class = "informal_capable")
   # one row per physician: 3 distinct NPIs, never 4 rows
   expect_identical(nrow(got), 3L)
   expect_identical(anyDuplicated(got$npi), 0L)
@@ -348,7 +352,8 @@ test_that("lineage columns exist and stay honest in every mode", {
   empty_mock <- function(u) '{"result_count":0,"results":[]}'
   testthat::local_mocked_bindings(npi_fetch_impl = empty_mock)
   z <- npi_search(first_name = "bill", last_name = "smith",
-                  name_expansion = "curated_one_hop")
+                  name_expansion = "curated_one_hop",
+                    source_class = "informal_capable")
   expect_identical(nrow(z), 0L)
   expect_true(all(c("found_by_queries", "found_by_edges") %in% names(z)))
 })

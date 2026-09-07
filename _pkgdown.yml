@@ -93,6 +93,8 @@ reference:
   - parse_npi_search
   - parse_npi_licenses
   - nickname_variants
+  - NICKNAME_POLICY
+  - assert_nickname_policy
 - title: Contracts
   desc: Assertions a caller runs in its own suite.
   contents:

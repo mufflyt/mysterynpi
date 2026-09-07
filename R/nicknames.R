@@ -45,6 +45,15 @@
 #'   `system.file("nicknames-LICENSE", package = "mysterynpi")`).
 "NICKNAME_EDGES"
 
+# The one sanctioned way to learn the dictionary's version without reading
+# the dictionary: consumers (npi_search's run manifest) call this instead of
+# touching NICKNAME_EDGES, so the access-boundary invariant stays exact --
+# only the canonical module's functions ever name the table.
+nickname_dictionary_version <- function() {
+  v <- attr(mysterynpi::NICKNAME_EDGES, "version")
+  if (is.null(v)) NA_character_ else v
+}
+
 #' Do two given-name tokens agree once recorded nicknames are admitted?
 #'
 #' THREE VERDICTS, SAME CONTRACT AS [middle_agreement()]. `"corroborates"`

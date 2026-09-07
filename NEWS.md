@@ -1,5 +1,21 @@
 # mysterynpi (development version)
 
+* THE NICKNAME POLICY IS LOCKED (`NICKNAME_POLICY`, decided 2026-09-07
+  from the frozen-matcher ablation; governing evidence recorded in the
+  object): verdict-layer nickname evidence retained globally; candidate
+  expansion retained REVIEW-ONLY and gated to informal-name-capable
+  source classes; auto-acceptance on nickname evidence alone impossible.
+  `npi_search()` gains `source_class` ("formal_record" refuses expansion;
+  "informal_capable" permits it), stamps `source_class`,
+  `candidate_expansion_used`, `review_only` and `acceptance_contribution`
+  on every row, and attaches a `run_manifest` attribute naming the
+  policy id, governing matcher SHA, and dictionary version. New
+  `assert_nickname_policy()` fails closed when an auto-accept set
+  contains a nickname-only candidate. Eight policy tests pin the ablation
+  results (126/0/0 with the table, 93/33/0 without, ten ghosts rejected);
+  two new mutants (gate removed, guard hollowed) bring the campaign
+  to 28.
+
 * `npi_search()` stops letting NPPES fuzzy-match in the dark. Measured
   live: the API alias-expands first names BY DEFAULT against an internal
   list nobody can read -- searching `bill` returned five providers all

@@ -13,6 +13,7 @@ npi_search(
   limit = 10L,
   licenses = FALSE,
   name_expansion = c("none", "curated_one_hop"),
+  source_class = c("formal_record", "informal_capable"),
   max_expansion = 25L
 )
 }
@@ -34,12 +35,24 @@ or `"curated_one_hop"` (execute the [nickname_variants()] plan).
 Anything else is an error -- deliberately an enum, not a Boolean, so a
 third behavior can never sneak in as a truthy value.}
 
+\item{source_class}{what kind of source the queried name comes from:
+`"formal_record"` (default -- legal/credentialing names; expansion is
+REFUSED, per [NICKNAME_POLICY]) or `"informal_capable"` (sources that
+plausibly record go-by names: scraped rosters, web profiles).
+Expansion-only candidates are stamped `review_only = TRUE` and
+[assert_nickname_policy()] refuses to auto-accept them.}
+
 \item{max_expansion}{passed to [nickname_variants()]; the hard ceiling
 on fan-out.}
 }
 \value{
-see [parse_npi_search()], plus the four provenance columns and
-  the two lineage columns `found_by_queries` and `found_by_edges`;
+see [parse_npi_search()], plus the four provenance columns, the
+  two lineage columns `found_by_queries` and `found_by_edges`, and the
+  four policy columns `source_class`, `candidate_expansion_used`,
+  `review_only`, `acceptance_contribution`; the frame carries a
+  `run_manifest` attribute recording the package version, policy id,
+  governing matcher SHA, dictionary version, and the modes this run
+  used;
   results are deduplicated by NPI (the plan's order -- input first, then
   sorted -- makes the retained scalar provenance deterministic, and the
   lineage columns keep every path). With `licenses = TRUE`, a list of

@@ -294,3 +294,61 @@ test_that("INVARIANT: exactly one route from input name to query variants", {
   expanders <- Filter(function(f) uses(f, "nickname_variants"), fns)
   expect_identical(sort(expanders), "npi_search")
 })
+
+test_that("dedup key is the NPI, and no expansion path's lineage is lost", {
+  # The section-8 invariant: a physician found by two aliases is ONE
+  # candidate (counts never inflate by fan-out), yet every path that found
+  # them stays reconstructable. The mock answers per queried spelling with
+  # OVERLAPPING NPIs: 1111111111 is found by both BILL and WILLIAM.
+  skip_if_not_installed("jsonlite")
+  fake_response <- function(u) {
+    fn <- sub(".*[?&]first_name=([^&]*).*", "\\1", u)
+    npis <- switch(fn,
+                   BILL    = c("1111111111", "2222222222"),
+                   WILLIAM = c("1111111111", "3333333333"),
+                   character(0))
+    if (!length(npis)) return('{"result_count":0,"results":[]}')
+    rows <- paste(sprintf(
+      '{"number":"%s","basic":{"first_name":"%s","last_name":"SMITH"},"addresses":[]}',
+      npis, fn), collapse = ",")
+    sprintf('{"result_count":%d,"results":[%s]}', length(npis), rows)
+  }
+  testthat::local_mocked_bindings(npi_fetch_impl = fake_response)
+  got <- npi_search(first_name = "bill", last_name = "smith",
+                    name_expansion = "curated_one_hop")
+  # one row per physician: 3 distinct NPIs, never 4 rows
+  expect_identical(nrow(got), 3L)
+  expect_identical(anyDuplicated(got$npi), 0L)
+  shared <- got[got$npi == "1111111111", ]
+  # scalar provenance keeps the FIRST path in plan order (the input)...
+  expect_identical(shared$queried_first_name, "BILL")
+  expect_true(is.na(shared$alias_edge_id))
+  # ...and the lineage columns keep EVERY path, identity written as "input"
+  expect_identical(shared$found_by_queries, "BILL|WILLIAM")
+  expect_identical(shared$found_by_edges, "input|BILL>WILLIAM")
+  # a provider found only by a variant carries that path as its scalar too
+  wm <- got[got$npi == "3333333333", ]
+  expect_identical(wm$queried_first_name, "WILLIAM")
+  expect_identical(wm$alias_edge_id, "BILL>WILLIAM")
+  expect_identical(wm$found_by_queries, "WILLIAM")
+  expect_identical(wm$found_by_edges, "BILL>WILLIAM")
+  only_bill <- got[got$npi == "2222222222", ]
+  expect_identical(only_bill$found_by_edges, "input")
+})
+
+test_that("lineage columns exist and stay honest in every mode", {
+  skip_if_not_installed("jsonlite")
+  testthat::local_mocked_bindings(npi_fetch_impl = function(u) read_fixture())
+  none <- npi_search(first_name = "bill", last_name = "smith")
+  expect_identical(unique(none$found_by_queries), "bill")
+  expect_identical(unique(none$found_by_edges), "input")
+  anon <- npi_search(npi = "1234567893")
+  expect_true(all(is.na(anon$found_by_queries)))
+  expect_true(all(is.na(anon$found_by_edges)))
+  empty_mock <- function(u) '{"result_count":0,"results":[]}'
+  testthat::local_mocked_bindings(npi_fetch_impl = empty_mock)
+  z <- npi_search(first_name = "bill", last_name = "smith",
+                  name_expansion = "curated_one_hop")
+  expect_identical(nrow(z), 0L)
+  expect_true(all(c("found_by_queries", "found_by_edges") %in% names(z)))
+})

@@ -38,11 +38,12 @@ third behavior can never sneak in as a truthy value.}
 on fan-out.}
 }
 \value{
-see [parse_npi_search()], plus the four provenance columns;
+see [parse_npi_search()], plus the four provenance columns and
+  the two lineage columns `found_by_queries` and `found_by_edges`;
   results are deduplicated by NPI (the plan's order -- input first, then
-  sorted -- makes the retained provenance deterministic). With
-  `licenses = TRUE`, a list of two data.frames, `providers` and
-  `licenses`.
+  sorted -- makes the retained scalar provenance deterministic, and the
+  lineage columns keep every path). With `licenses = TRUE`, a list of
+  two data.frames, `providers` and `licenses`.
 }
 \description{
 A thin fetch over [parse_npi_search()], which documents every column and
@@ -71,4 +72,15 @@ spelling that found this row), `alias_edge_id` (the [NICKNAME_EDGES] row
 that licensed the fan-out, `NA` when the row came from the input name
 itself), and `alias_dictionary_version`. All `NA` when no first name was
 given.
+
+DEDUPLICATION NEVER DISCARDS LINEAGE. The declared deduplication key is
+the NPI: a physician found by two expansion paths is ONE candidate, not
+two, so counts cannot inflate by fan-out. The retained scalar
+provenance is the first path in plan order (deterministic), and every
+path is kept in two aggregate columns: `found_by_queries` (the queried
+spellings that returned this NPI, `|`-joined in plan order) and
+`found_by_edges` (their edges, with the identity path written as the
+literal `input`, so the unexpanded query never masquerades as an alias
+expansion). A provider found by both the input and a variant reads,
+e.g., `found_by_edges = "input|BILL>WILLIAM"`.
 }

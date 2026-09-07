@@ -30,6 +30,15 @@
   refused-weld pins for the 13 issue-4 drops, approved-edge preservation,
   degree profile, cycle census), and the campaign gains three mutants:
   alias-back-on, fan-out guard disabled, NPI dedup dropped -- all killed.
+* Deduplication never discards lineage. The declared dedup key is the
+  NPI -- a physician found by two expansion paths is ONE candidate, so
+  counts cannot inflate by fan-out -- and every path is kept:
+  `found_by_queries` and `found_by_edges` aggregate all the spellings and
+  edges that returned each NPI (`"input|BILL>WILLIAM"`), with the
+  unexpanded query represented explicitly as `input`, never disguised as
+  an alias edge. Four more mutants (transitive expansion, provenance
+  corruption, lineage discard, unauthorized dictionary access outside the
+  canonical module) bring the campaign to 26, all killed.
 
 # mysterynpi 0.3.1
 

@@ -297,6 +297,17 @@ npi_fetch_impl <- function(u) {
 #' itself), and `alias_dictionary_version`. All `NA` when no first name was
 #' given.
 #'
+#' DEDUPLICATION NEVER DISCARDS LINEAGE. The declared deduplication key is
+#' the NPI: a physician found by two expansion paths is ONE candidate, not
+#' two, so counts cannot inflate by fan-out. The retained scalar
+#' provenance is the first path in plan order (deterministic), and every
+#' path is kept in two aggregate columns: `found_by_queries` (the queried
+#' spellings that returned this NPI, `|`-joined in plan order) and
+#' `found_by_edges` (their edges, with the identity path written as the
+#' literal `input`, so the unexpanded query never masquerades as an alias
+#' expansion). A provider found by both the input and a variant reads,
+#' e.g., `found_by_edges = "input|BILL>WILLIAM"`.
+#'
 #' @param first_name,last_name,state,postal_code,npi search criteria; any may
 #'   be omitted, but the API requires something. NPPES treats `first_name`
 #'   and `last_name` as case-insensitive and supports a trailing `*`
@@ -312,11 +323,12 @@ npi_fetch_impl <- function(u) {
 #'   frame as `list(providers, licenses)` -- the licenses via
 #'   [parse_npi_licenses()], ready for [license_agreement()]. Default
 #'   `FALSE` keeps the plain provider frame.
-#' @return see [parse_npi_search()], plus the four provenance columns;
+#' @return see [parse_npi_search()], plus the four provenance columns and
+#'   the two lineage columns `found_by_queries` and `found_by_edges`;
 #'   results are deduplicated by NPI (the plan's order -- input first, then
-#'   sorted -- makes the retained provenance deterministic). With
-#'   `licenses = TRUE`, a list of two data.frames, `providers` and
-#'   `licenses`.
+#'   sorted -- makes the retained scalar provenance deterministic, and the
+#'   lineage columns keep every path). With `licenses = TRUE`, a list of
+#'   two data.frames, `providers` and `licenses`.
 #' @export
 npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
                        postal_code = NULL, npi = NULL, limit = 10L,
@@ -369,11 +381,34 @@ npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
     for (col in names(plan)) p[[col]] <- rep(plan[[col]][i], nrow(p))
     p
   })
-  providers <- do.call(rbind, provs)
-  # one row per provider: the plan order (input first, then sorted) makes
-  # the retained provenance deterministic
+  all_rows <- do.call(rbind, provs)
+  providers <- all_rows
+  # THE DEDUPLICATION KEY IS THE NPI, DECLARED: one candidate row per
+  # physician, however many expansion paths found them. The plan order
+  # (input first, then sorted) makes the retained scalar provenance
+  # deterministic -- and the paths NOT retained as scalars are aggregated
+  # below, never discarded.
   providers <- providers[!duplicated(providers$npi), , drop = FALSE]
   rownames(providers) <- NULL
+  # Full lineage: every path that found each NPI, joined with "|" in plan
+  # order. The identity path is written as the literal "input" -- an
+  # explicit representation, never masquerading as an alias edge.
+  if (nrow(providers) == 0L) {
+    providers$found_by_queries <- character(0)
+    providers$found_by_edges <- character(0)
+  } else {
+    f <- factor(all_rows$npi, levels = providers$npi)
+    joinu <- function(x) {
+      if (all(is.na(x))) NA_character_ else paste(unique(x), collapse = "|")
+    }
+    path <- ifelse(is.na(all_rows$alias_edge_id),
+                   ifelse(is.na(all_rows$queried_first_name),
+                          NA_character_, "input"),
+                   all_rows$alias_edge_id)
+    providers$found_by_queries <-
+      as.character(tapply(all_rows$queried_first_name, f, joinu))
+    providers$found_by_edges <- as.character(tapply(path, f, joinu))
+  }
   if (!isTRUE(licenses)) return(providers)
   lics <- unique(do.call(rbind, lapply(texts, parse_npi_licenses)))
   rownames(lics) <- NULL

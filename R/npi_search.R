@@ -317,10 +317,12 @@ npi_fetch_impl <- function(u) {
 #'   or `"curated_one_hop"` (execute the [nickname_variants()] plan).
 #'   Anything else is an error -- deliberately an enum, not a Boolean, so a
 #'   third behavior can never sneak in as a truthy value.
-#' @param source_class what kind of source the queried name comes from:
-#'   `"formal_record"` (default -- legal/credentialing names; expansion is
-#'   REFUSED, per [NICKNAME_POLICY]) or `"informal_capable"` (sources that
-#'   plausibly record go-by names: scraped rosters, web profiles).
+#' @param source_class what kind of source the queried name comes from,
+#'   resolved against the governed registry [SOURCE_CLASSES]:
+#'   `"formal_record"` (default -- legal/credentialing names; expansion
+#'   FORBIDDEN, per [NICKNAME_POLICY]), `"informal_capable"` (sources that
+#'   plausibly record go-by names; review-only expansion permitted), or
+#'   `"unknown"` (FAILS CLOSED -- no fallback to informal-capable).
 #'   Expansion-only candidates are stamped `review_only = TRUE` and
 #'   [assert_nickname_policy()] refuses to auto-accept them.
 #' @param max_expansion passed to [nickname_variants()]; the hard ceiling
@@ -345,23 +347,27 @@ npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
                        postal_code = NULL, npi = NULL, limit = 10L,
                        licenses = FALSE,
                        name_expansion = c("none", "curated_one_hop"),
-                       source_class = c("formal_record", "informal_capable"),
+                       source_class = SOURCE_CLASSES$class,
                        max_expansion = 25L) {
   name_expansion <- match.arg(name_expansion)
   source_class <- match.arg(source_class)
-  # THE POLICY GATE (NICKNAME_POLICY, decided 2026-09-07 from the ablation):
-  # candidate expansion is review-only and permitted ONLY for sources that
-  # plausibly record informal go-by names. A formal legal-name roster gets
-  # no expansion; measured yield there was zero and collisions were not.
-  if (identical(name_expansion, "curated_one_hop") &&
-      identical(source_class, "formal_record")) {
-    stop("name_expansion = \"curated_one_hop\" is gated by ",
-         NICKNAME_POLICY$policy_id, ": a formal_record source class ",
-         "cannot invoke nickname candidate expansion.\n",
-         "  Declare source_class = \"informal_capable\" only if this ",
-         "source really records go-by names (scraped rosters, web ",
-         "profiles), and treat expansion-only candidates as review-only.",
-         call. = FALSE)
+  # THE POLICY GATE (NICKNAME_POLICY): expansion permission comes from ONE
+  # canonical registry lookup, never string-matching on source names, and
+  # fails closed -- "unknown" earns no expansion, and there is no fallback
+  # from unknown to informal-capable.
+  if (identical(name_expansion, "curated_one_hop")) {
+    perm <- source_class_permission(source_class)
+    if (!identical(perm, "review_only")) {
+      stop("name_expansion = \"curated_one_hop\" is gated by ",
+           NICKNAME_POLICY$policy_id, ": source class \"", source_class,
+           "\" is registered as \"", perm, "\" and cannot invoke ",
+           "nickname candidate expansion.\n",
+           "  Declare source_class = \"informal_capable\" only if this ",
+           "source really records go-by names (scraped rosters, web ",
+           "profiles); an unknown source fails closed until classified. ",
+           "Expansion-only candidates are review-only either way.",
+           call. = FALSE)
+    }
   }
   limit <- as.integer(limit)
   if (is.na(limit) || limit < 1L || limit > 200L) {
@@ -445,8 +451,17 @@ npi_search <- function(first_name = NULL, last_name = NULL, state = NULL,
     rep(identical(name_expansion, "curated_one_hop"), nrow(providers))
   providers$review_only <- !is.na(providers$found_by_edges) &
     !grepl("(^|\\|)input($|\\|)", providers$found_by_edges)
+  # Governed enum (NICKNAME_POLICY$acceptance_contribution_levels), the
+  # search-time subset: "none" -- found by the input alone, nickname
+  # evidence contributed nothing; "supporting" -- found by the input AND a
+  # nickname edge (both paths preserved in found_by_edges, never
+  # collapsed); "nickname_only" -- every path was an edge: review-only,
+  # never independently sufficient for acceptance.
+  has_edge <- !is.na(providers$found_by_edges) &
+    grepl(">", providers$found_by_edges, fixed = TRUE)
   providers$acceptance_contribution <-
-    ifelse(providers$review_only, "review_candidate", "direct_evidence")
+    ifelse(providers$review_only, "nickname_only",
+    ifelse(has_edge, "supporting", "none"))
   attr(providers, "run_manifest") <- list(
     package_version = as.character(utils::packageVersion("mysterynpi")),
     nickname_policy = NICKNAME_POLICY$policy_id,

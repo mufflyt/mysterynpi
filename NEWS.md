@@ -1,5 +1,26 @@
 # mysterynpi (development version)
 
+* The policy is now GOVERNED CONFIGURATION. `NICKNAME_POLICY` carries the
+  full machine-readable contract (policy_id, verdict_layer,
+  candidate_expansion, auto_accept_rule, governing_matcher_sha,
+  dictionary_version, governing_evidence, effective_date, supersedes) plus
+  a governed-edges record pinning ROBERT>BILL exactly as tested (0
+  rescues, inflation present, contained by review-only). The ablation
+  counts live in a versioned fixture whose checksum is pinned NEXT TO the
+  policy_id -- editing the evidence without a policy supersession fails
+  CI. `SOURCE_CLASSES` (exported) is the one canonical source-class
+  registry: formal_record forbidden, informal_capable review-only,
+  unknown FAILS CLOSED with no fallback; the gate resolves by registry
+  lookup, never string matching. `acceptance_contribution` is a governed
+  enum (none / supporting / nickname_only, with necessary / conflicting
+  reserved for the acceptance layer); both paths of a
+  nickname-plus-independent-evidence candidate are preserved, never
+  collapsed. `assert_nickname_policy()` now also fails closed on broken
+  lineage: missing policy columns, or missing lineage values on any
+  expansion-influenced row. Four new mutants (unknown-goes-informal,
+  lineage column dropped, nickname-only unflagged, fixture edited without
+  supersession): campaign 32/32.
+
 * THE NICKNAME POLICY IS LOCKED (`NICKNAME_POLICY`, decided 2026-09-07
   from the frozen-matcher ablation; governing evidence recorded in the
   object): verdict-layer nickname evidence retained globally; candidate

@@ -95,6 +95,7 @@ reference:
   - nickname_variants
   - NICKNAME_POLICY
   - assert_nickname_policy
+  - SOURCE_CLASSES
 - title: Contracts
   desc: Assertions a caller runs in its own suite.
   contents:

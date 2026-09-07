@@ -4,37 +4,32 @@
 \alias{NICKNAME_POLICY}
 \title{The locked nickname policy and its governing evidence}
 \format{
-A list with elements `policy_id`, `decided`, `verdict_layer`,
-  `candidate_expansion`, `auto_accept`, `source_class_gate`,
-  `governing_matcher_sha`, `governing_dictionary_version`,
-  `governing_evidence`.
+A list. Required governed fields: `policy_id`, `verdict_layer`,
+  `candidate_expansion`, `auto_accept_rule`, `governing_matcher_sha`,
+  `dictionary_version`, `governing_evidence`, `effective_date`,
+  `supersedes`. Supplementary: `source_class_gate`, `governed_edges`,
+  `acceptance_contribution_levels`.
 }
 \usage{
 NICKNAME_POLICY
 }
 \description{
-The production rules decided from the 2026-09-07 ablation study, recorded
-as data so every consumer can cite WHY the machinery behaves as it does:
+The production rules decided from the 2026-09-07 ablation, recorded as
+machine-readable, versioned configuration:
 }
 \details{
-* **Verdict layer** ([nickname_agreement()]): retained globally.
-* **Candidate expansion** ([npi_search()] `name_expansion =
-  "curated_one_hop"`): retained REVIEW-ONLY, and only for source classes
-  that plausibly record informal go-by names. A formal legal-name roster
-  (an AMCB-style certification roster) cannot invoke expansion at all.
-* **Auto-acceptance**: a candidate reachable only through a nickname edge
-  must never be auto-accepted; [assert_nickname_policy()] is the
-  fail-closed guard an acceptance step calls.
-* **Dictionary governance**: the versioned dictionary stands as tested,
-  including `ROBERT>BILL` -- zero measured rescues anywhere, downside
-  bounded by the review-only rule, retained as a governed, versioned
-  data decision rather than silently edited.
+* **Verdict layer** ([nickname_agreement()]): `retain_global`.
+* **Candidate expansion** ([npi_search()]): `retain_review_only`, and
+  only for source classes [SOURCE_CLASSES] marks `review_only`.
+* **Auto-acceptance**: `never_on_nickname_evidence_alone` --
+  [assert_nickname_policy()] is the fail-closed guard.
+* **Governed edges**: `ROBERT>BILL` stands exactly as tested -- zero
+  observed rescues, candidate inflation present, contained by the
+  review-only rule. A data-governance record, not a heuristic to tweak.
 
 Column correspondence for the lineage contract: `nickname_rule` is
-carried as `alias_edge_id`, `dictionary_version` as
-`alias_dictionary_version`; `source_class`, `candidate_expansion_used`,
-`review_only` and `acceptance_contribution` are stamped by
-[npi_search()]; `verdict_layer_used` is the downstream consumer's stamp
-when it applies [nickname_agreement()], and this policy object records
-the layer's standing (`retain_global`).
+carried as `alias_edge_id` and `dictionary_version` as
+`alias_dictionary_version`; `verdict_layer_used` is the downstream
+consumer's stamp when it applies [nickname_agreement()], whose standing
+this object records.
 }

@@ -18,7 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
+    <li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="../articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
     <li><a class="dropdown-item" href="../articles/vetoes-and-quarantine.html">Vetoes and quarantine: using conflicts without deleting people</a></li>
   </ul></li>
@@ -40,7 +41,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="mysterynpi-development-version">mysterynpi (development version)<a class="anchor" aria-label="anchor" href="#mysterynpi-development-version"></a></h2>
-<ul><li>
+<ul><li><p>Documentation for the decision: <code><a href="../articles/nickname-policy.html">vignette("nickname-policy")</a></code> – the appendix that recomputes the verdict-layer ablation on every build, documents the candidate-layer result, the source-class gate, the lineage contract, the ghost controls, and the ROBERT&gt;BILL governance record. The verdict-layer harness and per-edge ledger ship in <code>tools/ablation/</code>; the README gains the two ablation figures and a policy section.</p></li>
+<li>
 <p>The policy is now GOVERNED CONFIGURATION. <code>NICKNAME_POLICY</code> carries the full machine-readable contract (policy_id, verdict_layer, candidate_expansion, auto_accept_rule, governing_matcher_sha, dictionary_version, governing_evidence, effective_date, supersedes) plus a governed-edges record pinning ROBERT&gt;BILL exactly as tested (0 rescues, inflation present, contained by review-only). The ablation counts live in a versioned fixture whose checksum is pinned NEXT TO the policy_id – editing the evidence without a policy supersession fails</p>
 <ol start="101" style="list-style-type: upper-roman"><li>
 <code>SOURCE_CLASSES</code> (exported) is the one canonical source-class registry: formal_record forbidden, informal_capable review-only, unknown FAILS CLOSED with no fallback; the gate resolves by registry lookup, never string matching. <code>acceptance_contribution</code> is a governed enum (none / supporting / nickname_only, with necessary / conflicting reserved for the acceptance layer); both paths of a nickname-plus-independent-evidence candidate are preserved, never collapsed. <code><a href="../reference/assert_nickname_policy.html">assert_nickname_policy()</a></code> now also fails closed on broken lineage: missing policy columns, or missing lineage values on any expansion-influenced row. Four new mutants (unknown-goes-informal, lineage column dropped, nickname-only unflagged, fixture edited without supersession): campaign 32/32.</li>

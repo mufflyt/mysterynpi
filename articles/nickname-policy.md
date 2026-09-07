@@ -1,0 +1,253 @@
+# Appendix: the nickname policy, and the ablation that decided it
+
+This appendix documents a decision, not a feature. On 2026-09-07 a
+frozen-matcher ablation (matcher `fa7216f`, dictionary `2026-09-06.1`)
+asked the question the nickname machinery had been engineered around
+without answering: **does curated nickname expansion actually improve
+identity linkage, and at what false-positive cost?** The answer split
+cleanly by layer, and the split *is* the policy:
+
+- **Verdict layer**
+  ([`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)):
+  **retained globally.**
+- **Candidate expansion**
+  ([`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)’s
+  `curated_one_hop`): **review-only**, gated to source classes that
+  plausibly record go-by names, never sufficient for auto-acceptance.
+
+The policy ships as data so any consumer can cite it:
+
+``` r
+
+str(NICKNAME_POLICY, max.level = 1)
+#> List of 12
+#>  $ policy_id                     : chr "nickname-policy-2026-09-07"
+#>  $ effective_date                : chr "2026-09-07"
+#>  $ supersedes                    : chr NA
+#>  $ verdict_layer                 : chr "retain_global"
+#>  $ candidate_expansion           : chr "retain_review_only"
+#>  $ auto_accept_rule              : chr "never_on_nickname_evidence_alone"
+#>  $ source_class_gate             : chr "registry_driven_fail_closed"
+#>  $ governing_matcher_sha         : chr "fa7216f8966214cf8e1cc4e265b1b5efe56e2c88"
+#>  $ dictionary_version            : chr "2026-09-06.1"
+#>  $ governing_evidence            : chr "ablation appendix https://claude.ai/code/artifact/cd8dd9e2-e841-47b6-a639-fd334c20587b; evidence: ~/Dropbox (Pe"| __truncated__
+#>  $ governed_edges                :List of 1
+#>  $ acceptance_contribution_levels: chr [1:5] "none" "supporting" "nickname_only" "necessary" ...
+```
+
+## The verdict-layer result, recomputed here
+
+The evidence below is not quoted — it is **recomputed on every build of
+this vignette** from `ROSTER_BENCHMARK` (190 pairs, truth by
+construction; see
+[`vignette("roster-benchmark")`](https://mufflyt.github.io/mysterynpi/articles/roster-benchmark.md)),
+using that vignette’s reference policy with only the given-name rule
+swapped. Condition A ablates the nickname table (exact equality and
+initial-compatibility only); condition B is
+[`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
+as shipped.
+
+``` r
+
+decisions <- function(given_rule) {
+  b  <- ROSTER_BENCHMARK
+  ex <- extract_suffix(b$roster_name)
+  p  <- parse_person(ex$name)
+  axes <- data.frame(
+    surname = surname_agreement(p$last, b$npi_last,
+                                middle_a = p$middle, middle_b = b$npi_middle),
+    given   = given_rule(sub(" .*", "", p$first), b$npi_first),
+    middle  = middle_agreement(middle_tokens(p$middle),
+                               middle_tokens(b$npi_middle)),
+    suffix  = suffix_agreement(ex$suffix, b$npi_suffix),
+    gender  = gender_agreement(b$roster_gender, b$npi_gender),
+    license = license_agreement(b$roster_license, b$roster_state,
+                                b$npi_license, b$npi_state))
+  excused <- mapply(function(mt, nl)
+    length(intersect(mt, surname_tokens(nl))) > 0,
+    middle_tokens(p$middle), b$npi_last)
+  conflict <- axes$surname == "conflicts" | axes$given == "conflicts" |
+    (axes$middle == "conflicts" & !excused) | axes$suffix == "conflicts"
+  name_ok <- axes$surname == "corroborates" & axes$given == "corroborates"
+  ifelse(conflict, "reject",
+  ifelse(!name_ok, "review",
+  ifelse(axes$gender == "conflicts", "review", "accept")))
+}
+no_table <- function(a, b) {
+  norm <- function(x) gsub("[.]", "", name_key(x))
+  ka <- norm(a); kb <- norm(b)
+  vapply(seq_along(ka), function(i) {
+    x <- ka[i]; y <- kb[i]
+    if (!has_name_information(x) || !has_name_information(y))
+      return("uninformative")
+    if (x == y) return("corroborates")
+    if (nchar(x) == 1L || nchar(y) == 1L)
+      return(if (substr(x, 1, 1) == substr(y, 1, 1)) "corroborates"
+             else "conflicts")
+    "conflicts"
+  }, character(1))
+}
+A <- decisions(no_table)
+B <- decisions(nickname_agreement)
+table(A, truth = ROSTER_BENCHMARK$truth)
+#>         truth
+#> A        match nonmatch
+#>   accept    93        0
+#>   reject    33       58
+#>   review     6        0
+table(B, truth = ROSTER_BENCHMARK$truth)
+#>         truth
+#> B        match nonmatch
+#>   accept   126        0
+#>   reject     0       58
+#>   review     6        0
+```
+
+Thirty-three adjudicated true matches — every nickname-recorded pair —
+move from `reject` to `accept`, at zero false accepts and an unchanged
+review queue. And the table earns its keep in *both* directions: a
+softer removal (unproven given names route to review instead of vetoing)
+ballooned the review queue from 6 to 62, because the `conflicts` verdict
+had been silently rejecting 23 nonmatches (the JANE/JOAN and
+spelling-trap families). These exact counts are pinned in
+`tests/testthat/fixtures/ablation/ablation_pins_v1.csv`, whose checksum
+is coupled to the policy id — editing the evidence without a policy
+supersession fails CI.
+
+An honest caveat: this benchmark is constructed, and its nickname
+families exist by design. It proves the machinery does what it claims at
+zero measured cost; real-world *prevalence* came from the production
+crosswalks below.
+
+## The candidate-layer result (external data, summarized)
+
+Candidate generation was measured against 221 human-adjudicated
+roster-to-NPI links with a 40,000-row NPPES candidate pool (“adjudicated
+by a human, NOT produced by any matcher”; fixtures live outside this
+package):
+
+| endpoint                            | none | curated one-hop |          increment |
+|-------------------------------------|-----:|----------------:|-------------------:|
+| anchors with true NPI in candidates |  163 |             164 |             **+1** |
+| total candidates                    |  357 |             435 | **+78** (77 false) |
+| incremental PPV                     |    — |           0.013 |                  — |
+| anchors gaining review burden       |    — |          30/221 |              13.6% |
+
+The one rescue (DAN, recorded as a go-by name on the roster, DANIEL in
+the registry) is the exception that defines the rule: the nickname
+channel exists only where a source *writes* informal names. A
+live-registry replication found 0 rescues and +76% review burden. In
+production crosswalks, an official legal-name roster (22,309
+certificants) carried 14 parenthesized nicknames and zero
+nickname-dependent links; a scraped semi-official roster carried 26
+nickname-accepted links in 59,387 — twelve of them on name evidence
+alone.
+
+Hence the gate, resolved against one canonical registry — never by
+string-matching source names, with `unknown` failing closed:
+
+``` r
+
+SOURCE_CLASSES
+#>              class   expansion
+#> 1    formal_record   forbidden
+#> 2 informal_capable review_only
+#> 3          unknown fail_closed
+```
+
+``` r
+
+npi_search(first_name = "bill", last_name = "smith",
+           name_expansion = "curated_one_hop")   # formal_record: refused
+#> Error:
+#> ! name_expansion = "curated_one_hop" is gated by nickname-policy-2026-09-07: source class "formal_record" is registered as "forbidden" and cannot invoke nickname candidate expansion.
+#>   Declare source_class = "informal_capable" only if this source really records go-by names (scraped rosters, web profiles); an unknown source fails closed until classified. Expansion-only candidates are review-only either way.
+```
+
+## What a permitted expansion carries
+
+With `source_class = "informal_capable"`, every returned row is
+attributable: the plan itself shows each query and the exact dictionary
+edge that licensed it —
+
+``` r
+
+nickname_variants("BILL")[1:4, ]
+#>   input_first_name queried_first_name alias_edge_id alias_dictionary_version
+#> 1             BILL               BILL          <NA>             2026-09-06.1
+#> 2             BILL              BILLY    BILL>BILLY             2026-09-06.1
+#> 3             BILL               FRED     BILL>FRED             2026-09-06.1
+#> 4             BILL             ROBERT   ROBERT>BILL             2026-09-06.1
+```
+
+— and result rows carry `found_by_queries` / `found_by_edges` lineage
+(the identity path written as the literal `input`), plus
+`acceptance_contribution`: `none`, `supporting`, or `nickname_only`. The
+contract with the acceptance layer is
+[`assert_nickname_policy()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.md):
+a `nickname_only` candidate, or any expansion-influenced row with broken
+lineage, can never be auto-accepted — it goes to a human.
+
+## Negative controls
+
+All ten known-ghost fixtures stay rejected and unreachable, recomputed
+here:
+
+``` r
+
+ghosts <- data.frame(
+  a = c("MARVIN", "GEORGE", "CHRISTINA", "PATRICIA", "DANIELLE",
+        "ROBERT", "HAROLD", "ALBERT", "ELISABETH", "JANE"),
+  b = c("MORRIS", "GRETA", "CHRISTOPHER", "PATRICK", "DANIEL",
+        "WILLIAM", "HENRY", "ALEXANDER", "ELIZABETH", "JOAN"))
+data.frame(ghosts,
+  verdict = nickname_agreement(ghosts$a, ghosts$b),
+  reachable = mapply(function(x, y)
+    y %in% nickname_variants(x)$queried_first_name, ghosts$a, ghosts$b))
+#>                   a           b   verdict reachable
+#> MARVIN       MARVIN      MORRIS conflicts     FALSE
+#> GEORGE       GEORGE       GRETA conflicts     FALSE
+#> CHRISTINA CHRISTINA CHRISTOPHER conflicts     FALSE
+#> PATRICIA   PATRICIA     PATRICK conflicts     FALSE
+#> DANIELLE   DANIELLE      DANIEL conflicts     FALSE
+#> ROBERT       ROBERT     WILLIAM conflicts     FALSE
+#> HAROLD       HAROLD       HENRY conflicts     FALSE
+#> ALBERT       ALBERT   ALEXANDER conflicts     FALSE
+#> ELISABETH ELISABETH   ELIZABETH conflicts     FALSE
+#> JANE           JANE        JOAN conflicts     FALSE
+```
+
+## Governed edges: the ROBERT\>BILL record
+
+`ROBERT>BILL` is the corpus’s most-debated edge. Measured everywhere it
+could appear: zero rescues; its only observed act is manufacturing
+ROBERT candidates in BILL searches. It stays — as a governed, versioned
+data decision, its downside bounded by the review-only rule, its record
+carried in the policy object:
+
+``` r
+
+NICKNAME_POLICY$governed_edges
+#> $`ROBERT>BILL`
+#> $`ROBERT>BILL`$observed_rescues
+#> [1] 0
+#> 
+#> $`ROBERT>BILL`$observed_candidate_inflation
+#> [1] "present"
+#> 
+#> $`ROBERT>BILL`$policy_containment
+#> [1] "review_only"
+#> 
+#> $`ROBERT>BILL`$evidence
+#> [1] "ablation 2026-09-07, per-edge ledger"
+```
+
+## Provenance
+
+The complete study — design pre-registration, four data sources, the
+per-edge ledger (34 edges fired, one rescue), source-pair matrix,
+limitations — is archived with the evidence (`tools/ablation/README.md`
+points at everything). The verdict-layer harness ships in
+`tools/ablation/exp2_verdict_layer.R` and reruns anywhere this package
+installs. Matching was frozen at `fa7216f` throughout; nothing in the
+matcher, thresholds, or dictionary changed during the study.

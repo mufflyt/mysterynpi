@@ -85,6 +85,51 @@ to one row per (person, candidate), take the strongest class, resolve
 only when that class holds exactly one” is mechanism. *Which* classes
 exist and what evidence earns each one is policy, and stays with you.
 
+## The nickname policy: evidence yes, expansion review-only
+
+A frozen-matcher ablation (2026-09-07; matcher `fa7216f`, dictionary
+`2026-09-06.1`) answered the question this package had been engineering
+around: **nicknames are valuable as evidence, not as a broad
+search-expansion mechanism.** The decision ships as governed
+configuration — `NICKNAME_POLICY` — with its counts pinned in a
+versioned fixture whose checksum is coupled to the policy id, so the
+evidence cannot be edited without a policy supersession.
+
+At the **verdict layer**,
+[`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
+earned global retention: on 190 adjudicated pairs it rescued every
+nickname-recorded true match at zero false-accept cost, and its
+`conflicts` verdict is what keeps the spelling traps off the review
+queue.
+
+![Verdict-layer ablation: 33 rescued, 0 false
+accepts](reference/figures/README-verdict-ablation.png)
+
+Verdict-layer ablation: 33 rescued, 0 false accepts
+
+At the **candidate layer**, expansion measured against 221
+human-adjudicated roster→NPI links rescued one true match per 77 false
+candidates (incremental PPV 1.3%). So
+[`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)’s
+`name_expansion = "curated_one_hop"` is gated by a source-class registry
+(`SOURCE_CLASSES`): a formal legal-name roster cannot invoke it at all,
+an `unknown` source fails closed, and every expansion-only candidate is
+stamped `review_only` —
+[`assert_nickname_policy()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.md)
+refuses to auto-accept it. Every fan-out row names the exact dictionary
+edge that produced it (`alias_edge_id`, e.g. `ROBERT>BILL`) and the
+dictionary version.
+
+![Candidate-layer ablation: +1 rescue per +77 false
+candidates](reference/figures/README-candidate-ablation.png)
+
+Candidate-layer ablation: +1 rescue per +77 false candidates
+
+The full study — design, four data sources, per-edge ledger, limitations
+— is
+[`vignette("nickname-policy")`](https://mufflyt.github.io/mysterynpi/articles/nickname-policy.md);
+the verdict-layer harness ships in `tools/ablation/`.
+
 ## What is deliberately NOT here
 
 **Blocking.** Which candidates to generate — exact name, surname plus

@@ -1,11 +1,7 @@
 # Fail closed: no nickname-only candidate may be auto-accepted
 
 The acceptance-side guard of \[NICKNAME_POLICY\]. Give it the frame of
-candidates an automated step is about to accept; it errors – naming the
-offending NPIs and the edges that produced them – if any row is
-\`review_only\`, i.e. reachable ONLY through nickname expansion. Rows a
-human reviewer has since verified belong in a separate, adjudicated
-acceptance path, not in the automated one this guard protects.
+candidates an automated step is about to accept; it errors when
 
 ## Usage
 
@@ -17,10 +13,22 @@ assert_nickname_policy(accepted)
 
 - accepted:
 
-  a data.frame produced by \[npi_search()\] (it must carry the
-  \`review_only\` lineage column) holding the rows about to be
+  a data.frame produced by \[npi_search()\] holding the rows about to be
   auto-accepted.
 
 ## Value
 
 \`accepted\`, invisibly, when the policy holds.
+
+## Details
+
+\* any row's \`acceptance_contribution\` is \`"nickname_only"\` or its
+\`review_only\` flag is \`TRUE\` (the same rows, asserted independently
+as defense in depth), or \* the lineage contract is broken: the policy
+columns are absent, or a row that used candidate expansion is missing
+any required lineage field (\`source_class\`, \`review_only\`,
+\`acceptance_contribution\`, \`found_by_queries\`, \`found_by_edges\`,
+\`alias_dictionary_version\`).
+
+A frame that cannot prove where its rows came from cannot be
+auto-accepted; that is the point.

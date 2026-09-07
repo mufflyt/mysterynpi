@@ -183,6 +183,8 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
   : The locked nickname policy and its governing evidence
 - [`assert_nickname_policy()`](https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.md)
   : Fail closed: no nickname-only candidate may be auto-accepted
+- [`SOURCE_CLASSES`](https://mufflyt.github.io/mysterynpi/reference/SOURCE_CLASSES.md)
+  : The governed source-class registry
 
 ## Contracts
 

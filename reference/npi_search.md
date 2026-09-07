@@ -17,7 +17,7 @@ npi_search(
   limit = 10L,
   licenses = FALSE,
   name_expansion = c("none", "curated_one_hop"),
-  source_class = c("formal_record", "informal_capable"),
+  source_class = SOURCE_CLASSES$class,
   max_expansion = 25L
 )
 ```
@@ -51,10 +51,12 @@ npi_search(
 
 - source_class:
 
-  what kind of source the queried name comes from: \`"formal_record"\`
-  (default – legal/credentialing names; expansion is REFUSED, per
-  \[NICKNAME_POLICY\]) or \`"informal_capable"\` (sources that plausibly
-  record go-by names: scraped rosters, web profiles). Expansion-only
+  what kind of source the queried name comes from, resolved against the
+  governed registry \[SOURCE_CLASSES\]: \`"formal_record"\` (default –
+  legal/credentialing names; expansion FORBIDDEN, per
+  \[NICKNAME_POLICY\]), \`"informal_capable"\` (sources that plausibly
+  record go-by names; review-only expansion permitted), or \`"unknown"\`
+  (FAILS CLOSED – no fallback to informal-capable). Expansion-only
   candidates are stamped \`review_only = TRUE\` and
   \[assert_nickname_policy()\] refuses to auto-accept them.
 

@@ -45,10 +45,25 @@
 #'   `system.file("nicknames-LICENSE", package = "mysterynpi")`).
 "NICKNAME_EDGES"
 
-# The one sanctioned way to learn the dictionary's version without reading
-# the dictionary: consumers (npi_search's run manifest) call this instead of
-# touching NICKNAME_EDGES, so the access-boundary invariant stays exact --
-# only the canonical module's functions ever name the table.
+#' Version of the governed nickname dictionary
+#'
+#' The one sanctioned way to learn the dictionary's version without reading the
+#' dictionary. Consumers call this instead of touching `NICKNAME_EDGES`, so the
+#' access-boundary invariant stays exact: only the canonical module's own
+#' functions ever name the table.
+#'
+#' Every consumer that records nickname provenance needs this string, so it is
+#' part of the public contract rather than an internal helper. It was defined
+#' but unexported until 2026-09-08, which meant downstream repositories could
+#' not stamp the dictionary version they had actually matched under without
+#' reaching past the boundary the export exists to protect.
+#'
+#' @return `character(1)` version string, or `NA_character_` when the corpus
+#'   carries no version attribute.
+#' @examples
+#' mysterynpi::nickname_dictionary_version()
+#' @seealso [nickname_agreement()], [nickname_variants()]
+#' @export
 nickname_dictionary_version <- function() {
   v <- attr(mysterynpi::NICKNAME_EDGES, "version")
   if (is.null(v)) NA_character_ else v

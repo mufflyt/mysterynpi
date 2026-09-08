@@ -1,0 +1,8 @@
+# (repository, path, pattern) triples permitted to match a forbidden nickname
+# pattern, each with a reason and an expiry. Expired rows FAIL the scan.
+repository,path,pattern,reason,expires
+isochrones,NEWS.md,NICKNAME_MAP,historical changelog text describing the removed map,2027-12-31
+isochrones,docs_site/news/index.md,NICKNAME_MAP,rendered copy of the historical changelog,2027-12-31
+isochrones,docs/archive/misc_notes/PHASE2_IMPROVEMENTS_COMPLETE.md,NICKNAME_MAP,archived historical note explicitly marked archive,2027-12-31
+isochrones,docs_site/reference/get_nickname_map.md,NICKNAME_MAP,rendered reference page of the deprecated shim slated for removal,2027-06-30
+midwifery,R/lib/isochrones_dep.R,NICKNAME_MAP,vendored-dependency doc text; direct-mysterynpi migration tracked in the consolidation ledger,2027-06-30

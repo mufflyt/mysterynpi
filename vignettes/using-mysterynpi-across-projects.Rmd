@@ -1,0 +1,98 @@
+---
+title: "The consumer contract: which mysterynpi function answers which question"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{The consumer contract: which mysterynpi function answers which question}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(mysterynpi)
+```
+
+Every `mufflyt/*` repository that compares person names consumes THIS
+package. No consumer owns a second nickname dictionary, decides
+independently what two first names mean, builds its own NPPES URLs, or
+turns on the registry's opaque alias matching. Consumers keep their own
+*policy* — what evidence class a verdict earns, what score a relation is
+worth, when to accept — and delegate the *mechanics* here. The
+organization-wide drift scanner (`tools/audit/check_external_nickname_drift.R`)
+enforces this after the consolidation ends.
+
+## The decision table
+
+| Your question | Use | Never |
+|---|---|---|
+| Are these two given names nickname **evidence**? | `nickname_agreement()` — three verdicts; absence is uninformative | a local map, edit distance, a prefix rule |
+| Which alternate first names may I **query**? | `nickname_variants()` — the one-hop plan with `alias_edge_id` provenance | transitive closure, ad-hoc expansion |
+| I need NPPES search candidates | `npi_search()` — alias always off, lineage on every row, review-only gating by source class | building the URL yourself |
+| A dictionary view for display/reporting | `get_nickname_dictionary()` | reading `NICKNAME_EDGES` in production code |
+| The nicknames registered for one formal name | `get_nicknames_for_name()` | — |
+| Candidate **ranking** with similarity | `calculate_enhanced_first_name_similarity()` — only behind the explicit `options(mysterynpi.enable_similarity_scoring = TRUE)` opt-in | letting a score near a verdict |
+| Structured/free-text person-name compatibility | the `name_*` primitives with an **explicit** `mode` (`"positional_ie"` for structured↔structured, `"any_token"` for free text↔structured) | sniffing the string to guess the mode |
+| Turning on NPPES's own alias matching | **No.** Every query stays `use_first_name_alias=False`; `nickname_variants()` is the daylight replacement | `use_first_name_alias=TRUE` anywhere |
+
+## Layers that stay separate
+
+```{r, eval = FALSE}
+nickname_agreement("BETH", "ELIZABETH")     # evidence:   "corroborates"
+nickname_variants("BILL")                   # expansion:  a provenance plan
+calculate_enhanced_first_name_similarity(   # ranking:    opt-in only
+  "KATIE", "KATHERINE", get_nickname_dictionary())
+npi_search(first_name = "dan", last_name = "martin",   # transport:
+           name_expansion = "curated_one_hop",         # gated, review-only
+           source_class = "informal_capable")
+```
+
+There is deliberately no `match_name()` that collapses these. A verdict is
+not a score; a score is not a query plan; a query plan is not a transport.
+Collapsing them is how a ranking heuristic quietly becomes an identity
+decision.
+
+## What a caller's score looks like
+
+Points are caller policy; the *relation* is canonical. The isochrones
+30/25/0 scheme, correctly expressed:
+
+```{r}
+score_first_name <- function(a, b) {
+  v <- nickname_agreement(a, b)
+  norm_eq <- !is.na(a) & !is.na(b) &
+    gsub("[.]", "", name_key(a)) == gsub("[.]", "", name_key(b))
+  ifelse(norm_eq, 30L, ifelse(v == "corroborates", 25L, 0L))
+}
+score_first_name(c("WILLIAM", "BILL", "JANE"), c("WILLIAM", "WILLIAM", "JOAN"))
+```
+
+## What is not nickname evidence
+
+```{r}
+nickname_agreement("ELISABETH", "ELIZABETH")   # spelling is not a nickname
+nickname_agreement("J", "JAMES")               # initial-compatibility, its own rule
+names_have_compatible_given("S.", "S.", mode = "positional_ie")  # two initials: never
+```
+
+A three-character prefix rule ("Kat" matches Katherine, Kathleen, and
+Katrina alike) is not a nickname relation. A provider-specific verifier
+that empirically needs token-prefix compatibility keeps it under its own
+name (`healthgrades_first_token_prefix_compatible`-style), outside
+`nickname_agreement()`, and adds no edges to the dictionary.
+
+## Depending on this package
+
+Pin a version floor and fail loudly, the shim discipline the isochrones
+migration proved:
+
+```{r, eval = FALSE}
+if (!requireNamespace("mysterynpi", quietly = TRUE) ||
+    utils::packageVersion("mysterynpi") < "0.3.1") {
+  stop("mysterynpi >= 0.3.1 is required: install from ",
+       "github.com/mufflyt/mysterynpi (nickname behavior is not vendored).")
+}
+```
+
+Depend on it **directly**. A consumer that reaches nickname behavior
+through another consumer (midwifery → isochrones → mysterynpi) inherits
+two release cadences and neither contract.

@@ -1,0 +1,8 @@
+## Provenance: the reviewed differential fixture required by the primitives
+## port (owner-wide consolidation 0.5): every case whose behavior CHANGED
+## between the isochrones original (its old dictionary) and this port (the
+## canonical NICKNAME_EDGES 2026-09-06.1) is named here with its reason.
+## One row so far. Changing this file means a newly discovered difference:
+## review it, never absorb it silently.
+case_id,left,right,old_isochrones,ported_mysterynpi,reason,disposition
+DIFF-001,LINDA,MELINDA,FALSE,TRUE,corpus records the direct edge MELINDA>LINDA (real American usage); the isochrones fixture encoded an ADJUDICATED false merge of two certificants through this relation,NEEDS_ADJUDICATION in external_nickname_edge_audit; governed data decision like ROBERT>BILL; verdict-layer weld requires every other axis to also agree

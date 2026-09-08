@@ -296,6 +296,16 @@ test_that("INVARIANT: exactly one route from input name to query variants", {
                            paste(edge_readers, collapse = ", ")))
   expanders <- Filter(function(f) uses(f, "nickname_variants"), fns)
   expect_identical(sort(expanders), "npi_search")
+  # get_canonical_name() is a display label, never an identity verdict: no
+  # agreement rule may reference it (consolidation invariant 0.2)
+  verdict_fns <- c("nickname_agreement", "middle_agreement",
+                   "gender_agreement", "suffix_agreement",
+                   "license_agreement", "surname_agreement",
+                   "person_matches", "names_have_compatible_given",
+                   "names_have_compatible_surname")
+  for (f in intersect(verdict_fns, fns)) {
+    expect_false(uses(f, "get_canonical_name"), info = f)
+  }
 })
 
 test_that("dedup key is the NPI, and no expansion path's lineage is lost", {

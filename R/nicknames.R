@@ -45,10 +45,15 @@
 #'   `system.file("nicknames-LICENSE", package = "mysterynpi")`).
 "NICKNAME_EDGES"
 
-# The one sanctioned way to learn the dictionary's version without reading
-# the dictionary: consumers (npi_search's run manifest) call this instead of
-# touching NICKNAME_EDGES, so the access-boundary invariant stays exact --
-# only the canonical module's functions ever name the table.
+#' Nickname Dictionary Version
+#'
+#' The one sanctioned way to learn the dictionary's version without reading
+#' the dictionary: consumers call this instead of touching [NICKNAME_EDGES],
+#' so the access-boundary invariant stays exact.
+#'
+#' @return A length-one character vector with the nickname dictionary version,
+#'   or `NA_character_` if the loaded table has no version attribute.
+#' @export
 nickname_dictionary_version <- function() {
   v <- attr(mysterynpi::NICKNAME_EDGES, "version")
   if (is.null(v)) NA_character_ else v

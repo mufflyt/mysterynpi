@@ -6,6 +6,15 @@
 
 e <- mysterynpi::NICKNAME_EDGES
 
+test_that("nickname dictionary version is public", {
+  version <- mysterynpi::nickname_dictionary_version()
+
+  expect_type(version, "character")
+  expect_length(version, 1L)
+  expect_false(is.na(version))
+  expect_true(nzchar(version))
+})
+
 test_that("the dictionary is versioned, and edits without a bump fail here", {
   # THE RULE: any edge change bumps `version` in data-raw/NICKNAME_EDGES.R
   # and updates this triple in the same PR. A mismatch means someone edited

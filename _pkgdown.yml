@@ -42,6 +42,7 @@ reference:
   - gender_agreement
   - normalize_gender
   - nickname_agreement
+  - nickname_dictionary_version
   - NICKNAME_EDGES
   - suffix_agreement
   - normalize_suffix

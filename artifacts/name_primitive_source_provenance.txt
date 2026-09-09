@@ -1,0 +1,31 @@
+source checkout HEAD: 498f9983cc6dde995efa468b18f3cf4a24d09a33
+source branch: master
+source checkout status:
+  modified: NAMESPACE
+  modified: tests/testthat/test-fixtures.R
+  modified: tests/testthat/test-npi-search.R
+  modified: tools/ci/mutation_campaign.R
+  untracked: R/name_matching.R
+  untracked: tests/testthat/test-name-matching.R
+source file tracked/untracked:
+  /Users/tylermuffly/mysterynpi/R/name_matching.R: untracked in source checkout
+  /Users/tylermuffly/mysterynpi/tests/testthat/test-name-matching.R: untracked in source checkout
+nearest commit containing implementation:
+  c23bc412e8c2 on slice/preserve-uncommitted-consolidation
+mysterynpi source checksum:
+  R/name_matching.R source checkout: 9817dd707e7614ec2c63c8bf06ff93087199d9a86e9c08f0bc8e0647ecc6f9c9
+  R/name_matching.R consolidation worktree: 9817dd707e7614ec2c63c8bf06ff93087199d9a86e9c08f0bc8e0647ecc6f9c9
+  tests/testthat/test-name-matching.R source checkout: 84d29dceb3cb096de528a16dc7652569d76789d7b097101fc1f1e064fe54f9bd
+  tests/testthat/test-name-matching.R consolidation worktree: ef5104c36bc4ae893d353a20f993c291eecf9012267c0cb52412881120cb2dbb
+isochrones source checksum:
+  R/name_matching_primitives.R: d32f198a02627bc294fc52ab0d4c50b182b69d1eb4bb2b568af575e8fb4dfedc
+  tests/testthat/test-name-matching-primitives.R: 88289b89fa708320563abb4cadaa33afedc13ad8ec08bd9b781d708a33f51e01
+differences:
+  Implementation differs from isochrones only by added provenance/header text,
+  roxygen references, and two package-bound seams:
+    normalize_name_key(x) -> gsub("\\s+", " ", normalize_string(x))
+    are_nickname_variants(a, b) -> identical(nickname_agreement(a, b), "corroborates")
+  The consolidation worktree test file differs from the source checkout test
+  file only by ASCII normalization of labels and one diacritic fixture spelling.
+  The differential test still compares the port to the current isochrones
+  implementation with the same function-level fixtures.

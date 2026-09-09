@@ -13,6 +13,8 @@ fixture_provenance <- c(
     "generated verdict snapshot; regenerate only deliberately via data-raw/verdict_snapshot.R",
   "npi_api_response.json" =
     "hand-written synthetic NPPES API v2.1 response; shape observed live 2026-09-05, no real provider",
+  "port_differential_v1.csv" =
+    "reviewed name primitive port differential; documents intentional isochrones-to-mysterynpi behavior differences",
   "ablation/ablation_pins_v1.csv" =
     "pinned counts from the 2026-09-07 frozen-matcher ablation; governing evidence of nickname-policy-2026-09-07 -- changing it requires a policy supersession (checksum coupled in test-nickname-policy.R)")
 

@@ -65,11 +65,14 @@ test_that("inputs are normalised like the table: case, accents, periods", {
   expect_identical(nickname_agreement("k.c.", "CASEY"), "corroborates")
 })
 
-test_that("an initial is compatibility evidence, not a nickname", {
-  expect_identical(nickname_agreement("J", "JAMES"), "corroborates")
-  expect_identical(nickname_agreement("J.", "JULIE"), "corroborates")
-  expect_identical(nickname_agreement("J", "ROBERT"), "conflicts")
-  expect_identical(nickname_agreement("JAMES", "R"), "conflicts")
+test_that("initials are not nickname evidence", {
+  expect_identical(nickname_agreement("J", "JOHN"), "uninformative")
+  expect_identical(nickname_agreement("M", "MARY"), "uninformative")
+  expect_identical(nickname_agreement("J", "J"), "uninformative")
+  expect_identical(nickname_agreement("J.", "JULIE"), "uninformative")
+  expect_identical(nickname_agreement("J", "ROBERT"), "uninformative")
+  expect_identical(nickname_agreement("JAMES", "R"), "uninformative")
+  expect_identical(nickname_agreement("JOHN", "JOHNNY"), "corroborates")
 })
 
 test_that("absence is uninformative, never a conflict", {

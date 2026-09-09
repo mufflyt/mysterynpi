@@ -76,8 +76,8 @@ surname,LEE,,LEE,,corroborates,exact equality below the token floor still counts
 surname,O'BRIEN,,OBRIEN,,corroborates,apostrophes are formatting never a veto
 surname,LEE,,SMITH,,conflicts,recorded difference conflicts
 surname,,,SMITH,,uninformative,absence decides nothing
-nickname,J,,JAMES,,corroborates,issue-3 residual: an initial is compatibility not a nickname
-nickname,J,,ROBERT,,conflicts,issue-3 residual: an incompatible initial still vetoes
+nickname,J,,JAMES,,uninformative,issue-3 correction: an initial is compatibility evidence but not nickname evidence
+nickname,J,,ROBERT,,uninformative,issue-3 correction: an initial is compatibility evidence but not nickname evidence
 nickname,ROBERT,,WILLIAM,,conflicts,issue-4: reverse corpus edges must not weld distinct formals
 nickname,HAROLD,,HENRY,,conflicts,issue-4: a shared HARRY does not equate them
 nickname,KATE,,CATHERINE,,corroborates,issue-4 supplement: adjudicated from the isochrones hand maps

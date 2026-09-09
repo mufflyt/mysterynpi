@@ -54,6 +54,7 @@ patterns <- data.frame(
     "NPPES alias TRUE",
     "local nickname expander",
     "local nickname variants implementation",
+    "midwifery isochrones nickname layer",
     "prefix labelled as nickname"
   ),
   regex = c(
@@ -65,10 +66,15 @@ patterns <- data.frame(
     "use_first_name_alias\\s*=\\s*(TRUE|True|true|['\"]TRUE['\"]|['\"]True['\"]|['\"]true['\"])",
     "\\bexpand_first_name\\s*<-\\s*function\\b",
     "\\bnickname_variants\\s*<-\\s*function\\b",
-    "(nickname[^\\n]{0,80}substr\\s*\\([^\\n]*,\\s*1\\s*,\\s*3\\s*\\)|substr\\s*\\([^\\n]*,\\s*1\\s*,\\s*3\\s*\\)[^\\n]{0,80}nickname)"
+    "source\\s*\\([^\\n]*nickname_system[.]R",
+    "(nickname(.|\\n){0,160}substr\\s*\\([^\\n]*,\\s*1\\s*,\\s*3\\s*\\)|substr\\s*\\([^\\n]*,\\s*1\\s*,\\s*3\\s*\\)(.|\\n){0,160}nickname)"
   ),
   stringsAsFactors = FALSE
 )
+patterns$repository_scope <- NA_character_
+patterns$repository_scope[
+  patterns$pattern_name == "midwifery isochrones nickname layer"
+] <- "midwifery"
 
 is_text_file <- function(path) {
   grepl("[.](R|r|ya?ml|json)$", path) |
@@ -114,6 +120,8 @@ for (repo in repo_names) {
     if (!length(text)) next
     collapsed <- paste(text, collapse = "\n")
     for (i in seq_len(nrow(patterns))) {
+      scope <- patterns$repository_scope[i]
+      if (!is.na(scope) && !identical(repo, scope)) next
       if (grepl(patterns$regex[i], collapsed, perl = TRUE)) {
         if (!is_allowed(repo, rel, patterns$pattern_name[i])) {
           hits[[length(hits) + 1L]] <- data.frame(

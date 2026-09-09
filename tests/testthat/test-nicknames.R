@@ -55,6 +55,11 @@ test_that("a shared formal name admits; a shared nickname does not", {
 test_that("only recorded edges admit -- no spelling tolerance", {
   expect_identical(nickname_agreement("ELISABETH", "ELIZABETH"), "conflicts")
   expect_identical(nickname_agreement("JANE", "JOAN"), "conflicts")
+  expect_identical(nickname_agreement("JAMES", "BENJAMIN"), "conflicts")
+  expect_identical(nickname_agreement("CAROL", "CARLA"), "conflicts")
+  expect_identical(nickname_agreement("ANDERSON", "SANDERSON"), "conflicts")
+  expect_identical(nickname_agreement("WILLIAMS", "WILLIAMSON"), "conflicts")
+  expect_identical(nickname_agreement("MARTIN", "MARTINEZ"), "conflicts")
   # and the corpus records some spelling-adjacent USAGE; that is the table
   # speaking, not an edit-distance rule
   expect_identical(nickname_agreement("JULIA", "JULIE"), "corroborates")

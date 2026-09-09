@@ -16,7 +16,9 @@ fixture_provenance <- c(
   "port_differential_v1.csv" =
     "reviewed name primitive port differential; documents intentional isochrones-to-mysterynpi behavior differences",
   "ablation/ablation_pins_v1.csv" =
-    "pinned counts from the 2026-09-07 frozen-matcher ablation; governing evidence of nickname-policy-2026-09-07 -- changing it requires a policy supersession (checksum coupled in test-nickname-policy.R)")
+    "pinned counts from the 2026-09-07 frozen-matcher ablation; governing evidence of nickname-policy-2026-09-07 -- retained as superseded evidence",
+  "ablation/ablation_pins_v2.csv" =
+    "pinned counts from the 2026-09-09 initials-separation supersession; governing evidence of nickname-policy-2026-09-09 -- changing it requires a policy supersession (checksum coupled in test-nickname-policy.R)")
 
 fixture_dir <- testthat::test_path("fixtures")
 

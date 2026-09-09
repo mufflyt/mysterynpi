@@ -4,7 +4,9 @@
 # On 2026-09-07 a frozen-matcher ablation (matcher fa7216f, dictionary
 # 2026-09-06.1) answered the scientific question this package had been
 # engineering around: nicknames are valuable as EVIDENCE, not as a broad
-# search-expansion mechanism. The objects below are the decision, versioned.
+# search-expansion mechanism. On 2026-09-09 the policy was superseded only to
+# remove single-letter initials from nickname evidence. The 327-person
+# benchmark rows stayed frozen.
 #
 # SUPERSESSION, NEVER IN-PLACE EDITS. A change to any required field of
 # NICKNAME_POLICY demands a NEW policy_id, a NEW evidence artifact, new
@@ -41,20 +43,21 @@
 #'   `acceptance_contribution_levels`.
 #' @export
 NICKNAME_POLICY <- list(
-  policy_id = "nickname-policy-2026-09-07",
-  effective_date = "2026-09-07",
-  supersedes = NA_character_,
+  policy_id = "nickname-policy-2026-09-09",
+  effective_date = "2026-09-09",
+  supersedes = "nickname-policy-2026-09-07",
   verdict_layer = "retain_global",
   candidate_expansion = "retain_review_only",
   auto_accept_rule = "never_on_nickname_evidence_alone",
   source_class_gate = "registry_driven_fail_closed",
-  governing_matcher_sha = "fa7216f8966214cf8e1cc4e265b1b5efe56e2c88",
+  governing_matcher_sha = "fe9e6a3a0f4dfb4882f9ab17926157825963ea68",
   dictionary_version = "2026-09-06.1",
   governing_evidence = paste0(
     "ablation appendix ",
     "https://claude.ai/code/artifact/cd8dd9e2-e841-47b6-a639-fd334c20587b",
-    "; evidence: ~/Dropbox (Personal)/mysterynpi-nickname-ablation-2026-09-07/",
-    "; pinned counts: tests/testthat/fixtures/ablation/ablation_pins_v1.csv"),
+    "; evidence: initials separation supersession, 2026-09-09; ",
+    "327-person benchmark rows unchanged",
+    "; pinned counts: tests/testthat/fixtures/ablation/ablation_pins_v2.csv"),
   governed_edges = list(
     "ROBERT>BILL" = list(observed_rescues = 0L,
                          observed_candidate_inflation = "present",

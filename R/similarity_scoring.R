@@ -110,11 +110,12 @@ get_canonical_name <- function(name, nickname_dict) {
 
 #' Are two names one-hop equivalent under the corpus?
 #'
-#' THE SAME RELATION [nickname_agreement()] corroborates on: equal after
-#' normalisation, a recorded edge in either direction, or a shared formal
-#' root. One hop, never transitive closure -- a shared NICKNAME does not
-#' equate two formal names, so `AL` pairs with `ALBERT` and with
-#' `ALEXANDER` while `ALBERT` and `ALEXANDER` stay distinct.
+#' THE SAME RELATION [nickname_agreement()] corroborates on: equal full
+#' names after normalisation, a recorded edge in either direction, or a
+#' shared formal root. Single-letter initials are not nickname evidence,
+#' even when identical. One hop, never transitive closure -- a shared
+#' NICKNAME does not equate two formal names, so `AL` pairs with `ALBERT`
+#' and with `ALEXANDER` while `ALBERT` and `ALEXANDER` stay distinct.
 #' @param name1,name2 names to compare.
 #' @param nickname_dict from [create_nickname_dictionary()]; NULL is FALSE.
 #' @return logical.
@@ -126,6 +127,9 @@ are_nickname_equivalents <- function(name1, name2, nickname_dict) {
     return(FALSE)
   }
   x <- normalize_string(name1); y <- normalize_string(name2)
+  if (nchar(x) == 1L || nchar(y) == 1L) {
+    return(FALSE)
+  }
   if (x == y) return(TRUE)
   cx <- c(x, nickname_dict$nickname_to_formal[[x]])
   cy <- c(y, nickname_dict$nickname_to_formal[[y]])

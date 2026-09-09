@@ -72,6 +72,9 @@ test_that("equivalence is the verdict rule's relation, by construction", {
   }
   expect_false(are_nickname_equivalents("JANE", "JOAN", dict))
   expect_identical(nickname_agreement("JANE", "JOAN"), "conflicts")
+  expect_false(are_nickname_equivalents("J", "JOHN", dict))
+  expect_false(are_nickname_equivalents("M", "MARY", dict))
+  expect_false(are_nickname_equivalents("J", "J", dict))
 })
 
 test_that("the score tiers are exact, one-hop, neutral, or Jaro-Winkler", {

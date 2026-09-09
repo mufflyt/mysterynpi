@@ -4,9 +4,9 @@
 # PRE-REGISTERED before results were seen (2026-09-07):
 #   Matcher frozen at mysterynpi fa7216f. No dictionary or threshold changes.
 #   Condition A ("none"):     given-name agreement WITHOUT nickname admission:
-#                             exact equality or initial-compatibility
-#                             corroborates; absence uninformative; else
-#                             conflicts. The table is never consulted.
+#                             exact full-token equality corroborates; initials
+#                             and absence are uninformative; else conflicts.
+#                             The table is never consulted.
 #   Condition B ("curated"):  nickname_agreement() as shipped.
 #   Everything else byte-identical: same parse, same axes, same reference
 #   policy from vignette("roster-benchmark"), same truth.
@@ -25,7 +25,8 @@ p  <- parse_person(ex$name)
 roster_first <- sub(" .*", "", p$first)
 
 # Condition A: the no-nickname given-name rule. Same normalization and
-# initial handling as nickname_agreement (so ONLY the table is ablated),
+# same initials-as-uninformative handling as nickname_agreement (so ONLY the
+# table is ablated),
 # built from public helpers -- no package internals are modified.
 given_agreement_none <- function(a, b) {
   norm <- function(x) gsub("[.]", "", name_key(x))
@@ -34,11 +35,10 @@ given_agreement_none <- function(a, b) {
     x <- ka[i]; y <- kb[i]
     if (!has_name_information(x) || !has_name_information(y))
       return("uninformative")
-    if (x == y) return("corroborates")
     if (nchar(x) == 1L || nchar(y) == 1L) {
-      return(if (substr(x, 1, 1) == substr(y, 1, 1)) "corroborates"
-             else "conflicts")
+      return("uninformative")
     }
+    if (x == y) return("corroborates")
     "conflicts"
   }, character(1))
 }

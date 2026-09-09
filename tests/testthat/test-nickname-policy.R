@@ -1,6 +1,6 @@
 # The locked nickname policy (NICKNAME_POLICY): governed configuration with
 # machine-readable evidence. The pinned counts live in
-# fixtures/ablation/ablation_pins_v1.csv; the coupling test freezes that
+# fixtures/ablation/ablation_pins_v2.csv; the coupling test freezes that
 # fixture's checksum NEXT TO the policy_id, so editing the evidence without
 # superseding the policy fails here, by construction.
 
@@ -10,13 +10,13 @@ read_fixture_pol <- function() {
 }
 ablation_pins <- function() {
   p <- utils::read.csv(testthat::test_path("fixtures", "ablation",
-                                           "ablation_pins_v1.csv"),
+                                           "ablation_pins_v2.csv"),
                        comment.char = "#", stringsAsFactors = FALSE)
   stats::setNames(p$value, paste(p$arm, p$metric, sep = "."))
 }
 
 # The ablation's condition A: the given-name rule with the table ablated,
-# identical normalization and initial handling.
+# identical normalization and the same initials-as-uninformative boundary.
 given_agreement_none <- function(a, b) {
   norm <- function(x) gsub("[.]", "", name_key(x))
   ka <- norm(a); kb <- norm(b)
@@ -24,10 +24,9 @@ given_agreement_none <- function(a, b) {
     x <- ka[i]; y <- kb[i]
     if (!has_name_information(x) || !has_name_information(y))
       return("uninformative")
-    if (x == y) return("corroborates")
     if (nchar(x) == 1L || nchar(y) == 1L)
-      return(if (substr(x, 1, 1) == substr(y, 1, 1)) "corroborates"
-             else "conflicts")
+      return("uninformative")
+    if (x == y) return("corroborates")
     "conflicts"
   }, character(1))
 }
@@ -77,23 +76,23 @@ overlap_mock <- function(u) {
 
 test_that("A1: the policy object is versioned and frozen with its evidence", {
   p <- NICKNAME_POLICY
-  expect_identical(p$policy_id, "nickname-policy-2026-09-07")
-  expect_identical(p$effective_date, "2026-09-07")
-  expect_identical(p$supersedes, NA_character_)
+  expect_identical(p$policy_id, "nickname-policy-2026-09-09")
+  expect_identical(p$effective_date, "2026-09-09")
+  expect_identical(p$supersedes, "nickname-policy-2026-09-07")
   expect_identical(p$verdict_layer, "retain_global")
   expect_identical(p$candidate_expansion, "retain_review_only")
   expect_identical(p$auto_accept_rule, "never_on_nickname_evidence_alone")
   expect_identical(p$governing_matcher_sha,
-                   "fa7216f8966214cf8e1cc4e265b1b5efe56e2c88")
+                   "fe9e6a3a0f4dfb4882f9ab17926157825963ea68")
   expect_identical(p$dictionary_version, "2026-09-06.1")
   expect_true(nzchar(p$governing_evidence))
   # COUPLING: the evidence fixture's checksum is pinned NEXT TO the
   # policy_id. Changing the fixture without a new policy version (a new
   # policy_id, evidence, and supersedes chain) fails right here.
   fx <- paste(readLines(testthat::test_path("fixtures", "ablation",
-                                            "ablation_pins_v1.csv")),
+                                            "ablation_pins_v2.csv")),
               collapse = "\n")
-  expect_identical(sum(utf8ToInt(fx)), 69444L)
+  expect_identical(sum(utf8ToInt(fx)), 77186L)
 })
 
 test_that("A2: the source-class registry is canonical and fail-closed", {
@@ -262,9 +261,9 @@ test_that("8: the run manifest names the governing SHA and dictionary", {
     read_fixture_pol())
   got <- npi_search(first_name = "jane", last_name = "exampleson")
   m <- attr(got, "run_manifest")
-  expect_identical(m$nickname_policy, "nickname-policy-2026-09-07")
+  expect_identical(m$nickname_policy, "nickname-policy-2026-09-09")
   expect_identical(m$governing_matcher_sha,
-                   "fa7216f8966214cf8e1cc4e265b1b5efe56e2c88")
+                   "fe9e6a3a0f4dfb4882f9ab17926157825963ea68")
   expect_identical(m$dictionary_version,
                    attr(mysterynpi::NICKNAME_EDGES, "version"))
   expect_identical(m$name_expansion, "none")

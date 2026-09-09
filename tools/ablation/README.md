@@ -1,8 +1,10 @@
-# The nickname ablation (2026-09-07): reproducible pieces
+# The nickname ablation (2026-09-07, superseded 2026-09-09): reproducible pieces
 
-Governing evidence of `NICKNAME_POLICY` ("nickname-policy-2026-09-07").
-Full appendix: vignette("nickname-policy") and the published artifact
-referenced there; raw outputs and the candidate-layer harness live in
+Governing evidence of `NICKNAME_POLICY` ("nickname-policy-2026-09-09").
+The 2026-09-09 supersession separates initials from nickname evidence
+without changing the 327-person adjudication rows or dictionary edges. Full
+appendix: vignette("nickname-policy") and the published artifact referenced
+there; raw outputs and the candidate-layer harness live in
 `~/Dropbox (Personal)/mysterynpi-nickname-ablation-2026-09-07/`.
 
 - `exp2_verdict_layer.R` — the verdict-layer A/B on ROSTER_BENCHMARK plus

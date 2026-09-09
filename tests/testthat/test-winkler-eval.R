@@ -1,4 +1,4 @@
-# The Winkler numbers are PINNED, not merely reported: 4 of 327 typo-heavy
+# The Winkler numbers are PINNED, not merely reported: 3 of 327 typo-heavy
 # true pairs accepted, zero of 582 same-household negatives. A change that
 # moves either number is a change to what the rules recover on a foreign
 # corpus, and it must be deliberate -- the recall going UP is how an
@@ -23,7 +23,7 @@ test_that("the Winkler trade holds: almost no typo recall, zero false accepts", 
   m <- merge(a, b, by = "id", suffixes = c("_a", "_b"))
   expect_identical(nrow(m), 327L)
   dec <- winkler_decisions(m)
-  expect_identical(sum(dec == "accept"), 4L)
+  expect_identical(sum(dec == "accept"), 3L)
   expect_identical(sum(dec == "reject"), 323L)
 
   hn <- merge(a, b, by = c("house", "street"), suffixes = c("_a", "_b"))

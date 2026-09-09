@@ -15,9 +15,10 @@ are_nickname_equivalents(name1, name2, nickname_dict)
 logical.
 }
 \description{
-THE SAME RELATION [nickname_agreement()] corroborates on: equal after
-normalisation, a recorded edge in either direction, or a shared formal
-root. One hop, never transitive closure -- a shared NICKNAME does not
-equate two formal names, so `AL` pairs with `ALBERT` and with
-`ALEXANDER` while `ALBERT` and `ALEXANDER` stay distinct.
+THE SAME RELATION [nickname_agreement()] corroborates on: equal full
+names after normalisation, a recorded edge in either direction, or a
+shared formal root. Single-letter initials are not nickname evidence,
+even when identical. One hop, never transitive closure -- a shared
+NICKNAME does not equate two formal names, so `AL` pairs with `ALBERT`
+and with `ALEXANDER` while `ALBERT` and `ALEXANDER` stay distinct.
 }

@@ -1,0 +1,18 @@
+## Provenance: pinned counts from the 2026-09-09 initials-separation
+## supersession of the 2026-09-07 frozen-matcher ablation. The 327-person
+## benchmark rows are unchanged; only the nickname evidence boundary changed:
+## single-letter initials are uninformative, not nickname evidence.
+## Governing evidence for nickname-policy-2026-09-09: changing ANY value
+## requires a NEW policy version -- the coupling test in
+## test-nickname-policy.R pins this file checksum next to the policy_id.
+arm,metric,value
+with_table,auto_accept_true,115
+with_table,auto_accept_false,0
+with_table,rejected_true_matches,0
+with_table,review_queue,21
+with_table,nonmatch_rejected,54
+without_table,auto_accept_true,82
+without_table,rescued_by_table,33
+without_table,auto_accept_false,0
+controls,ghosts_corroborated,0
+controls,ghosts_reachable_by_expansion,0

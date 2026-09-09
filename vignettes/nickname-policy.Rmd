@@ -24,6 +24,10 @@ cleanly by layer, and the split *is* the policy:
   **review-only**, gated to source classes that plausibly record go-by
   names, never sufficient for auto-acceptance.
 
+On 2026-09-09 the policy was superseded only to separate initials from
+nickname evidence. The 327-person adjudication instrument and dictionary
+edges were not changed.
+
 The policy ships as data so any consumer can cite it:
 
 ```{r}
@@ -36,8 +40,8 @@ The evidence below is not quoted — it is **recomputed on every build of
 this vignette** from `ROSTER_BENCHMARK` (190 pairs, truth by
 construction; see `vignette("roster-benchmark")`), using that vignette's
 reference policy with only the given-name rule swapped. Condition A
-ablates the nickname table (exact equality and initial-compatibility
-only); condition B is `nickname_agreement()` as shipped.
+ablates the nickname table (exact full-token equality only; initials are
+uninformative); condition B is `nickname_agreement()` as shipped.
 
 ```{r}
 decisions <- function(given_rule) {
@@ -71,10 +75,9 @@ no_table <- function(a, b) {
     x <- ka[i]; y <- kb[i]
     if (!has_name_information(x) || !has_name_information(y))
       return("uninformative")
-    if (x == y) return("corroborates")
     if (nchar(x) == 1L || nchar(y) == 1L)
-      return(if (substr(x, 1, 1) == substr(y, 1, 1)) "corroborates"
-             else "conflicts")
+      return("uninformative")
+    if (x == y) return("corroborates")
     "conflicts"
   }, character(1))
 }
@@ -84,15 +87,14 @@ table(A, truth = ROSTER_BENCHMARK$truth)
 table(B, truth = ROSTER_BENCHMARK$truth)
 ```
 
-Thirty-three adjudicated true matches — every nickname-recorded pair —
-move from `reject` to `accept`, at zero false accepts and an unchanged
-review queue. And the table earns its keep in *both* directions: a
-softer removal (unproven given names route to review instead of vetoing)
-ballooned the review queue from 6 to 62, because the `conflicts` verdict
-had been silently rejecting 23 nonmatches (the JANE/JOAN and
-spelling-trap families). These exact counts are pinned in
-`tests/testthat/fixtures/ablation/ablation_pins_v1.csv`, whose checksum
-is coupled to the policy id — editing the evidence without a policy
+Thirty-three adjudicated true matches still depend on governed nickname
+edges, at zero false accepts. Removing initials from nickname evidence
+moves initial/full-name rows to review rather than letting them masquerade
+as nickname corroboration. These exact counts are pinned in
+`tests/testthat/fixtures/ablation/ablation_pins_v2.csv`, whose checksum
+is coupled to the policy id. The original
+`tests/testthat/fixtures/ablation/ablation_pins_v1.csv` remains in the
+tree as superseded evidence; editing the active evidence without a policy
 supersession fails CI.
 
 An honest caveat: this benchmark is constructed, and its nickname

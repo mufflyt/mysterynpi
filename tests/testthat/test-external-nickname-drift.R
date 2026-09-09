@@ -1,4 +1,13 @@
 test_that("external nickname drift scanner passes when consumer repos are available", {
+  repo_path <- function(...) {
+    candidates <- c(
+      file.path(...),
+      file.path("..", "..", ...)
+    )
+    hits <- candidates[file.exists(candidates)]
+    if (!length(hits)) return(candidates[[1]])
+    normalizePath(hits[[1]], mustWork = FALSE)
+  }
   scan_root <- Sys.getenv(
     "MUFFLYT_NICKNAME_SCAN_ROOT",
     "/Users/tylermuffly/nickname-consolidation-worktrees"
@@ -10,7 +19,7 @@ test_that("external nickname drift scanner passes when consumer repos are availa
     skip("consumer repository scan root is not available")
   }
 
-  script <- file.path("tools", "audit", "check_external_nickname_drift.R")
+  script <- repo_path("tools", "audit", "check_external_nickname_drift.R")
   result <- system2(
     file.path(R.home("bin"), "Rscript"),
     c("--vanilla", script),

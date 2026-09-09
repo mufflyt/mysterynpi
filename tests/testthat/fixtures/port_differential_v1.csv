@@ -1,0 +1,5 @@
+## Provenance: reviewed differential fixture required by the primitives port.
+## Every case whose behavior changed between the isochrones original and this
+## port is named here with its reason.
+case_id,left,right,old_isochrones,ported_mysterynpi,reason,disposition
+DIFF-001,LINDA,MELINDA,FALSE,TRUE,corpus records the direct edge MELINDA>LINDA; the isochrones fixture encoded an adjudicated false merge of two certificants through this relation,NEEDS_ADJUDICATION in external_nickname_edge_audit; governed data decision; verdict-layer weld requires every other axis to also agree

@@ -101,11 +101,12 @@ normalize_name <- function(x) {
 
 nickname_edges <- mysterynpi::NICKNAME_EDGES
 dictionary_version <- mysterynpi::nickname_dictionary_version()
-known_edges <- unique(c(
-  paste(nickname_edges$name, nickname_edges$nickname, sep = ">"),
-  paste(nickname_edges$nickname, nickname_edges$name, sep = ">")
-))
+governed_forward_edges <- unique(paste(nickname_edges$name,
+                                       nickname_edges$nickname, sep = ">"))
+governed_reverse_pairs <- unique(paste(nickname_edges$nickname,
+                                       nickname_edges$name, sep = ">"))
 known_nicknames <- unique(nickname_edges$nickname)
+explicit_supported_edges <- character(0)
 
 reject_keys <- stats::setNames(
   seq_along(rejects),
@@ -116,16 +117,25 @@ reject_keys <- stats::setNames(
 classify_edge <- function(formal, nickname) {
   key <- paste(formal, nickname, sep = ">")
   reject_idx <- unname(reject_keys[key])
-  if (key %in% known_edges) {
-    return(list(
-      classification = "ALREADY_PRESENT",
-      reason = "edge already governed by the current dictionary"
-    ))
-  }
   if (!is.na(reject_idx)) {
     return(list(
       classification = rejects[[reject_idx]]$cls,
       reason = rejects[[reject_idx]]$why
+    ))
+  }
+  if (key %in% governed_forward_edges) {
+    return(list(
+      classification = "ALREADY_PRESENT",
+      reason = "forward edge already governed by the current dictionary"
+    ))
+  }
+  if (key %in% governed_reverse_pairs) {
+    return(list(
+      classification = "REJECT_DIRECTIONAL_AMBIGUITY",
+      reason = paste(
+        "reverse of a governed formal>nickname edge;",
+        "the external row is not an independently governed forward edge"
+      )
     ))
   }
   if (formal %in% known_nicknames && !(formal %in% nickname_edges$name)) {
@@ -137,11 +147,17 @@ classify_edge <- function(formal, nickname) {
       )
     ))
   }
+  if (key %in% explicit_supported_edges) {
+    return(list(
+      classification = "SUPPORTED_NEW_EDGE",
+      reason = "explicit positive evidence encoded in the audit generator"
+    ))
+  }
   list(
-    classification = "SUPPORTED_NEW_EDGE",
+    classification = "NEEDS_ADJUDICATION",
     reason = paste(
-      "hypocorism evidence from an external map; not imported without",
-      "separate governed dictionary adjudication and version bump"
+      "external map is evidence that the pair was used downstream,",
+      "but no independent positive support is encoded here"
     )
   )
 }

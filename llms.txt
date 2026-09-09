@@ -291,6 +291,8 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Normalise recorded gender codes to \`"M"\`, \`"F"\`, or \`NA\`
 - [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
   : Do two given-name tokens agree once recorded nicknames are admitted?
+- [`nickname_dictionary_version()`](https://mufflyt.github.io/mysterynpi/reference/nickname_dictionary_version.md)
+  : Version of the governed nickname dictionary
 - [`NICKNAME_EDGES`](https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.md)
   : Formal-name / nickname edges, vendored from
   carltonnorthern/nicknames

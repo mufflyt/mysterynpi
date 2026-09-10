@@ -51,6 +51,24 @@ Drop-in replacements for the pipelines this was extracted from.
   : Given-name tokens of length \>= 2, initials EXCLUDED.
 - [`surname_tokens()`](https://mufflyt.github.io/mysterynpi/reference/surname_tokens.md)
   : Split a normalised surname into its components.
+- [`name_matching_primitives`](https://mufflyt.github.io/mysterynpi/reference/name_matching_primitives.md)
+  : Canonical person-name matching primitives
+- [`name_surname_components()`](https://mufflyt.github.io/mysterynpi/reference/name_surname_components.md)
+  : Split a surname into comparable whole components
+- [`name_given_tokens()`](https://mufflyt.github.io/mysterynpi/reference/name_given_tokens.md)
+  : Full given-name tokens, initials excluded
+- [`name_leading_given()`](https://mufflyt.github.io/mysterynpi/reference/name_leading_given.md)
+  : The leading given name, initials retained
+- [`name_given_match_position()`](https://mufflyt.github.io/mysterynpi/reference/name_given_match_position.md)
+  : Which positions matched, under \`any_token\`
+- [`name_surname_match_type()`](https://mufflyt.github.io/mysterynpi/reference/name_surname_match_type.md)
+  : How two surnames correspond, as an evidence type
+- [`names_have_compatible_surname()`](https://mufflyt.github.io/mysterynpi/reference/names_have_compatible_surname.md)
+  : Do two surnames describe the same family name?
+- [`names_have_compatible_given()`](https://mufflyt.github.io/mysterynpi/reference/names_have_compatible_given.md)
+  : Are two given names compatible?
+- [`NAME_SURNAME_PARTICLES`](https://mufflyt.github.io/mysterynpi/reference/NAME_SURNAME_PARTICLES.md)
+  : Surname particles
 - [`surname_token_table()`](https://mufflyt.github.io/mysterynpi/reference/surname_token_table.md)
   : Surname components as a long (id, token) data frame
 - [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md)

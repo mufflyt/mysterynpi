@@ -13,6 +13,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/LICENSE_STATUS_LEVELS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_NOISE.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_SURNAME_PARTICLES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_POLICY.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ROSTER_BENCHMARK.html</loc></url>
@@ -57,7 +58,15 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_status_audit.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_tokens.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/name_given_match_position.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/name_given_tokens.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/name_key.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/name_leading_given.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/name_matching_primitives.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/name_surname_components.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/name_surname_match_type.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/names_have_compatible_given.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/names_have_compatible_surname.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/needs_normalization.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/nickname_dictionary_version.html</loc></url>

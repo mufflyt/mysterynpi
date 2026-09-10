@@ -119,6 +119,31 @@ for (k in union(A$key, B$key)) {
     basis <- if (!is.na(cls_a) && !is.na(cls_b)) "AGREED" else if (!is.na(cls_a)) "AUDIT_A_ONLY_richer_rationale" else "AUDIT_B_ONLY_broader_coverage"
     why <- if (have_a) ra$reason[[1L]] else rb$reason[[1L]]
   }
+  # Rule 1 is SYMMETRIC. If presence in the corpus is a fact rather than a
+  # judgement, then ABSENCE is a fact too, and no amount of audit agreement can
+  # override it. The agreement path below took the audits' shared verdict
+  # verbatim, so a directional error both audits made propagated unchallenged:
+  # the legacy map carries an explicit REVERSE entry
+  #   "Jennifer" = c("Jen", "Jenny"),
+  #   "Jen"      = c("Jennifer", "Jenny"),
+  # and both audits called the harvested JEN>JENNIFER edge ALREADY_PRESENT.
+  # NICKNAME_EDGES is directional: JENNIFER>JEN is governed, and JEN is the
+  # formal name in ZERO of its 2846 edges. Labelling a reverse edge
+  # ALREADY_PRESENT hides it, which is the one outcome an audit must not
+  # produce. Whether the corpus should carry reciprocal edges is a live policy
+  # question (270 reciprocal pairs already exist), so this defers rather than
+  # decides, and it admits nothing.
+  if (identical(final, "ALREADY_PRESENT") && !(edge %in% governed)) {
+    rev_edge <- paste(src$normalized_nickname[[1L]], src$normalized_formal[[1L]], sep = ">")
+    final <- "NEEDS_ADJUDICATION"
+    basis <- "CORPUS_QUERY_CONTRADICTS_BOTH_AUDITS"
+    why <- sprintf(
+      "both audits called this ALREADY_PRESENT, but %s is not in NICKNAME_EDGES; the corpus is directional and %s the reverse edge %s. Deferred: whether reciprocal edges should be governed is policy, not an audit call",
+      edge,
+      if (rev_edge %in% governed) "does carry" else "does not carry",
+      rev_edge)
+  }
+
   if (is.na(final) || !nzchar(final)) {
     final <- "NEEDS_ADJUDICATION"
     basis <- "UNRESOLVED"

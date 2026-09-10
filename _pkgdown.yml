@@ -30,6 +30,15 @@ reference:
   - middle_tokens
   - given_tokens
   - surname_tokens
+  - name_matching_primitives
+  - name_surname_components
+  - name_given_tokens
+  - name_leading_given
+  - name_given_match_position
+  - name_surname_match_type
+  - names_have_compatible_surname
+  - names_have_compatible_given
+  - NAME_SURNAME_PARTICLES
   - surname_token_table
   - extract_suffix
   - SURNAME_PARTICLES

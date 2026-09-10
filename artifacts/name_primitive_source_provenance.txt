@@ -1,0 +1,87 @@
+NAME PRIMITIVE SOURCE PROVENANCE
+Generated 2026-09-10 for the nickname consolidation (LEFT, Task 1).
+
+WHY THIS FILE EXISTS
+The canonical name primitives were found as UNCOMMITTED working-tree state, not
+as a published implementation. Promoting untracked code to canonical without
+recording where it came from is how a repository acquires an authority nobody
+can trace. This records provenance BEFORE recovery, so the merge can be audited
+rather than trusted.
+
+Untracked generated .Rd files are NOT evidence that an implementation is
+canonical, and are not treated as such here.
+
+--------------------------------------------------------------------------
+SOURCE A: mysterynpi working tree (the implementation being promoted)
+--------------------------------------------------------------------------
+repository            github.com/mufflyt/mysterynpi
+checkout              ~/mysterynpi
+branch                master
+checkout HEAD         498f9983cc6dde995efa468b18f3cf4a24d09a33
+path                  R/name_matching.R
+tracked?              NO. untracked working-tree file.
+                      "git ls-files --error-unmatch R/name_matching.R" fails.
+nearest commit        NONE. No commit on any origin branch contains this file
+                      except the preservation branch created in this session
+                      (Source B), which is a copy of this same working tree.
+lines                      438
+top-level functions   7
+sha256                9817dd707e7614ec2c63c8bf06ff93087199d9a86e9c08f0bc8e0647ecc6f9c9
+
+--------------------------------------------------------------------------
+SOURCE B: preservation branch (verbatim snapshot of Source A)
+--------------------------------------------------------------------------
+repository            github.com/mufflyt/mysterynpi
+branch                slice/preserve-uncommitted-consolidation
+commit                c23bc412e8c27d7c99a977a9dcc1881e334521fd
+path                  R/name_matching.R
+tracked?              YES on that branch only. NOT on master.
+sha256                9817dd707e7614ec2c63c8bf06ff93087199d9a86e9c08f0bc8e0647ecc6f9c9
+identical to A?       YES. Byte-identical, verified by sha256 comparison.
+                      The preservation is faithful; nothing was altered in
+                      transit.
+
+--------------------------------------------------------------------------
+SOURCE C: isochrones implementation (the duplicate to be retired)
+--------------------------------------------------------------------------
+repository            github.com/mufflyt/isochrones
+branch                main
+path                  R/name_matching_primitives.R
+tracked?              YES
+introduced by         d2333afb9644833d9062d45b9e1f2385ac34f286 2026-08-16
+last touched by       733a9e345 2026-08-16
+lines                      406
+top-level functions   7
+sha256                d32f198a02627bc294fc52ab0d4c50b182b69d1eb4bb2b568af575e8fb4dfedc
+mysterynpi references 0
+
+--------------------------------------------------------------------------
+DESTINATION
+--------------------------------------------------------------------------
+repository            github.com/mufflyt/mysterynpi
+branch                slice/name-primitives-canonical
+base                  origin/master 71cfb46
+path                  R/name_matching.R
+sha256 (destination)  9817dd707e7614ec2c63c8bf06ff93087199d9a86e9c08f0bc8e0647ecc6f9c9
+
+--------------------------------------------------------------------------
+DIFFERENCES: Source A/B versus Source C
+--------------------------------------------------------------------------
+Both define the same seven functions:
+    name_surname_components
+    name_given_tokens
+    name_leading_given
+    names_have_compatible_surname
+    name_surname_match_type
+    name_given_match_position
+    names_have_compatible_given
+
+Line-count delta:      438 (mysterynpi) versus      406 (isochrones).
+
+The behavioural comparison is NOT asserted here. It is measured by the frozen
+differential fixture tests/fixtures/name_primitive_differential.csv and
+classified NO_CHANGE / INTENTIONAL_FIX / INTENTIONAL_API_DIFFERENCE /
+UNINTENDED_REGRESSION. A line-count or hash difference is not evidence of a
+behavioural difference, and this file deliberately does not claim otherwise.
+
+REQUIRED OUTCOME: unintended_regressions = 0 before Source C is deleted.

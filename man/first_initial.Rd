@@ -4,7 +4,7 @@
 \alias{first_initial}
 \title{First initial of a normalised name, or `NA` when there is no name.}
 \usage{
-first_initial(x, strip_alternates = TRUE, fold_hyphens = TRUE)
+first_initial(x, strip_alternates = TRUE, fold_hyphens = FALSE)
 }
 \arguments{
 \item{x}{character vector.}

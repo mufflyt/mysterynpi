@@ -4,7 +4,7 @@
 \alias{blank_na}
 \title{Normalised key with absence rendered as `""`, for use as a join key.}
 \usage{
-blank_na(x, strip_alternates = TRUE, fold_hyphens = TRUE)
+blank_na(x, strip_alternates = TRUE, fold_hyphens = FALSE)
 }
 \arguments{
 \item{x}{character vector.}

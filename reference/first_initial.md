@@ -8,7 +8,7 @@ spelling.
 ## Usage
 
 ``` r
-first_initial(x, strip_alternates = TRUE)
+first_initial(x, strip_alternates = TRUE, fold_hyphens = FALSE)
 ```
 
 ## Arguments
@@ -18,6 +18,10 @@ first_initial(x, strip_alternates = TRUE)
   character vector.
 
 - strip_alternates:
+
+  see \[name_key()\].
+
+- fold_hyphens:
 
   see \[name_key()\].
 

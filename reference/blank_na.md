@@ -5,7 +5,7 @@ Normalised key with absence rendered as \`""\`, for use as a join key.
 ## Usage
 
 ``` r
-blank_na(x, strip_alternates = TRUE)
+blank_na(x, strip_alternates = TRUE, fold_hyphens = FALSE)
 ```
 
 ## Arguments
@@ -15,6 +15,10 @@ blank_na(x, strip_alternates = TRUE)
   character vector.
 
 - strip_alternates:
+
+  see \[name_key()\].
+
+- fold_hyphens:
 
   see \[name_key()\].
 

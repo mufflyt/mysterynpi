@@ -52,7 +52,7 @@ characters – they PRESERVE them:</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">name_key</span><span class="op">(</span><span class="va">x</span>, strip_alternates <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">name_key</span><span class="op">(</span><span class="va">x</span>, strip_alternates <span class="op">=</span> <span class="cn">TRUE</span>, fold_hyphens <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -68,6 +68,16 @@ characters – they PRESERVE them:</p>
 `TRUE` is correct for person names and is the default. `FALSE` reproduces a
 normaliser that does not handle the convention – use it to prove a swap,
 not to ship.</p></dd>
+
+
+<dt id="arg-fold-hyphens">fold_hyphens<a class="anchor" aria-label="anchor" href="#arg-fold-hyphens"></a></dt>
+<dd><p>logical: treat a hyphen as equivalent to a space. `FALSE`
+(the default) treats a hyphen as a literal character, which is correct
+for [split_given()] and any given/middle-name comparison. Pass `TRUE`
+only when comparing SURNAMES, where a compound name written with a
+hyphen by one source and a space by another must join as the same
+person – see the defect note above for what goes wrong if this is
+applied to a given name instead.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -87,6 +97,26 @@ an accented roster name cannot reach its unaccented registry spelling by any
 route. Measured in one frozen linkage: of the 27 roster rows carrying
 non-ASCII name characters, the weakest evidence tier ran 26<!-- % against 1.5% -->
 cohort-wide, and the unmatched rate ran 30<!-- % against 10.4%. --></p>
+<p>WHAT `fold_hyphens` IS FOR, AND WHY IT DOES NOT DEFAULT ON (2026-09-11). A
+compound SURNAME is recorded with a hyphen by one source and a space by
+another – "ABBAS-RODRIGUEZ" against "Abbas Rodriguez" – and by default
+that is TWO DIFFERENT KEYS: no transliteration or case-folding touches a
+hyphen. A caller comparing surnames can pass `fold_hyphens = TRUE` to
+equate them; measured in the linkage this was found in, 57 of 87
+roster-wide fuzzy-surname matches (66<!-- %) were PURELY a hyphen-vs-space -->
+surname difference, not a genuine spelling discrepancy.</p>
+<p>THIS MUST NOT BE THE DEFAULT, AND MUST NOT BE APPLIED TO GIVEN/MIDDLE
+NAMES. A first attempt shipped `fold_hyphens = TRUE` as the default for
+every caller of [blank_na()], including [split_given()] – which every
+given-name split in this package's consumers goes through. A genuinely
+compound GIVEN name ("Samantha-Rose", "Bonnie-Dee", "Mary-Louise") is ONE
+name, not a given name plus an incidental middle name; folding its hyphen
+to a space made [split_given()] treat "Rose"/"Dee"/"Louise" as a separate,
+droppable middle token, which then matched a DIFFERENT real person sharing
+only the shortened given name and surname – three cross-state false
+identity matches were found this way before the default was reverted here.
+Fold hyphens where a SURNAME is being compared. Never fold them before
+splitting a given name.</p>
 <p>`NA` in, `NA` out. Callers needing `""` for a join must say so via
 [blank_na()], so absence is never converted to a value by accident.</p>
     </div>
@@ -96,9 +126,9 @@ cohort-wide, and the unmatched rate ran 30<!-- % against 10.4%. --></p>
 
 <p>`strip_alternates` exists so a swap can be PROVEN rather than assumed. The
 incumbent normaliser this was extracted alongside does not remove
-parenthesised alternate names; this one does, and that is a deliberate fix,
-not an accident of reimplementation – every roster row whose derived middle
-initial came out as `"("` failed to resolve, 9 of 9.</p>
+parenthesised alternate names; this one does, and that is a deliberate
+fix, not an accident of reimplementation – every roster row whose derived
+middle initial came out as `"("` failed to resolve, 9 of 9.</p>
 <p>So the migration is two reviewable steps, not one leap:</p>
 <div class="sourceCode"><pre><code><span></span>
 <span>  <span class="fu"><a href="../reference/name_key.html">name_key</a></span><span class="op">(</span><span class="va">x</span>, strip_alternates <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>   <span class="co"># byte-identical to the incumbent</span></span>
@@ -106,7 +136,8 @@ initial came out as `"("` failed to resolve, 9 of 9.</p>
 
 <p>Step one should change nothing and can be merged on that evidence. Step two
 changes keys for exactly the rows carrying a bracket, and deserves to be
-looked at on its own.</p>
+looked at on its own. `fold_hyphens` is a separate, opt-in, per-call
+decision – see above – not part of this migration.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

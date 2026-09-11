@@ -6,7 +6,7 @@ Ann"\`): the first token is the given name, the remainder is middle.
 ## Usage
 
 ``` r
-split_given(given, strip_alternates = TRUE)
+split_given(given, strip_alternates = TRUE, fold_hyphens = FALSE)
 ```
 
 ## Arguments
@@ -18,6 +18,10 @@ split_given(given, strip_alternates = TRUE)
 - strip_alternates:
 
   see \[name_key()\].
+
+- fold_hyphens:
+
+  see \[name_key()\]. Leave at the \`FALSE\` default – see above.
 
 ## Value
 
@@ -31,3 +35,13 @@ deleted on a middle-name conflict had that conflicting middle initial
 derived here rather than read from a middle-name column. Treat the
 result as weaker than a recorded middle name, and never let it veto on
 its own.
+
+NEVER call this with \`fold_hyphens = TRUE\`. A genuinely compound given
+name ("Samantha-Rose") is ONE name, not a given name plus a droppable
+middle token – folding its hyphen before the split hands "Rose" to
+\`middle_from_given\`, and a downstream veto that drops it can then
+match a DIFFERENT real person sharing only the shortened given name and
+surname. Three cross-state false identity matches were found this way
+when \`fold_hyphens\` briefly defaulted to \`TRUE\` for every caller of
+this function, including this one. Hyphen-folding belongs on a SURNAME
+comparison, never here.

@@ -4,12 +4,14 @@
 \alias{first_initial}
 \title{First initial of a normalised name, or `NA` when there is no name.}
 \usage{
-first_initial(x, strip_alternates = TRUE)
+first_initial(x, strip_alternates = TRUE, fold_hyphens = FALSE)
 }
 \arguments{
 \item{x}{character vector.}
 
 \item{strip_alternates}{see [name_key()].}
+
+\item{fold_hyphens}{see [name_key()].}
 }
 \value{
 character vector of single letters, or `NA`.

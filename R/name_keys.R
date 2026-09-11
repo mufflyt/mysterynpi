@@ -66,15 +66,37 @@ strip_parenthetical <- function(x) {
 #' non-ASCII name characters, the weakest evidence tier ran 26% against 1.5%
 #' cohort-wide, and the unmatched rate ran 30% against 10.4%.
 #'
+#' WHAT `fold_hyphens` IS FOR, AND WHY IT DOES NOT DEFAULT ON (2026-09-11). A
+#' compound SURNAME is recorded with a hyphen by one source and a space by
+#' another -- "ABBAS-RODRIGUEZ" against "Abbas Rodriguez" -- and by default
+#' that is TWO DIFFERENT KEYS: no transliteration or case-folding touches a
+#' hyphen. A caller comparing surnames can pass `fold_hyphens = TRUE` to
+#' equate them; measured in the linkage this was found in, 57 of 87
+#' roster-wide fuzzy-surname matches (66%) were PURELY a hyphen-vs-space
+#' surname difference, not a genuine spelling discrepancy.
+#'
+#' THIS MUST NOT BE THE DEFAULT, AND MUST NOT BE APPLIED TO GIVEN/MIDDLE
+#' NAMES. A first attempt shipped `fold_hyphens = TRUE` as the default for
+#' every caller of [blank_na()], including [split_given()] -- which every
+#' given-name split in this package's consumers goes through. A genuinely
+#' compound GIVEN name ("Samantha-Rose", "Bonnie-Dee", "Mary-Louise") is ONE
+#' name, not a given name plus an incidental middle name; folding its hyphen
+#' to a space made [split_given()] treat "Rose"/"Dee"/"Louise" as a separate,
+#' droppable middle token, which then matched a DIFFERENT real person sharing
+#' only the shortened given name and surname -- three cross-state false
+#' identity matches were found this way before the default was reverted here.
+#' Fold hyphens where a SURNAME is being compared. Never fold them before
+#' splitting a given name.
+#'
 #' `NA` in, `NA` out. Callers needing `""` for a join must say so via
 #' [blank_na()], so absence is never converted to a value by accident.
 #'
 #' @section Migrating from an existing normaliser:
 #' `strip_alternates` exists so a swap can be PROVEN rather than assumed. The
 #' incumbent normaliser this was extracted alongside does not remove
-#' parenthesised alternate names; this one does, and that is a deliberate fix,
-#' not an accident of reimplementation -- every roster row whose derived middle
-#' initial came out as `"("` failed to resolve, 9 of 9.
+#' parenthesised alternate names; this one does, and that is a deliberate
+#' fix, not an accident of reimplementation -- every roster row whose derived
+#' middle initial came out as `"("` failed to resolve, 9 of 9.
 #'
 #' So the migration is two reviewable steps, not one leap:
 #'
@@ -85,16 +107,24 @@ strip_parenthetical <- function(x) {
 #'
 #' Step one should change nothing and can be merged on that evidence. Step two
 #' changes keys for exactly the rows carrying a bracket, and deserves to be
-#' looked at on its own.
+#' looked at on its own. `fold_hyphens` is a separate, opt-in, per-call
+#' decision -- see above -- not part of this migration.
 #'
 #' @param x character vector.
 #' @param strip_alternates logical: remove parenthesised alternate names.
 #'   `TRUE` is correct for person names and is the default. `FALSE` reproduces a
 #'   normaliser that does not handle the convention -- use it to prove a swap,
 #'   not to ship.
+#' @param fold_hyphens logical: treat a hyphen as equivalent to a space. `FALSE`
+#'   (the default) treats a hyphen as a literal character, which is correct
+#'   for [split_given()] and any given/middle-name comparison. Pass `TRUE`
+#'   only when comparing SURNAMES, where a compound name written with a
+#'   hyphen by one source and a space by another must join as the same
+#'   person -- see the defect note above for what goes wrong if this is
+#'   applied to a given name instead.
 #' @return character vector.
 #' @export
-name_key <- function(x, strip_alternates = TRUE) {
+name_key <- function(x, strip_alternates = TRUE, fold_hyphens = FALSE) {
   if (is.null(x) || length(x) == 0L) return(character(0))
   x <- as.character(x)
   # A NUL byte terminates a PCRE string, silently truncating the rest of the
@@ -117,6 +147,9 @@ name_key <- function(x, strip_alternates = TRUE) {
   out <- stringi::stri_trans_general(out, "Latin-ASCII")
   out <- toupper(out)
   if (isTRUE(strip_alternates)) out <- strip_parenthetical(out)
+  # BEFORE the whitespace collapse below, so "ABBAS--RODRIGUEZ" or
+  # "ABBAS - RODRIGUEZ" cannot leave a double space behind.
+  if (isTRUE(fold_hyphens)) out <- gsub("-", " ", out, fixed = TRUE)
   out <- gsub("\\s+", " ", trimws(out))
   out[is.na(x)] <- NA_character_
   out
@@ -125,10 +158,11 @@ name_key <- function(x, strip_alternates = TRUE) {
 #' Normalised key with absence rendered as `""`, for use as a join key.
 #' @param x character vector.
 #' @param strip_alternates see [name_key()].
+#' @param fold_hyphens see [name_key()].
 #' @return character vector, `NA` mapped to `""`.
 #' @export
-blank_na <- function(x, strip_alternates = TRUE) {
-  k <- name_key(x, strip_alternates)
+blank_na <- function(x, strip_alternates = TRUE, fold_hyphens = FALSE) {
+  k <- name_key(x, strip_alternates, fold_hyphens)
   k[is.na(k)] <- ""
   k
 }
@@ -141,10 +175,11 @@ blank_na <- function(x, strip_alternates = TRUE) {
 #'
 #' @param x character vector.
 #' @param strip_alternates see [name_key()].
+#' @param fold_hyphens see [name_key()].
 #' @return character vector of single letters, or `NA`.
 #' @export
-first_initial <- function(x, strip_alternates = TRUE) {
-  k <- name_key(x, strip_alternates)
+first_initial <- function(x, strip_alternates = TRUE, fold_hyphens = FALSE) {
+  k <- name_key(x, strip_alternates, fold_hyphens)
   out <- substr(k, 1L, 1L)
   out[is.na(k) | !nzchar(k)] <- NA_character_
   out
@@ -161,12 +196,24 @@ first_initial <- function(x, strip_alternates = TRUE) {
 #' rather than read from a middle-name column. Treat the result as weaker than
 #' a recorded middle name, and never let it veto on its own.
 #'
+#' NEVER call this with `fold_hyphens = TRUE`. A genuinely compound given
+#' name ("Samantha-Rose") is ONE name, not a given name plus a droppable
+#' middle token -- folding its hyphen before the split hands "Rose" to
+#' `middle_from_given`, and a downstream veto that drops it can then match a
+#' DIFFERENT real person sharing only the shortened given name and surname.
+#' Three cross-state false identity matches were found this way when
+#' `fold_hyphens` briefly defaulted to `TRUE` for every caller of this
+#' function, including this one. Hyphen-folding belongs on a SURNAME
+#' comparison, never here.
+#'
 #' @param given character vector: the roster's given-name field.
 #' @param strip_alternates see [name_key()].
+#' @param fold_hyphens see [name_key()]. Leave at the `FALSE` default -- see
+#'   above.
 #' @return list with `given` and `middle_from_given`, both normalised.
 #' @export
-split_given <- function(given, strip_alternates = TRUE) {
-  k <- blank_na(given, strip_alternates)
+split_given <- function(given, strip_alternates = TRUE, fold_hyphens = FALSE) {
+  k <- blank_na(given, strip_alternates, fold_hyphens)
   list(given = sub("\\s.*$", "", k),
        middle_from_given = trimws(sub("^[^ ]*", "", k)))
 }

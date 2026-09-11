@@ -4,7 +4,7 @@
 \alias{name_key}
 \title{Canonical name join key: transliterated, upper-cased, whitespace-collapsed.}
 \usage{
-name_key(x, strip_alternates = TRUE)
+name_key(x, strip_alternates = TRUE, fold_hyphens = TRUE)
 }
 \arguments{
 \item{x}{character vector.}
@@ -13,6 +13,12 @@ name_key(x, strip_alternates = TRUE)
 `TRUE` is correct for person names and is the default. `FALSE` reproduces a
 normaliser that does not handle the convention -- use it to prove a swap,
 not to ship.}
+
+\item{fold_hyphens}{logical: treat a hyphen as equivalent to a space (a
+compound surname must join regardless of which way a source recorded
+it). `TRUE` is correct for person names and is the default. `FALSE`
+reproduces a normaliser that treats a hyphen as a literal character --
+use it to prove a swap, not to ship.}
 }
 \value{
 character vector.
@@ -34,26 +40,40 @@ route. Measured in one frozen linkage: of the 27 roster rows carrying
 non-ASCII name characters, the weakest evidence tier ran 26% against 1.5%
 cohort-wide, and the unmatched rate ran 30% against 10.4%.
 
+THE DEFECT `fold_hyphens` EXISTS TO PREVENT (2026-09-11). A compound
+surname is recorded with a hyphen by one source and a space by another --
+"ABBAS-RODRIGUEZ" against "Abbas Rodriguez" -- and until this fix that was
+TWO DIFFERENT KEYS: no transliteration or case-folding touches a hyphen.
+Every exact-match strategy therefore missed the pair entirely and the
+record fell through to fuzzy (Levenshtein) matching, reported as a weak,
+uncertain identity claim rather than the exact match it actually is.
+Measured in the linkage this was found in: 57 of 87 roster-wide
+fuzzy-surname matches (66%) were PURELY a hyphen-vs-space difference, not a
+genuine spelling discrepancy -- the single largest component of that whole
+evidence tier.
+
 `NA` in, `NA` out. Callers needing `""` for a join must say so via
 [blank_na()], so absence is never converted to a value by accident.
 }
 \section{Migrating from an existing normaliser}{
 
-`strip_alternates` exists so a swap can be PROVEN rather than assumed. The
-incumbent normaliser this was extracted alongside does not remove
-parenthesised alternate names; this one does, and that is a deliberate fix,
-not an accident of reimplementation -- every roster row whose derived middle
-initial came out as `"("` failed to resolve, 9 of 9.
+`strip_alternates` and `fold_hyphens` exist so a swap can be PROVEN rather
+than assumed. The incumbent normaliser this was extracted alongside does
+not remove parenthesised alternate names or fold hyphens; this one does,
+and both are deliberate fixes, not accidents of reimplementation -- every
+roster row whose derived middle initial came out as `"("` failed to
+resolve (9 of 9), and every hyphen/space-only surname mismatch fell to the
+weakest evidence tier instead of matching exactly.
 
 So the migration is two reviewable steps, not one leap:
 
 \preformatted{
-  name_key(x, strip_alternates = FALSE)   # byte-identical to the incumbent
-  name_key(x)                             # then flip, as its own diff
+  name_key(x, strip_alternates = FALSE, fold_hyphens = FALSE)  # byte-identical
+  name_key(x)                                                  # then flip, as its own diff
 }
 
 Step one should change nothing and can be merged on that evidence. Step two
-changes keys for exactly the rows carrying a bracket, and deserves to be
-looked at on its own.
+changes keys for exactly the rows carrying a bracket or a hyphen, and
+deserves to be looked at on its own.
 }
 

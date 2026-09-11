@@ -4,12 +4,14 @@
 \alias{split_given}
 \title{Split a fused given-name field into given name and trailing middle tokens.}
 \usage{
-split_given(given, strip_alternates = TRUE)
+split_given(given, strip_alternates = TRUE, fold_hyphens = TRUE)
 }
 \arguments{
 \item{given}{character vector: the roster's given-name field.}
 
 \item{strip_alternates}{see [name_key()].}
+
+\item{fold_hyphens}{see [name_key()].}
 }
 \value{
 list with `given` and `middle_from_given`, both normalised.

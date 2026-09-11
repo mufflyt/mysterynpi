@@ -66,35 +66,54 @@ strip_parenthetical <- function(x) {
 #' non-ASCII name characters, the weakest evidence tier ran 26% against 1.5%
 #' cohort-wide, and the unmatched rate ran 30% against 10.4%.
 #'
+#' THE DEFECT `fold_hyphens` EXISTS TO PREVENT (2026-09-11). A compound
+#' surname is recorded with a hyphen by one source and a space by another --
+#' "ABBAS-RODRIGUEZ" against "Abbas Rodriguez" -- and until this fix that was
+#' TWO DIFFERENT KEYS: no transliteration or case-folding touches a hyphen.
+#' Every exact-match strategy therefore missed the pair entirely and the
+#' record fell through to fuzzy (Levenshtein) matching, reported as a weak,
+#' uncertain identity claim rather than the exact match it actually is.
+#' Measured in the linkage this was found in: 57 of 87 roster-wide
+#' fuzzy-surname matches (66%) were PURELY a hyphen-vs-space difference, not a
+#' genuine spelling discrepancy -- the single largest component of that whole
+#' evidence tier.
+#'
 #' `NA` in, `NA` out. Callers needing `""` for a join must say so via
 #' [blank_na()], so absence is never converted to a value by accident.
 #'
 #' @section Migrating from an existing normaliser:
-#' `strip_alternates` exists so a swap can be PROVEN rather than assumed. The
-#' incumbent normaliser this was extracted alongside does not remove
-#' parenthesised alternate names; this one does, and that is a deliberate fix,
-#' not an accident of reimplementation -- every roster row whose derived middle
-#' initial came out as `"("` failed to resolve, 9 of 9.
+#' `strip_alternates` and `fold_hyphens` exist so a swap can be PROVEN rather
+#' than assumed. The incumbent normaliser this was extracted alongside does
+#' not remove parenthesised alternate names or fold hyphens; this one does,
+#' and both are deliberate fixes, not accidents of reimplementation -- every
+#' roster row whose derived middle initial came out as `"("` failed to
+#' resolve (9 of 9), and every hyphen/space-only surname mismatch fell to the
+#' weakest evidence tier instead of matching exactly.
 #'
 #' So the migration is two reviewable steps, not one leap:
 #'
 #' \preformatted{
-#'   name_key(x, strip_alternates = FALSE)   # byte-identical to the incumbent
-#'   name_key(x)                             # then flip, as its own diff
+#'   name_key(x, strip_alternates = FALSE, fold_hyphens = FALSE)  # byte-identical
+#'   name_key(x)                                                  # then flip, as its own diff
 #' }
 #'
 #' Step one should change nothing and can be merged on that evidence. Step two
-#' changes keys for exactly the rows carrying a bracket, and deserves to be
-#' looked at on its own.
+#' changes keys for exactly the rows carrying a bracket or a hyphen, and
+#' deserves to be looked at on its own.
 #'
 #' @param x character vector.
 #' @param strip_alternates logical: remove parenthesised alternate names.
 #'   `TRUE` is correct for person names and is the default. `FALSE` reproduces a
 #'   normaliser that does not handle the convention -- use it to prove a swap,
 #'   not to ship.
+#' @param fold_hyphens logical: treat a hyphen as equivalent to a space (a
+#'   compound surname must join regardless of which way a source recorded
+#'   it). `TRUE` is correct for person names and is the default. `FALSE`
+#'   reproduces a normaliser that treats a hyphen as a literal character --
+#'   use it to prove a swap, not to ship.
 #' @return character vector.
 #' @export
-name_key <- function(x, strip_alternates = TRUE) {
+name_key <- function(x, strip_alternates = TRUE, fold_hyphens = TRUE) {
   if (is.null(x) || length(x) == 0L) return(character(0))
   x <- as.character(x)
   # A NUL byte terminates a PCRE string, silently truncating the rest of the
@@ -117,6 +136,9 @@ name_key <- function(x, strip_alternates = TRUE) {
   out <- stringi::stri_trans_general(out, "Latin-ASCII")
   out <- toupper(out)
   if (isTRUE(strip_alternates)) out <- strip_parenthetical(out)
+  # BEFORE the whitespace collapse below, so "ABBAS--RODRIGUEZ" or
+  # "ABBAS - RODRIGUEZ" cannot leave a double space behind.
+  if (isTRUE(fold_hyphens)) out <- gsub("-", " ", out, fixed = TRUE)
   out <- gsub("\\s+", " ", trimws(out))
   out[is.na(x)] <- NA_character_
   out
@@ -125,10 +147,11 @@ name_key <- function(x, strip_alternates = TRUE) {
 #' Normalised key with absence rendered as `""`, for use as a join key.
 #' @param x character vector.
 #' @param strip_alternates see [name_key()].
+#' @param fold_hyphens see [name_key()].
 #' @return character vector, `NA` mapped to `""`.
 #' @export
-blank_na <- function(x, strip_alternates = TRUE) {
-  k <- name_key(x, strip_alternates)
+blank_na <- function(x, strip_alternates = TRUE, fold_hyphens = TRUE) {
+  k <- name_key(x, strip_alternates, fold_hyphens)
   k[is.na(k)] <- ""
   k
 }
@@ -141,10 +164,11 @@ blank_na <- function(x, strip_alternates = TRUE) {
 #'
 #' @param x character vector.
 #' @param strip_alternates see [name_key()].
+#' @param fold_hyphens see [name_key()].
 #' @return character vector of single letters, or `NA`.
 #' @export
-first_initial <- function(x, strip_alternates = TRUE) {
-  k <- name_key(x, strip_alternates)
+first_initial <- function(x, strip_alternates = TRUE, fold_hyphens = TRUE) {
+  k <- name_key(x, strip_alternates, fold_hyphens)
   out <- substr(k, 1L, 1L)
   out[is.na(k) | !nzchar(k)] <- NA_character_
   out
@@ -163,10 +187,11 @@ first_initial <- function(x, strip_alternates = TRUE) {
 #'
 #' @param given character vector: the roster's given-name field.
 #' @param strip_alternates see [name_key()].
+#' @param fold_hyphens see [name_key()].
 #' @return list with `given` and `middle_from_given`, both normalised.
 #' @export
-split_given <- function(given, strip_alternates = TRUE) {
-  k <- blank_na(given, strip_alternates)
+split_given <- function(given, strip_alternates = TRUE, fold_hyphens = TRUE) {
+  k <- blank_na(given, strip_alternates, fold_hyphens)
   list(given = sub("\\s.*$", "", k),
        middle_from_given = trimws(sub("^[^ ]*", "", k)))
 }

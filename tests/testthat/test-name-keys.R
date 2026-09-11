@@ -39,3 +39,22 @@ test_that("a fused given-name field splits without fabricating a middle", {
   expect_identical(split_given("Cynthia (Cindi)")$middle_from_given, "")
   expect_false(substr(split_given("Cynthia (Cindi)")$middle_from_given, 1, 1) == "(")
 })
+
+test_that("a hyphenated compound surname joins its space-separated spelling", {
+  # the defect: two different sources record the same compound surname with
+  # a hyphen and a space, and until fold_hyphens these were different keys
+  expect_identical(name_key("Abbas-Rodriguez"), name_key("Abbas Rodriguez"))
+  expect_identical(name_key("Abbas-Rodriguez"), "ABBAS RODRIGUEZ")
+  expect_identical(blank_na("Smith-Jones"), blank_na("Smith Jones"))
+  expect_identical(first_initial("Abbas-Rodriguez"), "A")
+  # multiple hyphens must not leave double spaces behind
+  expect_identical(name_key("Smith--Jones-Lee"), "SMITH JONES LEE")
+  expect_identical(name_key("Smith - Jones"), "SMITH JONES")
+  # fold_hyphens = FALSE reproduces the pre-fix, hyphen-as-literal behaviour
+  expect_identical(name_key("Abbas-Rodriguez", fold_hyphens = FALSE), "ABBAS-RODRIGUEZ")
+  expect_false(identical(name_key("Abbas-Rodriguez", fold_hyphens = FALSE),
+                        name_key("Abbas Rodriguez", fold_hyphens = FALSE)))
+  # interacts correctly with accent transliteration and alternate-stripping
+  expect_identical(name_key("Muñoz-García"), "MUNOZ GARCIA")
+  expect_identical(name_key("Smith-Jones (Suzy)"), "SMITH JONES")
+})

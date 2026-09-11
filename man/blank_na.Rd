@@ -4,12 +4,14 @@
 \alias{blank_na}
 \title{Normalised key with absence rendered as `""`, for use as a join key.}
 \usage{
-blank_na(x, strip_alternates = TRUE)
+blank_na(x, strip_alternates = TRUE, fold_hyphens = TRUE)
 }
 \arguments{
 \item{x}{character vector.}
 
 \item{strip_alternates}{see [name_key()].}
+
+\item{fold_hyphens}{see [name_key()].}
 }
 \value{
 character vector, `NA` mapped to `""`.

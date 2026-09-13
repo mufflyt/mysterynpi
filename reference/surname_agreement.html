@@ -58,7 +58,14 @@ one measured crosswalk, and marriage moves a surname wholesale.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">surname_agreement</span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span>, middle_a <span class="op">=</span> <span class="cn">NULL</span>, middle_b <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">surname_agreement</span><span class="op">(</span></span>
+<span>  <span class="va">a</span>,</span>
+<span>  <span class="va">b</span>,</span>
+<span>  middle_a <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  middle_b <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alternates_a <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alternates_b <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,8 +79,16 @@ fine; [name_key()] normalisation is applied internally.</p></dd>
 
 <dt id="arg-middle-a-middle-b">middle_a, middle_b<a class="anchor" aria-label="anchor" href="#arg-middle-a-middle-b"></a></dt>
 <dd><p>optional character vectors of the SAME record's
-  raw middle-name strings, enabling the cross-slot rescue: `middle_a`
-  belongs with `a`, and is searched for `b`'s surname components (and vice
+raw middle-name strings, enabling the cross-slot rescue: `middle_a`
+belongs with `a`, and is searched for `b`'s surname components (and vice
+versa). `NULL` skips the rescue.</p></dd>
+
+
+<dt id="arg-alternates-a-alternates-b">alternates_a, alternates_b<a class="anchor" aria-label="anchor" href="#arg-alternates-a-alternates-b"></a></dt>
+<dd><p>optional recorded alternate or former
+  surnames: a character vector (one alternate per record, `NA` for none)
+  or a list of character vectors (several per record). `alternates_a`
+  belongs with `a` and is compared against `b`'s surname (and vice
   versa). `NULL` skips the rescue.
 Apostrophes are erased before every comparison this rule makes:
 `O'BRIEN` vs `OBRIEN` is one surname written two ways, and a formatting
@@ -109,6 +124,15 @@ where marriage-related change is plausible – most physician cohorts –
 total surname disagreement alongside top-class agreement on everything
 else is a case for quarantine and review, not silent deletion. See
 `vignette("vetoes-and-quarantine")`.</p>
+<p>THE ALTERNATE-SURNAME RESCUE (step 3b). Registries record former legal
+surnames explicitly – NPPES publishes "Provider Other Last Name" for
+exactly this – and a legal name change otherwise reads as total
+disagreement: a 2026-09-13 sanction record for "Sarah Lynn Martin"
+resolved to an NPPES legal name of BRASSARD, same person, surname moved
+wholesale. When either side supplies recorded alternates, a match between
+one side's surname (key or component) and the other side's alternates
+corroborates. This is RECORDED evidence, stronger than the middle-slot
+rescue, and it never fires on a guess: no alternates supplied, no rescue.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -406,6 +406,8 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
 
 - [`npi_luhn_ok()`](https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.md)
   : Is this a structurally valid NPI?
+- [`normalize_credential()`](https://mufflyt.github.io/mysterynpi/reference/normalize_credential.md)
+  : Normalise a provider credential string
 - [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)
   : Search the NPPES registry for providers
 - [`parse_npi_search()`](https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.md)

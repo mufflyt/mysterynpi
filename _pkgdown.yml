@@ -99,6 +99,7 @@ reference:
 - title: NPI
   contents:
   - npi_luhn_ok
+  - npi_corroborate
   - ORG_NOISE
   - org_name_matches_person
   - npi_search

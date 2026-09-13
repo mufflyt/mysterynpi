@@ -48,3 +48,42 @@ test_that("absent parts are empty strings, never NA", {
 test_that("it errors clearly when humaniformat is unavailable", {
   expect_true(is.function(parse_person))   # contract documented in ?parse_person
 })
+
+test_that("format = 'surname_first' handles comma-less reversed rosters", {
+  # New York's Medicaid exclusion list publishes "FINCH SHANNON" -- surname
+  # first, no comma. Nothing in the string can reveal that; the caller
+  # declares it.
+  p <- parse_person(c("FINCH SHANNON", "MULLINGS CLAUDETTE"),
+                    format = "surname_first")
+  expect_identical(p$last, c("FINCH", "MULLINGS"))
+  expect_identical(p$first, c("SHANNON", "CLAUDETTE"))
+  # LAST FIRST MIDDLE: the tail parses as given + middle
+  p3 <- parse_person("FINCH SHANNON MARIE", format = "surname_first")
+  expect_identical(p3$last, "FINCH")
+  expect_identical(p3$first, "SHANNON")
+  expect_identical(p3$middle, "MARIE")
+})
+
+test_that("surname_first consumes leading particles into the surname", {
+  p <- parse_person("DE LA CRUZ JUAN", format = "surname_first")
+  expect_identical(p$last, "DE LA CRUZ")
+  expect_identical(p$first, "JUAN")
+})
+
+test_that("surname_first composes with credentials, commas, and absence", {
+  # credentials are stripped by the same pipeline
+  expect_identical(parse_person("FINCH SHANNON RN",
+                                format = "surname_first")$last, "FINCH")
+  # a string that already carries a comma is left to the comma logic
+  expect_identical(parse_person("FINCH, SHANNON",
+                                format = "surname_first")$first, "SHANNON")
+  # single tokens and absence behave exactly as the default format
+  p <- parse_person(c("Cher", NA_character_, ""), format = "surname_first")
+  expect_false(any(is.na(unlist(p))))
+  expect_identical(p$first[1], "CHER")
+})
+
+test_that("the default format is unchanged", {
+  expect_identical(parse_person("FINCH SHANNON")$last, "SHANNON")
+  expect_identical(parse_person("Jan Mróz")$last, "MROZ")
+})

@@ -73,17 +73,52 @@ strip_name_noise <- function(x) {
 #' `"Ann M. Barbaccia (Pollack), M.D."` into first `"M"`, middle `"BARBACCIA"`,
 #' surname `"ANN"`.
 #'
+#' SURNAME-FIRST WITHOUT A COMMA CANNOT BE DETECTED, ONLY DECLARED. The
+#' comma logic above covers `"Smith, John"`; some rosters publish
+#' `"FINCH SHANNON"` -- surname first, no comma -- and NOTHING in that string
+#' distinguishes it from a given-first "Finch Shannon" (Finch is a plausible
+#' given name). The caller knows the source's convention; `format =
+#' "surname_first"` declares it. Implementation: a comma is inserted after
+#' the surname span, and the string then flows through the SAME
+#' credential-aware reversal as an explicit `"Last, First"` -- one reversal
+#' path, not two. The surname span is the first token plus any leading
+#' [SURNAME_PARTICLES] run, so `"DE LA CRUZ JUAN"` reverses to
+#' `"JUAN DE LA CRUZ"`. Strings already carrying a comma are left to the
+#' comma logic. Limitation: an unhyphenated compound surname with no
+#' particle (`"SMITH JONES MARY"`) reads as surname `SMITH` -- there is no
+#' signal to do better without a recorded surname to check against.
+#'
 #' @param x character vector of free-text names.
+#' @param format `"given_first"` (the default: current behaviour, with
+#'   `"Last, First"` handled via the comma) or `"surname_first"` for
+#'   rosters that publish the surname first WITHOUT a comma.
 #' @return data.frame with `first`, `middle`, `last`, normalised via
 #'   [name_key()]. Absent parts are `""`, never `NA`, so
 #'   [has_name_information()] is the only test a caller needs.
 #' @export
-parse_person <- function(x) {
+parse_person <- function(x, format = c("given_first", "surname_first")) {
+  format <- match.arg(format)
   if (!requireNamespace("humaniformat", quietly = TRUE)) {
     stop("parse_person() requires the humaniformat package.\n",
          "  install.packages(\"humaniformat\")", call. = FALSE)
   }
   x <- as.character(x)
+  if (format == "surname_first") {
+    x <- vapply(x, function(one) {
+      if (is.na(one) || grepl(",", one, fixed = TRUE)) return(one)
+      tokens <- strsplit(trimws(one), "[[:space:]]+")[[1]]
+      if (length(tokens) < 2L) return(one)
+      bare <- toupper(gsub("[.]", "", tokens))
+      end <- 1L
+      while (end < length(tokens) && bare[end] %in% SURNAME_PARTICLES) {
+        end <- end + 1L
+      }
+      end <- min(end, length(tokens) - 1L)  # always leave a given name
+      paste(paste(tokens[1:end], collapse = " "),
+            paste(tokens[(end + 1L):length(tokens)], collapse = " "),
+            sep = ", ")
+    }, character(1), USE.NAMES = FALSE)
+  }
   # 2. IS THIS A "Last, First" REVERSAL, OR JUST A CREDENTIAL COMMA?
   # Two wrong answers were tried before this one. Testing the RAW string reads
   # ", M.D." as a reversal and returns first "M", surname "ANN". Testing the

@@ -99,6 +99,7 @@ reference:
 - title: NPI
   contents:
   - npi_luhn_ok
+  - normalize_credential
   - npi_search
   - parse_npi_search
   - parse_npi_licenses

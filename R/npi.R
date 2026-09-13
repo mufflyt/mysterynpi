@@ -14,13 +14,18 @@
 #' happened to satisfy the checksum. The leading-digit rule rejects those
 #' without any registry lookup.
 #'
+#' `NA` in, `NA` out -- the same contract [name_key()] documents. A missing
+#' NPI is not an invalid NPI: "the source recorded nothing" and "the source
+#' recorded a broken identifier" are different findings, and a `FALSE` for
+#' `NA` silently converts absence into evidence of invalidity.
+#'
 #' @param npi character vector.
-#' @return logical vector.
+#' @return logical vector; `NA` where `npi` is `NA`.
 #' @export
 npi_luhn_ok <- function(npi) {
+  npi <- as.character(npi)
   ok <- grepl("^[12][0-9]{9}$", npi)
-  if (!any(ok, na.rm = TRUE)) return(ok & FALSE)
-  vapply(seq_along(npi), function(i) {
+  out <- vapply(seq_along(npi), function(i) {
     if (!isTRUE(ok[i])) return(FALSE)
     d <- as.integer(strsplit(paste0("80840", substr(npi[i], 1, 9)), "")[[1]])
     idx <- rev(seq_along(d)); dbl <- d; odd <- which(idx %% 2 == 1)
@@ -28,4 +33,9 @@ npi_luhn_ok <- function(npi) {
     dbl[dbl > 9] <- dbl[dbl > 9] - 9
     (10 - (sum(dbl) %% 10)) %% 10 == as.integer(substr(npi[i], 10, 10))
   }, logical(1))
+  # NA in, NA out -- the same contract name_key() documents. "No NPI
+  # recorded" and "recorded NPI is invalid" are different findings; returning
+  # FALSE for NA reads absence as evidence of invalidity.
+  out[is.na(npi)] <- NA
+  out
 }

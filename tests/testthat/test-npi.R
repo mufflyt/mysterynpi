@@ -18,3 +18,10 @@ test_that("NPIs must begin with 1 or 2 -- REGRESSION", {
   two <- vapply(0:9, function(d) paste0("200000000", d), character(1))
   expect_identical(sum(npi_luhn_ok(two)), 1L)  # exactly one check digit works
 })
+
+test_that("NA in, NA out: absence is never read as invalidity", {
+  expect_identical(npi_luhn_ok(NA_character_), NA)
+  expect_identical(npi_luhn_ok(c("1396113270", NA, "bad")),
+                   c(TRUE, NA, FALSE))
+  expect_identical(npi_luhn_ok(character(0)), logical(0))
+})

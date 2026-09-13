@@ -10,7 +10,7 @@ npi_luhn_ok(npi)
 \item{npi}{character vector.}
 }
 \value{
-logical vector.
+logical vector; `NA` where `npi` is `NA`.
 }
 \description{
 Ten digits beginning with 1 or 2, with a Luhn check over the `80840`
@@ -27,4 +27,9 @@ datasets, 2026-09-13): of 9 checksum-passing candidates that turned out
 not to exist in NPPES, 7 began with 0 or 3 -- state provider numbers that
 happened to satisfy the checksum. The leading-digit rule rejects those
 without any registry lookup.
+
+`NA` in, `NA` out -- the same contract [name_key()] documents. A missing
+NPI is not an invalid NPI: "the source recorded nothing" and "the source
+recorded a broken identifier" are different findings, and a `FALSE` for
+`NA` silently converts absence into evidence of invalidity.
 }

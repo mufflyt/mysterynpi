@@ -25,3 +25,27 @@ test_that("NA in, NA out: absence is never read as invalidity", {
                    c(TRUE, NA, FALSE))
   expect_identical(npi_luhn_ok(character(0)), logical(0))
 })
+
+test_that("vectorised Luhn agrees with the per-element reference -- REGRESSION", {
+  reference <- function(one) {
+    if (is.na(one)) return(NA)
+    if (!grepl("^[12][0-9]{9}$", one)) return(FALSE)
+    d <- as.integer(strsplit(paste0("80840", substr(one, 1, 9)), "")[[1]])
+    idx <- rev(seq_along(d)); dbl <- d; odd <- which(idx %% 2 == 1)
+    dbl[odd] <- dbl[odd] * 2
+    dbl[dbl > 9] <- dbl[dbl > 9] - 9
+    (10 - (sum(dbl) %% 10)) %% 10 == as.integer(substr(one, 10, 10))
+  }
+  set.seed(80840)
+  pool <- c(
+    vapply(1:200, function(i) paste0(sample(c("0","1","2","3","9"), 1),
+      paste(sample(0:9, 9, replace = TRUE), collapse = "")), character(1)),
+    "1396113270", "1609986611", NA_character_, "", "bad", "139611327"
+  )
+  expect_identical(npi_luhn_ok(pool),
+                   vapply(pool, function(p) reference(p), logical(1),
+                          USE.NAMES = FALSE))
+  # single-element and empty vectors keep their shape
+  expect_identical(npi_luhn_ok("1396113270"), TRUE)
+  expect_identical(npi_luhn_ok(character(0)), logical(0))
+})

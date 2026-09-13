@@ -26,9 +26,12 @@ test_that("the switch propagates to every derived helper", {
   expect_identical(blank_na(x), "CYNTHIA A.")
   expect_identical(first_initial("(Sandra) Theresa", strip_alternates = FALSE), "(")
   expect_identical(first_initial("(Sandra) Theresa"), "T")
+  # split_given() strips punctuation from its outputs (issue #8), so the
+  # period is gone in BOTH branches; the parity claim here is only about
+  # strip_alternates propagation, which the bracket still demonstrates.
   expect_identical(split_given(x, strip_alternates = FALSE)$middle_from_given,
-                   "(CINDI) A.")
-  expect_identical(split_given(x)$middle_from_given, "A.")
+                   "(CINDI) A")
+  expect_identical(split_given(x)$middle_from_given, "A")
   expect_identical(middle_tokens("(Cindi) A", strip_alternates = FALSE)[[1]],
                    c("CINDI", "A"))
   expect_identical(surname_tokens("Smith (Melson)", strip_alternates = FALSE),

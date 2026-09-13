@@ -15,7 +15,8 @@ split_given(given, strip_alternates = TRUE, fold_hyphens = FALSE)
 above.}
 }
 \value{
-list with `given` and `middle_from_given`, both normalised.
+list with `given` and `middle_from_given`, both normalised and free
+  of periods and commas.
 }
 \description{
 Rosters routinely fuse middle names into the given-name column
@@ -37,4 +38,12 @@ Three cross-state false identity matches were found this way when
 `fold_hyphens` briefly defaulted to `TRUE` for every caller of this
 function, including this one. Hyphen-folding belongs on a SURNAME
 comparison, never here.
+
+Periods and commas are SEPARATORS here, never name characters: a roster
+initial is written `"I."`, and returning that period in `middle_from_given`
+leaves downstream middle-name columns mixing `"I."` with `"I"` (issue #8).
+They are replaced with a space rather than deleted -- the same convention
+[strip_name_noise()] uses -- so `"MARY,ANN"` stays two names instead of
+fusing into `"MARYANN"`. Hyphens and apostrophes are part of a name
+("Samantha-Rose", "D'Angelo") and pass through untouched.
 }

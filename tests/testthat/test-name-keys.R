@@ -40,6 +40,24 @@ test_that("a fused given-name field splits without fabricating a middle", {
   expect_false(substr(split_given("Cynthia (Cindi)")$middle_from_given, 1, 1) == "(")
 })
 
+test_that("split_given strips punctuation from split-out initials -- REGRESSION", {
+  # Issue #8: "OFELIA I." returned middle_from_given "I." with the period
+  # attached, so downstream middle-name columns mixed "I." and "I". Periods
+  # and commas are separators, replaced with a space (the strip_name_noise()
+  # convention) so adjacent tokens can never fuse.
+  expect_identical(split_given("Ofelia I.")$given, "OFELIA")
+  expect_identical(split_given("Ofelia I.")$middle_from_given, "I")
+  expect_identical(split_given("John B.")$middle_from_given, "B")
+  expect_identical(split_given("Mary, Ann")$middle_from_given, "ANN")
+  # comma with no space separates the tokens rather than fusing them
+  expect_identical(split_given("Mary,Ann")$given, "MARY")
+  expect_identical(split_given("Mary,Ann")$middle_from_given, "ANN")
+  # hyphens and apostrophes are name characters, not punctuation
+  expect_identical(split_given("Samantha-Rose")$given, "SAMANTHA-ROSE")
+  expect_identical(split_given("Samantha-Rose")$middle_from_given, "")
+  expect_identical(split_given("D'Angelo")$given, "D'ANGELO")
+})
+
 test_that("fold_hyphens defaults to FALSE: a hyphen is a literal character", {
   # the safe default. A hyphen must never be folded unless a caller opts in
   # explicitly for a SURNAME comparison -- see the split_given test below for

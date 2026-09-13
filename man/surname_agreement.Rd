@@ -4,15 +4,28 @@
 \alias{surname_agreement}
 \title{Do two surnames agree, disagree, or decide nothing?}
 \usage{
-surname_agreement(a, b, middle_a = NULL, middle_b = NULL)
+surname_agreement(
+  a,
+  b,
+  middle_a = NULL,
+  middle_b = NULL,
+  alternates_a = NULL,
+  alternates_b = NULL
+)
 }
 \arguments{
 \item{a, b}{character vectors of surnames, the same length. Raw strings are
 fine; [name_key()] normalisation is applied internally.}
 
 \item{middle_a, middle_b}{optional character vectors of the SAME record's
-  raw middle-name strings, enabling the cross-slot rescue: `middle_a`
-  belongs with `a`, and is searched for `b`'s surname components (and vice
+raw middle-name strings, enabling the cross-slot rescue: `middle_a`
+belongs with `a`, and is searched for `b`'s surname components (and vice
+versa). `NULL` skips the rescue.}
+
+\item{alternates_a, alternates_b}{optional recorded alternate or former
+  surnames: a character vector (one alternate per record, `NA` for none)
+  or a list of character vectors (several per record). `alternates_a`
+  belongs with `a` and is compared against `b`'s surname (and vice
   versa). `NULL` skips the rescue.
 Apostrophes are erased before every comparison this rule makes:
 `O'BRIEN` vs `OBRIEN` is one surname written two ways, and a formatting
@@ -54,4 +67,14 @@ where marriage-related change is plausible -- most physician cohorts --
 total surname disagreement alongside top-class agreement on everything
 else is a case for quarantine and review, not silent deletion. See
 `vignette("vetoes-and-quarantine")`.
+
+THE ALTERNATE-SURNAME RESCUE (step 3b). Registries record former legal
+surnames explicitly -- NPPES publishes "Provider Other Last Name" for
+exactly this -- and a legal name change otherwise reads as total
+disagreement: a 2026-09-13 sanction record for "Sarah Lynn Martin"
+resolved to an NPPES legal name of BRASSARD, same person, surname moved
+wholesale. When either side supplies recorded alternates, a match between
+one side's surname (key or component) and the other side's alternates
+corroborates. This is RECORDED evidence, stronger than the middle-slot
+rescue, and it never fires on a guess: no alternates supplied, no rescue.
 }

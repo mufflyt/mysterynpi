@@ -33,11 +33,26 @@
 #' else is a case for quarantine and review, not silent deletion. See
 #' `vignette("vetoes-and-quarantine")`.
 #'
+#' THE ALTERNATE-SURNAME RESCUE (step 3b). Registries record former legal
+#' surnames explicitly -- NPPES publishes "Provider Other Last Name" for
+#' exactly this -- and a legal name change otherwise reads as total
+#' disagreement: a 2026-09-13 sanction record for "Sarah Lynn Martin"
+#' resolved to an NPPES legal name of BRASSARD, same person, surname moved
+#' wholesale. When either side supplies recorded alternates, a match between
+#' one side's surname (key or component) and the other side's alternates
+#' corroborates. This is RECORDED evidence, stronger than the middle-slot
+#' rescue, and it never fires on a guess: no alternates supplied, no rescue.
+#'
 #' @param a,b character vectors of surnames, the same length. Raw strings are
 #'   fine; [name_key()] normalisation is applied internally.
 #' @param middle_a,middle_b optional character vectors of the SAME record's
 #'   raw middle-name strings, enabling the cross-slot rescue: `middle_a`
 #'   belongs with `a`, and is searched for `b`'s surname components (and vice
+#'   versa). `NULL` skips the rescue.
+#' @param alternates_a,alternates_b optional recorded alternate or former
+#'   surnames: a character vector (one alternate per record, `NA` for none)
+#'   or a list of character vectors (several per record). `alternates_a`
+#'   belongs with `a` and is compared against `b`'s surname (and vice
 #'   versa). `NULL` skips the rescue.
 #' Apostrophes are erased before every comparison this rule makes:
 #' `O'BRIEN` vs `OBRIEN` is one surname written two ways, and a formatting
@@ -48,20 +63,34 @@
 #' @return character: `"corroborates"`, `"conflicts"`, or `"uninformative"`
 #'   (either surname absent or reduced to nothing by normalisation).
 #' @export
-surname_agreement <- function(a, b, middle_a = NULL, middle_b = NULL) {
+surname_agreement <- function(a, b, middle_a = NULL, middle_b = NULL,
+                              alternates_a = NULL, alternates_b = NULL) {
   n <- length(a)
   if (length(b) != n) stop("a and b must be the same length", call. = FALSE)
-  for (m in list(middle_a, middle_b)) {
+  for (m in list(middle_a, middle_b, alternates_a, alternates_b)) {
     if (!is.null(m) && length(m) != n) {
-      stop("middle_a and middle_b must be NULL or the same length as a",
-           call. = FALSE)
+      stop("middle_a, middle_b, alternates_a and alternates_b must be NULL ",
+           "or the same length as a", call. = FALSE)
     }
   }
   deq <- function(x) if (is.character(x)) gsub("'", "", x, fixed = TRUE) else
     lapply(x, gsub, pattern = "'", replacement = "", fixed = TRUE)
+  # one recorded-alternates list per record: keys and components together,
+  # so "SMITH-JONES" as an alternate meets both "SMITH-JONES" and "SMITH"
+  alt_list <- function(alternates) {
+    if (is.null(alternates)) return(vector("list", n))
+    if (!is.list(alternates)) alternates <- as.list(alternates)
+    lapply(alternates, function(alt) {
+      alt <- alt[!is.na(alt) & nzchar(alt)]
+      if (!length(alt)) return(character(0))
+      keys <- name_key(alt)
+      deq(unique(c(keys[!is.na(keys)], unlist(lapply(alt, surname_tokens)))))
+    })
+  }
   ka <- deq(name_key(a)); kb <- deq(name_key(b))
   mta <- if (is.null(middle_a)) vector("list", n) else deq(middle_tokens(middle_a))
   mtb <- if (is.null(middle_b)) vector("list", n) else deq(middle_tokens(middle_b))
+  aa <- alt_list(alternates_a); ab <- alt_list(alternates_b)
   vapply(seq_len(n), function(i) {
     if (!has_name_information(ka[i]) || !has_name_information(kb[i])) {
       return("uninformative")
@@ -69,6 +98,13 @@ surname_agreement <- function(a, b, middle_a = NULL, middle_b = NULL) {
     if (ka[i] == kb[i]) return("corroborates")
     ta <- deq(surname_tokens(a[i])); tb <- deq(surname_tokens(b[i]))
     if (length(intersect(ta, tb))) return("corroborates")
+    # the alternate-surname rescue: the OTHER side's surname matches a
+    # RECORDED former/alternate surname of this side (NPPES "Provider
+    # Other Last Name" and kin)
+    if (length(intersect(c(kb[i], tb), aa[[i]])) ||
+        length(intersect(c(ka[i], ta), ab[[i]]))) {
+      return("corroborates")
+    }
     # the maiden-as-middle rescue: a full surname component surviving in the
     # OTHER record's middle slot
     if (length(intersect(tb, mta[[i]])) || length(intersect(ta, mtb[[i]]))) {

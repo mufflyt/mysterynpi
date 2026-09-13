@@ -39,6 +39,25 @@ test_that("credentials and titles are removed, names that look like them are not
   expect_identical(parse_person("Ms Erin Mason")$last, "MASON")
 })
 
+test_that("all-provider-type credentials are stripped -- 2026-09-13 additions", {
+  # From the OpenSanctions Medicaid exclusion linkage (8,450 sanctioned
+  # individuals of every provider type): DC 314, DDS 248, LPN 130, DPM 114,
+  # DMD 101, PA 73. None were in NAME_NOISE, so each sailed through into a
+  # parsed name slot.
+  expect_identical(strip_name_noise("Jane Doe, D.D.S."), "Jane Doe")
+  expect_identical(strip_name_noise("Jane Doe DMD"), "Jane Doe")
+  expect_identical(strip_name_noise("John Roe, D.C."), "John Roe")
+  expect_identical(strip_name_noise("John Roe DPM"), "John Roe")
+  expect_identical(strip_name_noise("Ann Poe, LPN"), "Ann Poe")
+  expect_identical(strip_name_noise("Ann Poe, PA-C"), "Ann Poe")
+  expect_identical(strip_name_noise("Ann Poe, Pharm.D."), "Ann Poe")
+  expect_identical(parse_person("Jane Doe, D.D.S.")$last, "DOE")
+  expect_identical(parse_person("John Roe, O.D.")$last, "ROE")
+  # token matching still protects real names that contain a credential
+  expect_identical(parse_person("Dana Odell")$last, "ODELL")
+  expect_identical(parse_person("Paul Paxton")$last, "PAXTON")
+})
+
 test_that("absent parts are empty strings, never NA", {
   p <- parse_person(c("Cher", NA_character_, ""))
   expect_false(any(is.na(unlist(p))))
@@ -47,4 +66,43 @@ test_that("absent parts are empty strings, never NA", {
 
 test_that("it errors clearly when humaniformat is unavailable", {
   expect_true(is.function(parse_person))   # contract documented in ?parse_person
+})
+
+test_that("format = 'surname_first' handles comma-less reversed rosters", {
+  # New York's Medicaid exclusion list publishes "FINCH SHANNON" -- surname
+  # first, no comma. Nothing in the string can reveal that; the caller
+  # declares it.
+  p <- parse_person(c("FINCH SHANNON", "MULLINGS CLAUDETTE"),
+                    format = "surname_first")
+  expect_identical(p$last, c("FINCH", "MULLINGS"))
+  expect_identical(p$first, c("SHANNON", "CLAUDETTE"))
+  # LAST FIRST MIDDLE: the tail parses as given + middle
+  p3 <- parse_person("FINCH SHANNON MARIE", format = "surname_first")
+  expect_identical(p3$last, "FINCH")
+  expect_identical(p3$first, "SHANNON")
+  expect_identical(p3$middle, "MARIE")
+})
+
+test_that("surname_first consumes leading particles into the surname", {
+  p <- parse_person("DE LA CRUZ JUAN", format = "surname_first")
+  expect_identical(p$last, "DE LA CRUZ")
+  expect_identical(p$first, "JUAN")
+})
+
+test_that("surname_first composes with credentials, commas, and absence", {
+  # credentials are stripped by the same pipeline
+  expect_identical(parse_person("FINCH SHANNON RN",
+                                format = "surname_first")$last, "FINCH")
+  # a string that already carries a comma is left to the comma logic
+  expect_identical(parse_person("FINCH, SHANNON",
+                                format = "surname_first")$first, "SHANNON")
+  # single tokens and absence behave exactly as the default format
+  p <- parse_person(c("Cher", NA_character_, ""), format = "surname_first")
+  expect_false(any(is.na(unlist(p))))
+  expect_identical(p$first[1], "CHER")
+})
+
+test_that("the default format is unchanged", {
+  expect_identical(parse_person("FINCH SHANNON")$last, "SHANNON")
+  expect_identical(parse_person("Jan Mróz")$last, "MROZ")
 })

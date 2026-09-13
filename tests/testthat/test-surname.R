@@ -61,3 +61,53 @@ test_that("the shipped contract passes, and can fail", {
   }
   expect_error(assert_surname_agreement_contract(exact_only))
 })
+
+test_that("a recorded alternate surname rescues a legal name change", {
+  # NPPES publishes "Provider Other Last Name" for exactly this: a
+  # 2026-09-13 sanction record for Sarah Lynn Martin resolved to NPPES
+  # legal name BRASSARD -- same person, surname moved wholesale.
+  expect_identical(
+    surname_agreement("Brassard", "Martin", alternates_a = "Martin"),
+    "corroborates"
+  )
+  expect_identical(
+    surname_agreement("Brassard", "Martin", alternates_b = "Brassard"),
+    "corroborates"
+  )
+  # no alternates supplied: same comparison stays a conflict, never a guess
+  expect_identical(surname_agreement("Brassard", "Martin"), "conflicts")
+})
+
+test_that("alternates match by component and survive normalisation", {
+  # a hyphenated alternate meets the bare component
+  expect_identical(
+    surname_agreement("Nguyen", "Smith", alternates_a = "Smith-Jones"),
+    "corroborates"
+  )
+  # apostrophes and accents normalise like the surnames themselves
+  expect_identical(
+    surname_agreement("Miller", "OBrien", alternates_a = "O'Brien"),
+    "corroborates"
+  )
+  # an unrelated alternate does not rescue
+  expect_identical(
+    surname_agreement("Nguyen", "Smith", alternates_a = "Kowalski"),
+    "conflicts"
+  )
+})
+
+test_that("alternates accept a list of several per record, NA means none", {
+  expect_identical(
+    surname_agreement(c("Brassard", "Lee"), c("Martin", "Park"),
+                      alternates_a = list(c("Old", "Martin"), NA_character_)),
+    c("corroborates", "conflicts")
+  )
+  expect_identical(
+    surname_agreement("Brassard", "Martin", alternates_a = NA_character_),
+    "conflicts"
+  )
+  expect_error(
+    surname_agreement("A", "B", alternates_a = c("x", "y")),
+    "same length"
+  )
+})

@@ -406,6 +406,10 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
 
 - [`npi_luhn_ok()`](https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.md)
   : Is this a structurally valid NPI?
+- [`ORG_NOISE`](https://mufflyt.github.io/mysterynpi/reference/ORG_NOISE.md)
+  : Corporate-form and generic-descriptor tokens in organization names.
+- [`org_name_matches_person()`](https://mufflyt.github.io/mysterynpi/reference/org_name_matches_person.md)
+  : Does an organization name carry a person's identity?
 - [`normalize_credential()`](https://mufflyt.github.io/mysterynpi/reference/normalize_credential.md)
   : Normalise a provider credential string
 - [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)

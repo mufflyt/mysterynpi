@@ -16,6 +16,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_SURNAME_PARTICLES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_POLICY.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/ORG_NOISE.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ROSTER_BENCHMARK.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SOURCE_CLASSES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_FREQUENCIES.html</loc></url>
@@ -81,6 +82,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_search.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/org_name_matches_person.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_npi_licenses.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_npi_search.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_person.html</loc></url>

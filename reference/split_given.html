@@ -71,7 +71,8 @@ above.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>list with `given` and `middle_from_given`, both normalised.</p>
+    <p>list with `given` and `middle_from_given`, both normalised and free
+  of periods and commas.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -89,6 +90,13 @@ Three cross-state false identity matches were found this way when
 `fold_hyphens` briefly defaulted to `TRUE` for every caller of this
 function, including this one. Hyphen-folding belongs on a SURNAME
 comparison, never here.</p>
+<p>Periods and commas are SEPARATORS here, never name characters: a roster
+initial is written `"I."`, and returning that period in `middle_from_given`
+leaves downstream middle-name columns mixing `"I."` with `"I"` (issue #8).
+They are replaced with a space rather than deleted – the same convention
+[strip_name_noise()] uses – so `"MARY,ANN"` stays two names instead of
+fusing into `"MARYANN"`. Hyphens and apostrophes are part of a name
+("Samantha-Rose", "D'Angelo") and pass through untouched.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

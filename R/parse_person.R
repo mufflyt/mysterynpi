@@ -6,13 +6,27 @@
 #'
 #' Stripped BEFORE parsing: a name parser has no way to know `CRNP` is not a
 #' middle name.
+#'
+#' The vocabulary began nursing/midwifery-centric. The final block was added
+#' from an all-provider-type source (the 2026-09-13 OpenSanctions Medicaid
+#' exclusion linkage, 8,450 sanctioned individuals): the NPPES credential
+#' column there showed DC on 314 providers, DDS 248, LPN 130, DPM 114,
+#' DMD 101, PA 73, with OD, PSYD, PHARMD, RPH, LVN, LCSW and DPT at lower
+#' counts -- none of which were in the vocabulary, so any of them appearing
+#' in a name string sailed through [strip_name_noise()] into a parsed name
+#' slot. Short ambiguous tokens (PA, OD, DC) follow the precedent already
+#' set by MS, MA, DO and LM: in a PROVIDER-DIRECTORY name string the
+#' credential reading is overwhelmingly the correct one.
 #' @export
 NAME_NOISE <- c(
   "DNP","DNSC","DNS","PHD","EDD","MD","DO","MSN","MSC","MS","MA","MPH",
   "BSN","BS","BA","RN","APRN","ARNP","CNM","CM","CNS","CRNP","CRNA",
   "NP","FNP","WHNP","PNP","ANP","AGNP","IBCLC","LCCE","FACNM","FAAN",
   "FACOG","FACS","FRCS","RNC","LM","CPM","DR","PROF","MR","MRS","MS",
-  "MISS","JR","SR","II","III","IV")
+  "MISS","JR","SR","II","III","IV",
+  # all-provider-type credentials (2026-09-13 Medicaid exclusion linkage)
+  "DDS","DMD","DC","DPM","OD","PA","PAC","PA-C","LPN","LVN","PSYD",
+  "PHARMD","RPH","LCSW","DPT")
 
 #' Strip credential and title TOKENS from a personal-name string
 #'

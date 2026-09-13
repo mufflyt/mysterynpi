@@ -39,6 +39,25 @@ test_that("credentials and titles are removed, names that look like them are not
   expect_identical(parse_person("Ms Erin Mason")$last, "MASON")
 })
 
+test_that("all-provider-type credentials are stripped -- 2026-09-13 additions", {
+  # From the OpenSanctions Medicaid exclusion linkage (8,450 sanctioned
+  # individuals of every provider type): DC 314, DDS 248, LPN 130, DPM 114,
+  # DMD 101, PA 73. None were in NAME_NOISE, so each sailed through into a
+  # parsed name slot.
+  expect_identical(strip_name_noise("Jane Doe, D.D.S."), "Jane Doe")
+  expect_identical(strip_name_noise("Jane Doe DMD"), "Jane Doe")
+  expect_identical(strip_name_noise("John Roe, D.C."), "John Roe")
+  expect_identical(strip_name_noise("John Roe DPM"), "John Roe")
+  expect_identical(strip_name_noise("Ann Poe, LPN"), "Ann Poe")
+  expect_identical(strip_name_noise("Ann Poe, PA-C"), "Ann Poe")
+  expect_identical(strip_name_noise("Ann Poe, Pharm.D."), "Ann Poe")
+  expect_identical(parse_person("Jane Doe, D.D.S.")$last, "DOE")
+  expect_identical(parse_person("John Roe, O.D.")$last, "ROE")
+  # token matching still protects real names that contain a credential
+  expect_identical(parse_person("Dana Odell")$last, "ODELL")
+  expect_identical(parse_person("Paul Paxton")$last, "PAXTON")
+})
+
 test_that("absent parts are empty strings, never NA", {
   p <- parse_person(c("Cher", NA_character_, ""))
   expect_false(any(is.na(unlist(p))))

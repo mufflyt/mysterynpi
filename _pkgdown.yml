@@ -99,6 +99,8 @@ reference:
 - title: NPI
   contents:
   - npi_luhn_ok
+  - ORG_NOISE
+  - org_name_matches_person
   - npi_search
   - parse_npi_search
   - parse_npi_licenses

@@ -1,14 +1,24 @@
 #' Is this a structurally valid NPI?
 #'
-#' Ten digits with a Luhn check over the `80840` prefix. Cheap, and it catches
-#' the truncated, shifted and concatenated identifiers that otherwise join to
-#' nothing and look like a matching failure.
+#' Ten digits beginning with 1 or 2, with a Luhn check over the `80840`
+#' prefix. Cheap, and it catches the truncated, shifted and concatenated
+#' identifiers that otherwise join to nothing and look like a matching
+#' failure.
+#'
+#' THE LEADING DIGIT IS PART OF THE FORMAT. CMS has only ever issued NPIs
+#' beginning with 1 (and reserves 2); roughly one in ten arbitrary 10-digit
+#' strings passes the Luhn checksum by chance, so the checksum alone is a
+#' weak gate. Measured on a real linkage (39 state Medicaid exclusion
+#' datasets, 2026-09-13): of 9 checksum-passing candidates that turned out
+#' not to exist in NPPES, 7 began with 0 or 3 -- state provider numbers that
+#' happened to satisfy the checksum. The leading-digit rule rejects those
+#' without any registry lookup.
 #'
 #' @param npi character vector.
 #' @return logical vector.
 #' @export
 npi_luhn_ok <- function(npi) {
-  ok <- grepl("^[0-9]{10}$", npi)
+  ok <- grepl("^[12][0-9]{9}$", npi)
   if (!any(ok, na.rm = TRUE)) return(ok & FALSE)
   vapply(seq_along(npi), function(i) {
     if (!isTRUE(ok[i])) return(FALSE)

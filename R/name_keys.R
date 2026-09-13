@@ -206,14 +206,24 @@ first_initial <- function(x, strip_alternates = TRUE, fold_hyphens = FALSE) {
 #' function, including this one. Hyphen-folding belongs on a SURNAME
 #' comparison, never here.
 #'
+#' Periods and commas are SEPARATORS here, never name characters: a roster
+#' initial is written `"I."`, and returning that period in `middle_from_given`
+#' leaves downstream middle-name columns mixing `"I."` with `"I"` (issue #8).
+#' They are replaced with a space rather than deleted -- the same convention
+#' [strip_name_noise()] uses -- so `"MARY,ANN"` stays two names instead of
+#' fusing into `"MARYANN"`. Hyphens and apostrophes are part of a name
+#' ("Samantha-Rose", "D'Angelo") and pass through untouched.
+#'
 #' @param given character vector: the roster's given-name field.
 #' @param strip_alternates see [name_key()].
 #' @param fold_hyphens see [name_key()]. Leave at the `FALSE` default -- see
 #'   above.
-#' @return list with `given` and `middle_from_given`, both normalised.
+#' @return list with `given` and `middle_from_given`, both normalised and free
+#'   of periods and commas.
 #' @export
 split_given <- function(given, strip_alternates = TRUE, fold_hyphens = FALSE) {
   k <- blank_na(given, strip_alternates, fold_hyphens)
+  k <- gsub("\\s+", " ", trimws(gsub("[.,]", " ", k)))
   list(given = sub("\\s.*$", "", k),
        middle_from_given = trimws(sub("^[^ ]*", "", k)))
 }

@@ -10,3 +10,15 @@ NAME_NOISE
 Stripped BEFORE parsing: a name parser has no way to know `CRNP` is not a
 middle name.
 }
+\details{
+The vocabulary began nursing/midwifery-centric. The final block was added
+from an all-provider-type source (the 2026-09-13 OpenSanctions Medicaid
+exclusion linkage, 8,450 sanctioned individuals): the NPPES credential
+column there showed DC on 314 providers, DDS 248, LPN 130, DPM 114,
+DMD 101, PA 73, with OD, PSYD, PHARMD, RPH, LVN, LCSW and DPT at lower
+counts -- none of which were in the vocabulary, so any of them appearing
+in a name string sailed through [strip_name_noise()] into a parsed name
+slot. Short ambiguous tokens (PA, OD, DC) follow the precedent already
+set by MS, MA, DO and LM: in a PROVIDER-DIRECTORY name string the
+credential reading is overwhelmingly the correct one.
+}

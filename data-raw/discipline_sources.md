@@ -120,22 +120,17 @@ demonstrated by the WAFraudScan repo). These carry license numbers and case numb
 and link to order PDFs — everything DocInfo lacks. Inventory and per-state adapters
 are the follow-on task once the FSMB answer (credentials/quote) is known.
 
-## 6-7. DEA registrant actions + FDA debarments (MOVED to isochrones, 2026-09-13)
+## Out of scope: federal Federal-Register feeds (DEA / FDA)
 
-The Federal Register acquisition layer (DEA 21 U.S.C. 823/824 registrant
-actions, FDA 21 U.S.C. 335a debarments), the event taxonomy, the
-exclusion-weight policy (adverse final orders 1.0 / favorable 0 / pending NA),
-and the harvested tables now live in the isochrones repo:
-`~/isochrones/R/federal_register_dea_actions.R`,
-`R/federal_register_fda_debarments.R`,
-`data/federal_adverse_actions/*.csv`, documented in
-`docs/APPENDIX_FEDERAL_ADVERSE_ACTIONS.md` there. Key facts kept here so this
-map stays complete: both feeds are per-person Federal Register notices via the
-keyless API (the only two such federal series -- OIG exclusions, CMS
-revocations, and FDA investigator disqualifications are NOT in the FR); DEA's
-"Cases Against Doctors" app is dead (404); neither feed carries an NPI, so
-linkage is mysterynpi's job (name + credential + state + city for DEA,
-name-only for FDA).
+Federal per-person adverse-action feeds -- DEA controlled-substance
+registration actions and FDA debarments, harvested from the Federal Register
+API -- are **not part of this package** and must not be re-added here. They are
+a workforce-cohort concern, and their acquisition layer, event taxonomy, and
+exclusion-weight policy live in the isochrones repo
+(`R/federal_register_*.R`, `data/federal_adverse_actions/`,
+`docs/APPENDIX_FEDERAL_ADVERSE_ACTIONS.md`). This package handles
+state-medical-board discipline and NPI/name resolution only; sections 1-5
+above are its scope.
 
 ## Provenance rules (non-negotiable)
 

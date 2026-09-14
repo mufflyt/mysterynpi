@@ -11,6 +11,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/news/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/paper.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/LICENSE_STATUS_LEVELS.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/MEDICAL_UNIT_PATTERNS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_NOISE.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_SURNAME_PARTICLES.html</loc></url>
@@ -93,6 +94,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/resolve_ordered_classes.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/split_given.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/sql_npi_name.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_med_suffix.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_name_noise.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_parenthetical.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.html</loc></url>

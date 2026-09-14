@@ -2,6 +2,27 @@
 
 ## mysterynpi (development version)
 
+- [`strip_med_suffix()`](https://mufflyt.github.io/mysterynpi/reference/strip_med_suffix.md)
+  (new, with `MEDICAL_UNIT_PATTERNS`): the institution in a CMS
+  medical-school name. CMS maps every clinician’s education through a
+  medical-school list, so a nurse-midwife trained at a university’s
+  nursing school arrives as “ SCHOOL OF MEDICINE”. Extracted from the
+  midwifery pipeline, where it had been applied to the Doctors and
+  Clinicians file and a commercial directory carrying the same field.
+  Two defects were fixed on the way in:
+
+  - a named school of a university returned the school’s name (“BRODY
+    SCHOOL OF MEDICINE AT EAST CAROLINA UNIVERSITY” gave “BRODY”); it
+    now returns the university.
+  - an institution whose name is the medical phrase was cut to a place
+    (“BAYLOR COLLEGE OF MEDICINE” gave “BAYLOR”, “OHIO MEDICAL
+    UNIVERSITY” gave “OHIO”); a strip that leaves no institution word is
+    now refused.
+
+  Base R only; no new dependency. The 88 distinct strings from that
+  pipeline are pinned in
+  `tests/testthat/fixtures/cms_medical_school_names.csv`.
+
 - Documentation for the decision:
   [`vignette("nickname-policy")`](https://mufflyt.github.io/mysterynpi/articles/nickname-policy.md)
   – the appendix that recomputes the verdict-layer ablation on every

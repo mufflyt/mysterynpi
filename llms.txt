@@ -412,6 +412,10 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
   : Corporate-form and generic-descriptor tokens in organization names.
 - [`org_name_matches_person()`](https://mufflyt.github.io/mysterynpi/reference/org_name_matches_person.md)
   : Does an organization name carry a person's identity?
+- [`strip_med_suffix()`](https://mufflyt.github.io/mysterynpi/reference/strip_med_suffix.md)
+  : The institution in a CMS medical-school name
+- [`MEDICAL_UNIT_PATTERNS`](https://mufflyt.github.io/mysterynpi/reference/MEDICAL_UNIT_PATTERNS.md)
+  : Medical-school unit phrases, longest first
 - [`normalize_credential()`](https://mufflyt.github.io/mysterynpi/reference/normalize_credential.md)
   : Normalise a provider credential string
 - [`npi_search()`](https://mufflyt.github.io/mysterynpi/reference/npi_search.md)

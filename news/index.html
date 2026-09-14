@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,13 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="mysterynpi-development-version">mysterynpi (development version)<a class="anchor" aria-label="anchor" href="#mysterynpi-development-version"></a></h2>
-<ul><li><p>Documentation for the decision: <code><a href="../articles/nickname-policy.html">vignette("nickname-policy")</a></code> – the appendix that recomputes the verdict-layer ablation on every build, documents the candidate-layer result, the source-class gate, the lineage contract, the ghost controls, and the ROBERT&gt;BILL governance record. The verdict-layer harness and per-edge ledger ship in <code>tools/ablation/</code>; the README gains the two ablation figures and a policy section.</p></li>
+<ul><li>
+<p><code><a href="../reference/strip_med_suffix.html">strip_med_suffix()</a></code> (new, with <code>MEDICAL_UNIT_PATTERNS</code>): the institution in a CMS medical-school name. CMS maps every clinician’s education through a medical-school list, so a nurse-midwife trained at a university’s nursing school arrives as “<university> SCHOOL OF MEDICINE”. Extracted from the midwifery pipeline, where it had been applied to the Doctors and Clinicians file and a commercial directory carrying the same field. Two defects were fixed on the way in:</university></p>
+<ul><li>a named school of a university returned the school’s name (“BRODY SCHOOL OF MEDICINE AT EAST CAROLINA UNIVERSITY” gave “BRODY”); it now returns the university.</li>
+<li>an institution whose name is the medical phrase was cut to a place (“BAYLOR COLLEGE OF MEDICINE” gave “BAYLOR”, “OHIO MEDICAL UNIVERSITY” gave “OHIO”); a strip that leaves no institution word is now refused.</li>
+</ul><p>Base R only; no new dependency. The 88 distinct strings from that pipeline are pinned in <code>tests/testthat/fixtures/cms_medical_school_names.csv</code>.</p>
+</li>
+<li><p>Documentation for the decision: <code><a href="../articles/nickname-policy.html">vignette("nickname-policy")</a></code> – the appendix that recomputes the verdict-layer ablation on every build, documents the candidate-layer result, the source-class gate, the lineage contract, the ghost controls, and the ROBERT&gt;BILL governance record. The verdict-layer harness and per-edge ledger ship in <code>tools/ablation/</code>; the README gains the two ablation figures and a policy section.</p></li>
 <li>
 <p>The policy is now GOVERNED CONFIGURATION. <code>NICKNAME_POLICY</code> carries the full machine-readable contract (policy_id, verdict_layer, candidate_expansion, auto_accept_rule, governing_matcher_sha, dictionary_version, governing_evidence, effective_date, supersedes) plus a governed-edges record pinning ROBERT&gt;BILL exactly as tested (0 rescues, inflation present, contained by review-only). The ablation counts live in a versioned fixture whose checksum is pinned NEXT TO the policy_id – editing the evidence without a policy supersession fails</p>
 <ol start="101" style="list-style-type: upper-roman"><li>

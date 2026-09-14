@@ -102,6 +102,8 @@ reference:
   - npi_corroborate
   - ORG_NOISE
   - org_name_matches_person
+  - strip_med_suffix
+  - MEDICAL_UNIT_PATTERNS
   - normalize_credential
   - npi_search
   - parse_npi_search

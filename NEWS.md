@@ -1,5 +1,15 @@
 # mysterynpi (development version)
 
+* `assert_org_name_matches_person_contract()` (new): every other agreement
+  rule (`surname_agreement()`, `suffix_agreement()`, `nickname_agreement()`,
+  `middle_agreement()`, `gender_agreement()`, `license_agreement()`,
+  `normalize_license_status()`) ships a portable contract assertion a
+  downstream fork can run against its own copy; `org_name_matches_person()`
+  did not have one despite being exported with real, previously-undetected
+  failure modes. Pins the professional-corporation pattern, the
+  corporate-form/credential noise floor, hyphen folding, and the DO-surname
+  collision fix.
+
 * `org_name_matches_person()` now runs `strip_name_noise()` on the raw
   string before normalising it, instead of stripping `NAME_NOISE` with a
   bare `setdiff()` afterward. The difference matters for exactly the

@@ -311,3 +311,48 @@ assert_license_status_contract <- function(fn = normalize_license_status) {
   }
   invisible(TRUE)
 }
+
+#' Assert that the person/organization name bridge still behaves as relied on.
+#'
+#' Pins the professional-corporation pattern (all 14 name "mismatches" in the
+#' 2026-09-13 Medicaid exclusion linkage were this, not wrong people), the
+#' corporate-form/credential noise floor, hyphen folding, and the DO-surname
+#' collision fix -- a practice literally named after the physician's own
+#' surname, where that surname collides with a NAME_NOISE credential token
+#' (the Vietnamese surname "Do" vs. the DO credential), used to lose its only
+#' shared identity token and report no match.
+#'
+#' @param fn the function to test; defaults to [org_name_matches_person()].
+#' @return `TRUE` invisibly, or `stop()` naming the property that failed.
+#' @export
+assert_org_name_matches_person_contract <- function(fn = org_name_matches_person) {
+  expect <- list(
+    # a physician's own professional corporation
+    list("NADINE H. YASSA, M.D., INC.", "Nadine H. Yassa", TRUE),
+    # an unrelated organization
+    list("ECHO PARK PHARMACY", "Tarek Mohammad Ebrahim", FALSE),
+    # corporate form and credentials alone are never a match: nothing to
+    # compare, NA, never a false FALSE
+    list("MEDICAL GROUP INC", "J. MD", NA),
+    # hyphens fold for this comparison
+    list("ABBAS-RODRIGUEZ MEDICAL GROUP", "Maria Abbas Rodriguez", TRUE),
+    # the DO-surname collision: a practice named after the physician's own
+    # colliding surname must not lose its identity token to credential
+    # stripping
+    list("Do Family Medicine Clinic", "Anh Do", TRUE))
+  for (e in expect) {
+    got <- fn(e[[1]], e[[2]])
+    if (!identical(got, e[[3]])) {
+      stop(sprintf("org_name_matches_person contract: %s vs %s gave '%s', expected '%s'",
+                   e[[1]], e[[2]],
+                   if (is.na(got)) "NA" else got,
+                   if (is.na(e[[3]])) "NA" else e[[3]]),
+           call. = FALSE)
+    }
+  }
+  if (!inherits(try(fn("A B", c("x", "y")), silent = TRUE), "try-error")) {
+    stop("org_name_matches_person contract: mismatched lengths must error, not recycle",
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}

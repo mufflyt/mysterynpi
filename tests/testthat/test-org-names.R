@@ -59,3 +59,9 @@ test_that("absence and length are handled", {
   )
   expect_error(org_name_matches_person("A B", c("x", "y")), "same length")
 })
+
+test_that("the shipped contract passes, and can fail", {
+  expect_true(assert_org_name_matches_person_contract())
+  never_match <- function(org, person) rep(FALSE, length(org))
+  expect_error(assert_org_name_matches_person_contract(never_match))
+})

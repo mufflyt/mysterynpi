@@ -2,6 +2,20 @@
 
 ## mysterynpi (development version)
 
+- [`sql_npi_name()`](https://mufflyt.github.io/mysterynpi/reference/sql_npi_name.md)
+  now folds German digraphs (`ü`/`ö`/`ä`/`ß` -\> `ue`/`oe`/ `ae`/`ss`)
+  before handing the column to `strip_accents()`, matching
+  [`normalize_string()`](https://mufflyt.github.io/mysterynpi/reference/normalize_string.md)‘s
+  own ordering. `strip_accents()` alone only drops a diacritic, so it
+  turned `"Müller"` into `"MULLER"` while `normalize_string("Müller")`
+  gives `"MUELLER"` – a silent R/SQL parity break for exactly the
+  population the function’s own docstring promises parity for. Confirmed
+  against a live DuckDB connection and caught by isochrones’ own
+  downstream parity test (`test-sql-npi-name-helper.R`), which now
+  passes. `duckdb`/`DBI` added to Suggests for an executable parity test
+  in this package’s own suite (`test-normalize.R`), not just a claim in
+  a docstring.
+
 - [`graduation_year_agreement()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.md)
   (new, with
   [`graduation_year_band()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_band.md)

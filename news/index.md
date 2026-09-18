@@ -2,6 +2,36 @@
 
 ## mysterynpi (development version)
 
+- [`graduation_year_agreement()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.md)
+  (new, with
+  [`graduation_year_band()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_band.md)
+  and the `GRADUATION_YEAR_BANDS` table): the package’s first identity
+  axis that is not a name. Names are the axis registries agree on
+  because they copy one another — measured against a commercial national
+  directory, its first name matched NPPES for 100% of linked clinicians,
+  surname 99.96%, sex 99.92% and primary taxonomy 99.75%, so evidence
+  drawn from them is one source restated rather than two agreeing. A
+  graduation year is independent: it equals the credentialing year for
+  70.4% of true links but the NPI’s own enumeration year for only 39.4%.
+
+  - **The bands are signed.** Graduating the year *before* credentialing
+    carries a likelihood ratio of 10.2; the year *after*, 1.8. A
+    symmetric “within one year” band averages a strong signal with a
+    weak one.
+  - **A two- to three-year gap is evidence AGAINST a link** (ratios
+    0.4–0.8), not weak evidence for it. Two independent implementations
+    reached that conclusion; both had been scoring it positive.
+  - `"conflicts"` fires only beyond ten years, and is a flag rather than
+    a veto: an earlier degree in another discipline or a later doctorate
+    reads the same way. `"uninformative"` covers absence (about 47% of
+    pairs) and the middle bands, whose weight a scoring caller takes
+    from `log2_lr`.
+  - **Provisional.** The weights come from a silver standard —
+    high-confidence incumbent links against same-name decoys — not
+    adjudicated pairs, and from one cohort against one directory
+    snapshot. The table ships as data so a study can supply its own, as
+    with `NICKNAME_EDGES`.
+
 - [`strip_med_suffix()`](https://mufflyt.github.io/mysterynpi/reference/strip_med_suffix.md)
   (new, with `MEDICAL_UNIT_PATTERNS`): the institution in a CMS
   medical-school name. CMS maps every clinician’s education through a

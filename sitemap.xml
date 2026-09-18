@@ -10,6 +10,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/news/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/paper.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/GRADUATION_YEAR_BANDS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/LICENSE_STATUS_LEVELS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MEDICAL_UNIT_PATTERNS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.html</loc></url>
@@ -50,6 +51,8 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/get_nickname_dictionary.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/get_nicknames_for_name.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/given_tokens.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/graduation_year_band.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/has_name_information.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/join_ledger_entry.html</loc></url>

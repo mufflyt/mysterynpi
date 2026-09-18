@@ -124,6 +124,13 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
 - [`surname_rarity()`](https://mufflyt.github.io/mysterynpi/reference/surname_rarity.md)
   : How common is this surname? Census facts, for ordered-class
   refinement
+- [`graduation_year_agreement()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.md)
+  : Does a graduation year agree with a credentialing year?
+- [`graduation_year_band()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_band.md)
+  : Which band does a graduation year fall in, relative to a
+  credentialing year?
+- [`GRADUATION_YEAR_BANDS`](https://mufflyt.github.io/mysterynpi/reference/GRADUATION_YEAR_BANDS.md)
+  : Calibrated bands for \[graduation_year_agreement()\].
 
 ## Similarity scoring (candidate ranking, never verdicts)
 

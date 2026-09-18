@@ -49,4 +49,21 @@ three-or-more-token segment is still read as the credential (e.g.
 `"John Michael Smith DO"`, one segment, three tokens) -- this carve-out
 narrows `NAME_NOISE`'s reach for exactly the ambiguous case, it does not
 widen it, and every other `NAME_NOISE` token is unaffected.
+
+KNOWN LIMITATION: A SEGMENT THAT IS ENTIRELY UPPERCASE HAS NO CASE SIGNAL
+LEFT TO GIVE. Case is the only thing that distinguishes a genuine
+three-or-more-token compound surname (`"Nguyen Van Do"`) from a genuine
+three-or-more-token credentialed name (`"John Michael Smith DO"`) once
+both are past the two-token rule. A source that uppercases the whole
+record -- common in bulk exports -- erases that signal for BOTH
+directions at once: `"NGUYEN VAN DO"` reads as credentialed and loses its
+real surname (`strip_name_noise("NGUYEN VAN DO")` returns `"NGUYEN VAN"`,
+not `"NGUYEN VAN DO"`), and there is no available string-only fix, since
+any rule that recovers the surname in that case would just as wrongly
+protect `"JOHN MICHAEL SMITH DO"`'s real credential. Deciding which
+failure to prefer needs a prior on which is more common in a given
+pipeline's source data, which this package deliberately does not assume.
+A caller feeding it known-uppercase-only source data and needing better
+than this should resolve the ambiguity before calling in, e.g. by
+checking a name/roster field the source already disambiguates elsewhere.
 }

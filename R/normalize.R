@@ -149,7 +149,24 @@ extract_first_initial <- function(x) {
 #'
 #' The join key must be built identically on both sides or the database half of
 #' a pipeline quietly disagrees with the R half about who matched whom. Requires
-#' a `strip_accents` UDF registered on the connection.
+#' a `strip_accents` UDF registered on the connection (DuckDB ships one built
+#' in).
+#'
+#' GERMAN DIGRAPHS, BEFORE `strip_accents()`, FOR THE SAME REASON
+#' [normalize_string()] ORDERS ITS OWN SUBSTITUTION FIRST. `strip_accents()`
+#' only knows how to drop a diacritic: `"Müller"` becomes `"MULLER"`,
+#' losing the letter the umlaut stood in for. German romanises umlauts as a
+#' digraph, not a bare vowel -- `"Müller"` is `"MUELLER"` -- and once
+#' `strip_accents()` has already dropped the dots there is no way to recover
+#' that. So the digraph substitution runs on the RAW column expression,
+#' before `TRIM`/`UPPER`/`strip_accents()` ever see it, mirroring
+#' [normalize_string()]'s own ordering exactly. Confirmed against a live
+#' DuckDB connection: pre-fix, `sql_npi_name()` emitted `"MULLER"` /
+#' `"SCHON"` for `"Müller"` / `"Schön"` while
+#' `normalize_string()` gave `"MUELLER"` / `"SCHOEN"` -- the exact silent
+#' R/SQL parity break this function exists to prevent, caught by the
+#' isochrones downstream parity test this function's contract is written
+#' for.
 #'
 #' @param col character(1): a column expression.
 #' @return character(1) SQL.
@@ -159,7 +176,19 @@ sql_npi_name <- function(col) {
     stop("sql_npi_name() requires a non-empty single-string column expression",
          call. = FALSE)
   }
-  sprintf("strip_accents(UPPER(TRIM(%s)))", col)
+  # Order matches normalize_string(): German digraphs before the generic
+  # accent strip, so "u"-with-umlaut becomes "ue", not a bare "u". \uxxxx
+  # escapes, not literal characters, so this code file stays ASCII-portable
+  # (R CMD check: "checking code files for non-ASCII characters").
+  digraphs <- c("\u00df" = "ss",
+                "\u00fc" = "ue", "\u00dc" = "ue",
+                "\u00f6" = "oe", "\u00d6" = "oe",
+                "\u00e4" = "ae", "\u00c4" = "ae")
+  expr <- col
+  for (ch in names(digraphs)) {
+    expr <- sprintf("REPLACE(%s, '%s', '%s')", expr, ch, digraphs[[ch]])
+  }
+  sprintf("strip_accents(UPPER(TRIM(%s)))", expr)
 }
 
 #' Would normalising this vector change it?

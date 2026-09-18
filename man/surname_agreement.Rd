@@ -15,7 +15,7 @@ surname_agreement(
 }
 \arguments{
 \item{a, b}{character vectors of surnames, the same length. Raw strings are
-fine; [name_key()] normalisation is applied internally.}
+fine; [name_surname_match_type()] normalisation is applied internally.}
 
 \item{middle_a, middle_b}{optional character vectors of the SAME record's
 raw middle-name strings, enabling the cross-slot rescue: `middle_a`
@@ -27,6 +27,7 @@ versa). `NULL` skips the rescue.}
   or a list of character vectors (several per record). `alternates_a`
   belongs with `a` and is compared against `b`'s surname (and vice
   versa). `NULL` skips the rescue.
+
 Apostrophes are erased before every comparison this rule makes:
 `O'BRIEN` vs `OBRIEN` is one surname written two ways, and a formatting
 difference must not become a veto. [name_key()] itself keeps the
@@ -47,34 +48,56 @@ one measured crosswalk, and marriage moves a surname wholesale.
 \details{
 FOUR STEPS, EACH ONE EARNING ITS PLACE:
 
-1. Exact [name_key()] equality corroborates. This runs FIRST so that
-   surnames below the token floor still compare: `LEE` vs `LEE` is real
-   agreement even though `LEE` is too short to be a blocking token.
-2. A shared component from [surname_tokens()] corroborates:
-   `MCCARTHY-DERVIN` shares `MCCARTHY` with `MCCARTHY`. Particles never
-   count -- `DE LA CRUZ` and `DE LEON` share only convention.
-3. THE MAIDEN-AS-MIDDLE RESCUE. A changed surname often survives in the
+1. Absence first: either side reduced to nothing by normalisation is
+   `"uninformative"`, never a conflict.
+2. [name_surname_match_type()] `!= "none"` corroborates. That primitive is
+   this package's single canonical surname-correspondence engine -- exact
+   equality (so `LEE` vs `LEE` corroborates even though `LEE` is too short
+   to be a blocking token), same components under a different separator
+   (`MCCARTHY-DERVIN` vs `MCCARTHY DERVIN`), one side concatenating the
+   separator away (`ABU-GHAZALEH` vs `ABUGHAZALEH`), and component
+   subset (`MCCARTHY-DERVIN` shares `MCCARTHY` with `MCCARTHY`), with
+   particles guarded out -- `DE LA CRUZ` and `DE LEON` share only
+   convention. Apostrophes are folded away by the same primitive, so
+   `O'BRIEN` vs `OBRIEN` is a formatting difference, not a veto.
+
+   This package used to run its own, older, component-and-particle logic
+   here ([surname_tokens()], a 4-character token floor). It silently
+   disagreed with [name_surname_match_type()] on real compound-name
+   patterns -- `ABU-GHAZALEH` vs `ABUGHAZALEH` conflicted under the old
+   logic and corroborates here -- so this rule was migrated onto the one
+   canonical engine rather than left as a second, divergent
+   implementation of the same question. [surname_tokens()] and
+   [MIN_SURNAME_TOKEN] remain for [surname_token_table()]'s blocking-key
+   use case, which is a different question (what is a safe join key?)
+   from this one (do these two surnames correspond?).
+3. THE ALTERNATE-SURNAME RESCUE. Registries record former legal surnames
+   explicitly -- NPPES publishes "Provider Other Last Name" for exactly
+   this -- and a legal name change otherwise reads as total disagreement:
+   a 2026-09-13 sanction record for "Sarah Lynn Martin" resolved to an
+   NPPES legal name of BRASSARD, same person, surname moved wholesale.
+   When either side supplies recorded alternates, a match between one
+   side's surname (key or component) and the other side's alternates
+   corroborates. This is RECORDED evidence, stronger than the
+   middle-slot rescue below, and it never fires on a guess: no
+   alternates supplied, no rescue.
+4. THE MAIDEN-AS-MIDDLE RESCUE. A changed surname often survives in the
    OTHER record's middle slot: `KATHERINE REINHARD RYE` against
    `KATHERINE A. REINHARD` holds the surname `REINHARD` as a middle token.
-   When the surnames themselves share nothing, a full surname component
-   (>= [MIN_SURNAME_TOKEN]) found among the other side's middle tokens
-   corroborates. Pass the raw middle strings via `middle_a`/`middle_b`;
-   without them this step is skipped, never guessed.
-4. Otherwise, two recorded surnames that share nothing conflict.
+   When the surnames themselves share nothing and no recorded alternate
+   rescues them either, a full surname component (>= [MIN_SURNAME_TOKEN])
+   found among the other side's middle tokens corroborates. Pass the raw
+   middle strings via `middle_a`/`middle_b`; without them this step is
+   skipped, never guessed. This step deliberately keeps the higher, more
+   conservative token floor: a middle-name slot is noisier evidence than
+   a surname field, and a 2-character component rescuing a match there
+   would trade a real surname veto for a coincidence far more often than
+   it fixes one.
+5. Otherwise, two recorded surnames that share nothing conflict.
 
 USE THE CONFLICT WITH THE SAME DISCIPLINE AS THE GENDER VETO. In a cohort
 where marriage-related change is plausible -- most physician cohorts --
 total surname disagreement alongside top-class agreement on everything
 else is a case for quarantine and review, not silent deletion. See
 `vignette("vetoes-and-quarantine")`.
-
-THE ALTERNATE-SURNAME RESCUE (step 3b). Registries record former legal
-surnames explicitly -- NPPES publishes "Provider Other Last Name" for
-exactly this -- and a legal name change otherwise reads as total
-disagreement: a 2026-09-13 sanction record for "Sarah Lynn Martin"
-resolved to an NPPES legal name of BRASSARD, same person, surname moved
-wholesale. When either side supplies recorded alternates, a match between
-one side's surname (key or component) and the other side's alternates
-corroborates. This is RECORDED evidence, stronger than the middle-slot
-rescue, and it never fires on a guess: no alternates supplied, no rescue.
 }

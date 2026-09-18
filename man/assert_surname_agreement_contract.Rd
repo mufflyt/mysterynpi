@@ -14,6 +14,7 @@ assert_surname_agreement_contract(fn = surname_agreement)
 }
 \description{
 Pins the component logic, the sub-floor exact match, the apostrophe fold,
-the particle refusal, and the maiden-as-middle rescue -- each a measured
-failure mode of exact-equality surname comparison.
+the concatenation fold, the particle refusal, and the maiden-as-middle
+rescue -- each a measured failure mode of exact-equality surname
+comparison.
 }

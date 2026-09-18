@@ -1,4 +1,4 @@
-# mysterynpi (development version)
+# mysterynpi 0.4.0
 
 * `sql_npi_name()` now folds German digraphs (`ü`/`ö`/`ä`/`ß` -> `ue`/`oe`/
   `ae`/`ss`) before handing the column to `strip_accents()`, matching

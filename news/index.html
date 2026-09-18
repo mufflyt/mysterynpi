@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="mysterynpi-development-version">mysterynpi (development version)<a class="anchor" aria-label="anchor" href="#mysterynpi-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.4.0" id="mysterynpi-040">mysterynpi 0.4.0<a class="anchor" aria-label="anchor" href="#mysterynpi-040"></a></h2>
 <ul><li><p><code><a href="../reference/sql_npi_name.html">sql_npi_name()</a></code> now folds German digraphs (<code>ü</code>/<code>ö</code>/<code>ä</code>/<code>ß</code> -&gt; <code>ue</code>/<code>oe</code>/ <code>ae</code>/<code>ss</code>) before handing the column to <code>strip_accents()</code>, matching <code><a href="../reference/normalize_string.html">normalize_string()</a></code>‘s own ordering. <code>strip_accents()</code> alone only drops a diacritic, so it turned <code>"Müller"</code> into <code>"MULLER"</code> while <code>normalize_string("Müller")</code> gives <code>"MUELLER"</code> – a silent R/SQL parity break for exactly the population the function’s own docstring promises parity for. Confirmed against a live DuckDB connection and caught by isochrones’ own downstream parity test (<code>test-sql-npi-name-helper.R</code>), which now passes. <code>duckdb</code>/<code>DBI</code> added to Suggests for an executable parity test in this package’s own suite (<code>test-normalize.R</code>), not just a claim in a docstring.</p></li>
 <li>
 <p><code><a href="../reference/graduation_year_agreement.html">graduation_year_agreement()</a></code> (new, with <code><a href="../reference/graduation_year_band.html">graduation_year_band()</a></code> and the <code>GRADUATION_YEAR_BANDS</code> table): the package’s first identity axis that is not a name. Names are the axis registries agree on because they copy one another — measured against a commercial national directory, its first name matched NPPES for 100% of linked clinicians, surname 99.96%, sex 99.92% and primary taxonomy 99.75%, so evidence drawn from them is one source restated rather than two agreeing. A graduation year is independent: it equals the credentialing year for 70.4% of true links but the NPI’s own enumeration year for only 39.4%.</p>

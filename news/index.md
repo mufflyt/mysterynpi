@@ -1,6 +1,6 @@
 # Changelog
 
-## mysterynpi (development version)
+## mysterynpi 0.4.0
 
 - [`sql_npi_name()`](https://mufflyt.github.io/mysterynpi/reference/sql_npi_name.md)
   now folds German digraphs (`ü`/`ö`/`ä`/`ß` -\> `ue`/`oe`/ `ae`/`ss`)

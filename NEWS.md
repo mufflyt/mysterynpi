@@ -1,5 +1,19 @@
 # mysterynpi (development version)
 
+* `extract_suffix()` no longer reads a LEADING token as a generational
+  suffix. Suffixes trail; a token in the first position is a title, not a
+  generation. The gap mattered for "Sr." -- also the standard abbreviation
+  for "Sister" (a nun) when it leads a name, e.g. a women-religious
+  clinician's record: `"Sr. Mary Josephine, CNM"`. Before this fix,
+  `extract_suffix()` read that leading "Sr." as `SENIOR`, deleted it from
+  the name, and reported `suffix = "SR"` -- feeding a false generation into
+  `suffix_agreement()`'s father/son veto for someone who was never a
+  "Senior". `extract_suffix()` runs inside `parse_person()`, so every
+  caller of `parse_person()` was exposed, not just direct callers of
+  `extract_suffix()`. `"Sister"` unabbreviated was never affected; a
+  genuine trailing suffix (`"...Smith Jr"`) still is -- the fix is
+  positional, not a vocabulary change.
+
 * `assert_org_name_matches_person_contract()` (new): every other agreement
   rule (`surname_agreement()`, `suffix_agreement()`, `nickname_agreement()`,
   `middle_agreement()`, `gender_agreement()`, `license_agreement()`,

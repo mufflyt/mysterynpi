@@ -77,6 +77,35 @@ test_that("it vectorises elementwise and refuses recycling", {
   expect_error(suffix_agreement(c("JR", "SR"), "JR"), "same length")
 })
 
+test_that("a leading 'Sr.' is the religious title Sister, never a generation", {
+  # THE DEFECT: extract_suffix() scanned every token for suffix vocabulary,
+  # with no positional check. "Sr." is also the standard abbreviation for
+  # "Sister" (a nun) when it LEADS a name -- e.g. clinician records for
+  # women religious who are also NPs/CNMs/RNs -- and no US name suffix ever
+  # leads a name (suffixes trail, per SUFFIX_SPELLINGS' own docs). Before
+  # this fix, extract_suffix("Sr. Mary Josephine, CNM") read the leading
+  # "Sr." as a generational suffix, deleted it from the name, and reported
+  # suffix = "SR" -- feeding a false generation into suffix_agreement()'s
+  # father/son veto for someone who was never a "Senior" at all.
+  got <- extract_suffix("Sr. Mary Josephine, CNM")
+  expect_identical(got$suffix, NA_character_)
+  expect_identical(got$name, "Sr. Mary Josephine, CNM")
+
+  # the unabbreviated form was never affected -- this pins that it still isn't
+  expect_identical(extract_suffix("Sister Mary Josephine, CNM")$suffix,
+                    NA_character_)
+
+  # a genuine trailing suffix is still caught -- the fix is positional
+  # (first token only), not a vocabulary change
+  expect_identical(extract_suffix("Mary Josephine Smith Jr")$suffix, "JR")
+
+  # strip_name_noise() still removes "Sr." as a title once suffix
+  # extraction is out of the way -- only the suffix *field* changes
+  p <- parse_person("Sr. Mary Josephine Smith, CNM")
+  expect_identical(p$suffix, "")
+  expect_identical(p$last, "SMITH")
+})
+
 test_that("the shipped contract passes, and can fail", {
   expect_true(assert_suffix_agreement_contract())
   never_veto <- function(a, b) rep("uninformative", length(a))

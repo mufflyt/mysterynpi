@@ -52,6 +52,16 @@ test_that("a shared formal name admits; a shared nickname does not", {
   expect_identical(nickname_agreement("ALBERT", "ALEXANDER"), "conflicts")
 })
 
+test_that("a large, real hub (CHRIS/KRIS, 18 formal names) still guards every pair", {
+  # Exhaustive pairwise check of every formal name reachable from "CHRIS"
+  # found zero hub-only false corroborations -- every apparent
+  # cross-corroboration was either a genuine direct edge or a legitimate
+  # shared-formal-name link (the BOB/BOBBY->ROBERT pattern). Pinning the one
+  # pair a future edge-table edit is likeliest to regress: two well-known,
+  # definitely-different names connected only through the shared hub.
+  expect_identical(nickname_agreement("CHRISTOPHER", "KRISTOFFER"), "conflicts")
+})
+
 test_that("only recorded edges admit -- no spelling tolerance", {
   expect_identical(nickname_agreement("ELISABETH", "ELIZABETH"), "conflicts")
   expect_identical(nickname_agreement("JANE", "JOAN"), "conflicts")

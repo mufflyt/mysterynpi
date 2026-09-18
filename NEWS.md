@@ -1,5 +1,17 @@
 # mysterynpi (development version)
 
+* `org_name_matches_person()` now runs `strip_name_noise()` on the raw
+  string before normalising it, instead of stripping `NAME_NOISE` with a
+  bare `setdiff()` afterward. The difference matters for exactly the
+  surnames that collide with a credential token (`DO`, the Vietnamese
+  surname vs. the Doctor of Osteopathic Medicine credential):
+  `org_name_matches_person("Do Family Medicine Clinic", "Anh Do")` --  a
+  practice literally named after the physician's own surname -- returned
+  `FALSE` before this fix, because the shared identity token "DO" was
+  stripped as noise on both sides before comparison. `strip_name_noise()`'s
+  DO carve-out must run before `name_key()` uppercases the string, since its
+  title-case heuristic is a case distinction.
+
 * `given_tokens()`, `middle_tokens()`, `name_given_tokens()` and
   `name_leading_given()` no longer split a token on a hyphen. A genuinely
   compound given or middle name ("Mary-Jane", "Anne-Marie") is ONE name,

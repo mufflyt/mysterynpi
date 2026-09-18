@@ -20,11 +20,28 @@ ORG_NOISE <- c(
 # Identity tokens of a name string: name_key() normalisation, split on
 # whitespace, corporate-form and credential vocabulary removed. Shared by
 # org_name_matches_person() and npi_corroborate().
+#
+# CREDENTIAL REMOVAL GOES THROUGH strip_name_noise(), NOT A BARE
+# setdiff(..., NAME_NOISE), so a surname that collides with a credential
+# token (`DO`, the Vietnamese surname vs. the Doctor of Osteopathic Medicine
+# credential -- see strip_name_noise()'s "THE DO CARVE-OUT") gets the same
+# protection here as everywhere else NAME_NOISE is applied. A practice
+# literally named after the physician's own colliding surname --
+# "Do Family Medicine Clinic" for a physician named Anh Do, the organisation
+# form of the exact defect strip_name_noise() exists to prevent -- used to
+# strip "DO" unconditionally and lose the only shared identity token,
+# reporting no match between a person and their own practice.
+#
+# THIS MUST RUN ON THE RAW STRING, BEFORE name_key() UPPERCASES IT.
+# strip_name_noise()'s title-case carve-out ("Do", never "DO") is a case
+# distinction; running it after normalisation would destroy the very signal
+# it reads.
 .identity_tokens <- function(x) {
-  keys <- name_key(x, fold_hyphens = TRUE)
+  stripped <- strip_name_noise(x)
+  keys <- name_key(stripped, fold_hyphens = TRUE)
   lapply(strsplit(ifelse(is.na(keys), "", keys), " ", fixed = TRUE), function(t) {
     t <- t[nchar(t) >= 2L]
-    setdiff(t, c(ORG_NOISE, NAME_NOISE))
+    setdiff(t, ORG_NOISE)
   })
 }
 

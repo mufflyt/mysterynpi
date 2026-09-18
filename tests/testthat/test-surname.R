@@ -15,6 +15,21 @@ test_that("particles are convention, not identity", {
   expect_identical(surname_agreement("VAN DYKE", "VAN BUREN"), "conflicts")
 })
 
+test_that("surname_agreement uses the same engine as name_surname_match_type", {
+  # surname_agreement() used to run its own component/particle logic
+  # (surname_tokens(), a 4-character floor) instead of delegating to
+  # name_surname_match_type(). The two disagreed on real compound-name
+  # patterns: ABU was a stripped particle in the old logic (dropping the
+  # only shared component) but a real, retained component in the new one.
+  expect_identical(surname_agreement("Abu-Ghazaleh", "Abughazaleh"),
+                   "corroborates")
+  # a compound surname against the SHORT bare form of one of its parts: the
+  # old engine's 4-character component floor dropped "LEE" (3 characters)
+  # entirely, so this conflicted even though the surnames plainly share a
+  # component. name_surname_match_type()'s 2-character floor does not.
+  expect_identical(surname_agreement("Lee-Chen", "Lee"), "corroborates")
+})
+
 test_that("apostrophes are formatting, never a veto", {
   expect_identical(surname_agreement("O'BRIEN", "OBRIEN"), "corroborates")
   expect_identical(surname_agreement("D'ANGELO", "DANGELO"), "corroborates")

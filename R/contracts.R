@@ -222,8 +222,9 @@ assert_license_agreement_contract <- function(fn = license_agreement) {
 #' Assert that surname agreement still behaves as this caller relies on.
 #'
 #' Pins the component logic, the sub-floor exact match, the apostrophe fold,
-#' the particle refusal, and the maiden-as-middle rescue -- each a measured
-#' failure mode of exact-equality surname comparison.
+#' the concatenation fold, the particle refusal, and the maiden-as-middle
+#' rescue -- each a measured failure mode of exact-equality surname
+#' comparison.
 #'
 #' @param fn the function to test; defaults to [surname_agreement()].
 #' @return `TRUE` invisibly, or `stop()` naming the property that failed.
@@ -236,6 +237,9 @@ assert_surname_agreement_contract <- function(fn = surname_agreement) {
     list("LEE", "LEE",                    "corroborates"),
     # formatting must not veto
     list("O'BRIEN", "OBRIEN",             "corroborates"),
+    # concatenation must not veto -- the divergence found between this rule's
+    # former standalone component logic and name_surname_match_type()
+    list("ABU-GHAZALEH", "ABUGHAZALEH",   "corroborates"),
     # particles are convention, not identity
     list("DE LA CRUZ", "DE LEON",         "conflicts"),
     # recorded difference conflicts

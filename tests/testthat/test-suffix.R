@@ -36,6 +36,23 @@ test_that("extract_suffix must run BEFORE strip_name_noise, which deletes it", {
   expect_identical(extract_suffix("John Smith Jr")$suffix, "JR")
 })
 
+test_that("parse_person() gets the ordering right even if a caller wouldn't", {
+  # A pipeline that treats "strip titles" and "suffix handling" as two
+  # independently composable stages loses the suffix the moment titles are
+  # stripped first, because NAME_NOISE also lists JR/SR/II/III/IV (see the
+  # test above). parse_person() extracts the suffix BEFORE its own internal
+  # title-stripping runs, so this hazard cannot be triggered by composing
+  # stages in the wrong order -- the suffix is always safe by construction.
+  p <- parse_person("John Smith Jr, MD")
+  expect_identical(p$last, "SMITH")
+  expect_identical(p$suffix, "JR")
+
+  p2 <- parse_person(c("Powell, Henry, Jr.", "Jane Doe", NA_character_))
+  expect_identical(p2$first,  c("HENRY", "JANE", ""))
+  expect_identical(p2$last,   c("POWELL", "DOE", ""))
+  expect_identical(p2$suffix, c("JR", "", ""))
+})
+
 test_that("the father/son veto fires on recorded generations", {
   expect_identical(suffix_agreement("JR", "SR"), "conflicts")
   expect_identical(suffix_agreement("II", "III"), "conflicts")

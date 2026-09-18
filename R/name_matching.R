@@ -297,8 +297,19 @@ name_surname_match_type <- function(a, b) {
 
   vapply(seq_len(n), function(i) {
     x <- ca[[i]]; y <- cb[[i]]
+    # EXACT MUST BE CHECKED BEFORE THE EMPTY-COMPONENT SHORT-CIRCUIT BELOW.
+    # name_surname_components() drops anything under 2 letters, so an input
+    # like "A." or "9" yields zero components on BOTH sides even when the two
+    # raw strings are identical -- checking length(x)==0 first would report
+    # "none" for two recorded surnames that are byte-for-byte the same, which
+    # breaks the invariant every caller relies on: identical recorded input
+    # never conflicts (see the property battery in test-rule-contracts.R,
+    # "identical recorded inputs never conflict", which caught this when
+    # surname_agreement() was migrated onto this primitive).
+    if (!is.na(ka[i]) && !is.na(kb[i]) && nzchar(ka[i]) && identical(ka[i], kb[i])) {
+      return("exact")
+    }
     if (length(x) == 0L || length(y) == 0L) return("none")
-    if (!is.na(ka[i]) && !is.na(kb[i]) && identical(ka[i], kb[i])) return("exact")
     if (setequal(x, y)) return("separator_equivalent")
     # Concatenation requires MORE THAN ONE component on the joined side.
     # With a single component paste(x, collapse = "") is just x, so the test

@@ -41,6 +41,41 @@
   Base R only; no new dependency. The 88 distinct strings from that pipeline
   are pinned in `tests/testthat/fixtures/cms_medical_school_names.csv`.
 
+* `surname_agreement()` no longer runs its own component/particle logic
+  (`surname_tokens()`, `SURNAME_PARTICLES`, a 4-character floor). It now
+  delegates to `name_surname_match_type()`, this package's single
+  canonical surname-correspondence engine, which the two implementations
+  had silently drifted apart from: `surname_agreement("Abu-Ghazaleh",
+  "Abughazaleh")` returned `"conflicts"` because `ABU` was a stripped
+  particle in the old logic and the only shared component, while
+  `name_surname_match_type()` correctly reports `"concatenated_equivalent"`.
+  The migration also incidentally fixes a floor asymmetry (`"Lee-Chen"` vs
+  bare `"Lee"` now corroborates instead of conflicting, since the 3-letter
+  `LEE` no longer needs to clear a 4-character floor). The alternate-surname
+  rescue, the maiden-as-middle rescue, and the three-verdict contract are
+  unchanged; `name_surname_match_type()` now simply runs before them as the
+  primary correspondence check. `surname_tokens()` and `MIN_SURNAME_TOKEN`
+  remain, but only back `surname_token_table()`'s blocking-key use case now,
+  which is a different question (what is a safe join key?) from surname
+  agreement (do these two surnames correspond?).
+
+  Migrating exposed a bug in `name_surname_match_type()` itself: its
+  empty-component short-circuit ran BEFORE the exact-key check, so two
+  identical recorded surnames with zero letter-components (e.g. `"A."`)
+  were reported as `"none"` -- no correspondence -- instead of `"exact"`.
+  Fixed by checking exact-key identity first.
+
+* `parse_person()` now extracts the generational suffix (JR/SR/II/III/IV)
+  internally, BEFORE its own title-stripping runs, and returns it as a new
+  `suffix` column. Previously a caller had to know to call
+  `extract_suffix()` before `parse_person()`/`strip_name_noise()`, because
+  both of those treat suffix tokens as noise and silently delete them; a
+  pipeline that composed "strip titles" and "suffix handling" as separate
+  stages in the natural reading order lost every suffix -- and with it,
+  `suffix_agreement()`'s father/son veto -- with no error. Baking the
+  extraction into `parse_person()` removes the ordering hazard by
+  construction instead of relying on caller discipline.
+
 * Documentation for the decision: `vignette("nickname-policy")` -- the
   appendix that recomputes the verdict-layer ablation on every build,
   documents the candidate-layer result, the source-class gate, the

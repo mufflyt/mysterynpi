@@ -69,3 +69,21 @@ testthat::test_that("unequal-length vectors are refused, not recycled", {
   testthat::expect_error(
     mysterynpi::names_have_compatible_surname(c("A", "B", "C"), c("A", "B")))
 })
+
+testthat::test_that("identical raw keys are exact even with zero components", {
+  # name_surname_components() drops anything under 2 letters, so "A." (an
+  # initial-with-period, or any other short/non-alphabetic surname) yields
+  # zero components on both sides even when the two recorded surnames are
+  # byte-for-byte identical. The empty-component check used to run BEFORE
+  # the exact-key check and returned "none" for this case -- i.e. two
+  # identical recorded surnames reported as having no correspondence at
+  # all, which broke the invariant that identical recorded input never
+  # conflicts (caught by surname_agreement("A.", "A.") via the generic
+  # property battery in test-rule-contracts.R once surname_agreement() was
+  # migrated onto this primitive).
+  testthat::expect_identical(mysterynpi::name_surname_match_type("A.", "A."),
+                             "exact")
+  testthat::expect_true(mysterynpi::names_have_compatible_surname("A.", "A."))
+  testthat::expect_identical(mysterynpi::surname_agreement("A.", "A."),
+                             "corroborates")
+})

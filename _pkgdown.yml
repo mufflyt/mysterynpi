@@ -64,6 +64,9 @@ reference:
   - license_status_audit
   - surname_agreement
   - surname_rarity
+  - graduation_year_agreement
+  - graduation_year_band
+  - GRADUATION_YEAR_BANDS
 - title: Similarity scoring (candidate ranking, never verdicts)
   desc: The fenced exception; extracted from isochrones, quirks pinned.
   contents:

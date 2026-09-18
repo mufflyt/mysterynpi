@@ -41,10 +41,16 @@ THREE VERDICTS, SAME CONTRACT AS [middle_agreement()].
   bands (2 to 10 years either way). Absence is about 47% of pairs in the
   source measurement, so a caller that reads `"uninformative"` as
   disagreement discards half its population. The middle bands are reported
-  as uninformative rather than as a conflict because their evidence is
-  weak and NEGATIVE: a caller that scores must take it from `log2_lr`, and
-  a caller that scores a 2-to-3-year gap as evidence FOR a link has the sign
-  backwards.
+  as uninformative rather than as a conflict because no single one of them
+  is strong enough to veto a link — but be clear about what the verdict
+  costs a caller that reads only verdicts: among pairs where BOTH years are
+  known, landing in a middle band is about five times more likely for a
+  non-match than a match (8.4% against 42.2%, a ratio of 0.20). That is real
+  evidence, and the three-verdict vocabulary this package shares across its
+  rules has no way to say "weakly against". A caller that scores must
+  therefore take the middle bands from `log2_lr`, where the sign is
+  explicit; a caller that scores a 2-to-3-year gap as evidence FOR a link
+  has it backwards.
 * `"conflicts"` -- beyond ten years either way.
 
 USE THE CONFLICT AS A FLAG, NOT A VETO, with the discipline

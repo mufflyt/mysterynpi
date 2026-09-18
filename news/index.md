@@ -53,6 +53,56 @@
   pipeline are pinned in
   `tests/testthat/fixtures/cms_medical_school_names.csv`.
 
+- [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
+  no longer runs its own component/particle logic
+  ([`surname_tokens()`](https://mufflyt.github.io/mysterynpi/reference/surname_tokens.md),
+  `SURNAME_PARTICLES`, a 4-character floor). It now delegates to
+  [`name_surname_match_type()`](https://mufflyt.github.io/mysterynpi/reference/name_surname_match_type.md),
+  this package’s single canonical surname-correspondence engine, which
+  the two implementations had silently drifted apart from:
+  `surname_agreement("Abu-Ghazaleh", "Abughazaleh")` returned
+  `"conflicts"` because `ABU` was a stripped particle in the old logic
+  and the only shared component, while
+  [`name_surname_match_type()`](https://mufflyt.github.io/mysterynpi/reference/name_surname_match_type.md)
+  correctly reports `"concatenated_equivalent"`. The migration also
+  incidentally fixes a floor asymmetry (`"Lee-Chen"` vs bare `"Lee"` now
+  corroborates instead of conflicting, since the 3-letter `LEE` no
+  longer needs to clear a 4-character floor). The alternate-surname
+  rescue, the maiden-as-middle rescue, and the three-verdict contract
+  are unchanged;
+  [`name_surname_match_type()`](https://mufflyt.github.io/mysterynpi/reference/name_surname_match_type.md)
+  now simply runs before them as the primary correspondence check.
+  [`surname_tokens()`](https://mufflyt.github.io/mysterynpi/reference/surname_tokens.md)
+  and `MIN_SURNAME_TOKEN` remain, but only back
+  [`surname_token_table()`](https://mufflyt.github.io/mysterynpi/reference/surname_token_table.md)’s
+  blocking-key use case now, which is a different question (what is a
+  safe join key?) from surname agreement (do these two surnames
+  correspond?).
+
+  Migrating exposed a bug in
+  [`name_surname_match_type()`](https://mufflyt.github.io/mysterynpi/reference/name_surname_match_type.md)
+  itself: its empty-component short-circuit ran BEFORE the exact-key
+  check, so two identical recorded surnames with zero letter-components
+  (e.g. `"A."`) were reported as `"none"` – no correspondence – instead
+  of `"exact"`. Fixed by checking exact-key identity first.
+
+- [`parse_person()`](https://mufflyt.github.io/mysterynpi/reference/parse_person.md)
+  now extracts the generational suffix (JR/SR/II/III/IV) internally,
+  BEFORE its own title-stripping runs, and returns it as a new `suffix`
+  column. Previously a caller had to know to call
+  [`extract_suffix()`](https://mufflyt.github.io/mysterynpi/reference/extract_suffix.md)
+  before
+  [`parse_person()`](https://mufflyt.github.io/mysterynpi/reference/parse_person.md)/[`strip_name_noise()`](https://mufflyt.github.io/mysterynpi/reference/strip_name_noise.md),
+  because both of those treat suffix tokens as noise and silently delete
+  them; a pipeline that composed “strip titles” and “suffix handling” as
+  separate stages in the natural reading order lost every suffix – and
+  with it,
+  [`suffix_agreement()`](https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.md)’s
+  father/son veto – with no error. Baking the extraction into
+  [`parse_person()`](https://mufflyt.github.io/mysterynpi/reference/parse_person.md)
+  removes the ordering hazard by construction instead of relying on
+  caller discipline.
+
 - Documentation for the decision:
   [`vignette("nickname-policy")`](https://mufflyt.github.io/mysterynpi/articles/nickname-policy.md)
   – the appendix that recomputes the verdict-layer ablation on every

@@ -1,5 +1,19 @@
 # mysterynpi (development version)
 
+* `given_tokens()`, `middle_tokens()`, `name_given_tokens()` and
+  `name_leading_given()` no longer split a token on a hyphen. A genuinely
+  compound given or middle name ("Mary-Jane", "Anne-Marie") is ONE name,
+  exactly like `split_given()` already treats it -- but these four
+  tokenisers split on "-" like any other delimiter, and because
+  `person_matches()`/`middle_agreement()`/`names_have_compatible_given()`
+  corroborate on ANY shared token, that let a compound name satisfy a match
+  against an unrelated person sharing only ONE half of the compound:
+  `person_matches("SMITH", given_tokens("Mary-Jane"), "SMITH",
+  given_tokens("Jane"))` returned `TRUE`. Same defect class `fold_hyphens`'s
+  documentation already describes for given names (three cross-state false
+  identity matches), just not yet applied to these four functions when that
+  policy was set.
+
 * `strip_name_noise()`/`parse_person()`: the Vietnamese surname "Do" is no
   longer deleted as the DO credential (Doctor of Osteopathic Medicine).
   `NAME_NOISE` cannot record two answers for one token, and unconditional

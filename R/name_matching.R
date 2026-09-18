@@ -195,6 +195,16 @@ name_surname_components <- function(x) {
 #' @param first,middle `character`: given and middle name fields. `middle` may
 #'   be `NULL`.
 #' @return `list` of `character` token vectors, one per input element.
+#'
+#' @section A hyphen never splits a token:
+#' "Mary-Jane" is ONE given name. Splitting it into `"MARY"`/`"JANE"` let a
+#' compound given name satisfy [names_have_compatible_given()]'s
+#' `mode = "any_token"` shared-token test against an unrelated "Jane" who
+#' shares nothing but the second half of the compound -- the same false-
+#' corroboration defect [name_key()]'s `fold_hyphens` documentation
+#' describes for given names generally (three cross-state false identity
+#' matches), just not yet applied to this tokeniser. Consistent with
+#' [split_given()], which already never folds a given-name hyphen.
 #' @family name-matching
 #' @export
 name_given_tokens <- function(first, middle = NULL) {
@@ -205,7 +215,7 @@ name_given_tokens <- function(first, middle = NULL) {
   f2 <- f; f2[is.na(f2)] <- ""
   both <- trimws(paste(f2, m))
   lapply(both, function(s) {
-    t <- strsplit(s, "[^A-Za-z]+")[[1]]
+    t <- strsplit(s, "[^A-Za-z-]+")[[1]]
     t <- toupper(t[nzchar(t)])
     unique(t[nchar(t) >= 2L])
   })
@@ -218,7 +228,8 @@ name_given_tokens <- function(first, middle = NULL) {
 #' This is the one place an initial must survive: "Dowdle, S. Addreina" has
 #' leading given `S`, and dropping it would leave `ADDREINA` -- the middle name
 #' -- masquerading as the first, which is exactly the collision the positional
-#' mode exists to prevent.
+#' mode exists to prevent. As in [name_given_tokens()], a hyphen never splits
+#' the leading token: "Mary-Jane" is the whole leading given name, not "Mary".
 #'
 #' @param first `character`: the given-name field.
 #' @return `character` of the same length; `NA` where absent.
@@ -228,7 +239,7 @@ name_leading_given <- function(first) {
   k <- .nm_key(first)
   vapply(k, function(s) {
     if (is.na(s) || !nzchar(s)) return(NA_character_)
-    t <- strsplit(s, "[^A-Za-z]+")[[1]]
+    t <- strsplit(s, "[^A-Za-z-]+")[[1]]
     t <- t[nzchar(t)]
     if (length(t) == 0L) NA_character_ else toupper(t[1])
   }, character(1), USE.NAMES = FALSE)

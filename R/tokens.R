@@ -53,19 +53,39 @@ surname_tokens <- function(x, strip_alternates = TRUE) {
 #' it would make every initial-only row uninformative rather than comparable,
 #' and comparability is the whole point of the middle-name axis.
 #'
+#' A HYPHEN NEVER SPLITS A TOKEN HERE, for the same reason [name_key()]'s
+#' `fold_hyphens` must default `FALSE` and must never apply before
+#' [split_given()]: "Anne-Marie" is ONE compound name, not "Anne" plus an
+#' incidental, droppable "Marie". Splitting it produced a real false
+#' corroboration -- `middle_agreement(middle_tokens("Anne-Marie"),
+#' middle_tokens("Marie"))` returned `"corroborates"` against a middle name
+#' that is a DIFFERENT, unrelated person's, sharing only the second half of
+#' the compound. This is the identical defect class [name_key()]'s
+#' `fold_hyphens` documentation describes for given names (three cross-state
+#' false identity matches), just not yet applied to this tokeniser when that
+#' policy was set.
+#'
 #' @param x character vector.
 #' @param strip_alternates see [name_key()].
 #' @return list of character vectors, one per input.
 #' @export
 middle_tokens <- function(x, strip_alternates = TRUE) {
   k <- blank_na(x, strip_alternates)
-  lapply(strsplit(k, "[^A-Z']+"), function(t) unique(t[nzchar(t)]))
+  lapply(strsplit(k, "[^A-Z'-]+"), function(t) unique(t[nzchar(t)]))
 }
 
 #' Given-name tokens of length >= 2, initials EXCLUDED.
 #'
 #' Initials are dropped for matching because `"W."` is compatible with every
 #' W; they remain available in the parsed columns for reporting.
+#'
+#' A HYPHEN NEVER SPLITS A TOKEN HERE. "Mary-Jane" is ONE given name; splitting
+#' it into `"MARY"`/`"JANE"` let it satisfy [person_matches()]'s shared-token
+#' requirement against an unrelated "Jane" who shares nothing but the second
+#' half of the compound -- `person_matches("SMITH", given_tokens("Mary-Jane"),
+#' "SMITH", given_tokens("Jane"))` returned `TRUE` before this fix. Consistent
+#' with [split_given()], which already never folds a given-name hyphen for
+#' exactly this reason.
 #'
 #' @param given,middle character vectors.
 #' @param strip_alternates see [name_key()].
@@ -74,7 +94,7 @@ middle_tokens <- function(x, strip_alternates = TRUE) {
 given_tokens <- function(given, middle = NULL, strip_alternates = TRUE) {
   b <- if (is.null(middle)) blank_na(given, strip_alternates) else
     trimws(paste(blank_na(given, strip_alternates), blank_na(middle, strip_alternates)))
-  lapply(strsplit(b, "[^A-Z']+"), function(t) {
+  lapply(strsplit(b, "[^A-Z'-]+"), function(t) {
     t <- t[nchar(t) >= 2L]
     unique(t[nzchar(t)])
   })

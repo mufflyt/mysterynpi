@@ -106,3 +106,43 @@ test_that("the default format is unchanged", {
   expect_identical(parse_person("FINCH SHANNON")$last, "SHANNON")
   expect_identical(parse_person("Jan Mróz")$last, "MROZ")
 })
+
+test_that("the 'Do' surname is protected from the DO credential, given-first", {
+  # THE DEFECT: strip_name_noise("Anh Do") returned "Anh" -- the surname was
+  # deleted as the DO credential, which then read as unqueryable downstream
+  # (has_name_information() on an empty last name is FALSE) and silently
+  # dropped the record. Found in an isochrones consumer of this package
+  # (resolve_dea_action_to_npi()) whose DEA-action records for practitioners
+  # actually named "Do" were vanishing before ever reaching NPI lookup.
+  expect_identical(strip_name_noise("Anh Do"), "Anh Do")
+  expect_identical(strip_name_noise("Linda Do"), "Linda Do")
+  expect_identical(strip_name_noise("Nguyen Van Do"), "Nguyen Van Do")
+  expect_identical(parse_person("Anh Do")$last, "DO")
+  expect_identical(parse_person("Linda Do")$last, "DO")
+  expect_identical(parse_person("Nguyen Van Do")$last, "VAN DO")
+  expect_true(has_name_information(parse_person("Anh Do")$last))
+})
+
+test_that("the 'Do' surname is protected surname-first, including with a trailing credential", {
+  # Segment-scoped, not string-scoped: "Do, Anh, M.D." protects the one-token
+  # "Do" segment even though the credential segment "M.D." brings the WHOLE
+  # string's token count to three.
+  expect_identical(strip_name_noise("Do, Anh"), "Do Anh")
+  expect_identical(strip_name_noise("Do, Anh, M.D."), "Do Anh")
+  expect_identical(parse_person("Do, Anh")$last, "DO")
+  expect_identical(parse_person("Do, Anh, M.D.")$last, "DO")
+  # reverses to "Nguyen Van Do"; humaniformat's own multi-token surname
+  # grouping (unrelated to this carve-out) reads the last two tokens as one
+  # compound surname, same as parsing "Nguyen Van Do" directly would.
+  expect_identical(parse_person("Do, Nguyen Van")$last, "VAN DO")
+})
+
+test_that("the DO credential is still stripped -- the carve-out narrows NAME_NOISE, it does not widen it", {
+  expect_identical(strip_name_noise("John Smith DO"), "John Smith")
+  expect_identical(strip_name_noise("John Michael Smith DO"), "John Michael Smith")
+  expect_identical(strip_name_noise("John Smith D.O."), "John Smith")
+  expect_identical(strip_name_noise("Smith, John, MD"), "Smith John")
+  expect_identical(parse_person("John Smith DO")$last, "SMITH")
+  expect_identical(parse_person("John Michael Smith DO")$last, "SMITH")
+  expect_false(grepl("DO", parse_person("John Smith DO")$last, fixed = TRUE))
+})

@@ -37,16 +37,60 @@ NAME_NOISE <- c(
 #' meant to help it. Splitting on delimiters and dropping whole tokens cannot
 #' match a substring, so no name can be truncated here.
 #'
+#' THE "DO" CARVE-OUT. `"Do"` is both the `DO` credential (Doctor of
+#' Osteopathic Medicine) and a common Vietnamese surname, and `NAME_NOISE`
+#' cannot record both answers for one token. Unconditional stripping deletes
+#' the surname from every `"Anh Do"`/`"Do, Anh"`-shaped name --
+#' `strip_name_noise("Anh Do")` returned `"Anh"` before this carve-out, and
+#' since [parse_person()] threads its result through
+#' [has_name_information()], the record then read as unqueryable and was
+#' silently dropped rather than resolved. First found in an isochrones
+#' consumer (`resolve_dea_action_to_npi()`, `federal_register_dea_actions.R`)
+#' whose DEA-action records for practitioners actually named "Do" were
+#' vanishing before ever reaching NPI lookup.
+#'
+#' A `"do"`/`"DO"`/`"Do"` token (case-insensitive) is read as a SURNAME, not
+#' the credential, when EITHER (a) it is one of exactly two tokens within its
+#' own comma-delimited segment of the string -- a plausible `given surname`
+#' pair, e.g. `"Anh Do"`, or, since [parse_person()] hands this function each
+#' `"Last, First"` segment separately, a plausible lone surname segment, e.g.
+#' the `"Do"` in `"Do, Anh"` -- or (b) it is written in unambiguous title case
+#' `"Do"` (never `"DO"`), regardless of token count, e.g. `"Nguyen Van Do"`.
+#' Segment-scoped, not string-scoped: `"Do, Anh, M.D."` protects the
+#' one-token `"Do"` segment even though the credential segment `"M.D."`
+#' brings the WHOLE string's token count to three, because each comma
+#' segment is judged on its own, matching how [parse_person()] itself
+#' decides `"Last, First"` reversal segment-by-segment. All-caps `"DO"` in a
+#' three-or-more-token segment is still read as the credential (e.g.
+#' `"John Michael Smith DO"`, one segment, three tokens) -- this carve-out
+#' narrows `NAME_NOISE`'s reach for exactly the ambiguous case, it does not
+#' widen it, and every other `NAME_NOISE` token is unaffected.
+#'
 #' @param x character vector.
 #' @return character vector with credential and title tokens removed.
 #' @export
 strip_name_noise <- function(x) {
   vapply(as.character(x), function(s) {
     if (is.na(s)) return(NA_character_)
-    parts <- strsplit(s, "[[:space:],]+")[[1]]
-    parts <- parts[nzchar(parts)]
-    bare <- toupper(gsub("[.]", "", parts))
-    keep <- parts[!(bare %in% NAME_NOISE)]
+    # Segment on comma FIRST so the DO carve-out can be judged per segment
+    # (see "THE DO CARVE-OUT" above); each segment is then space-tokenised
+    # exactly as the original single-pass split did, so behaviour for every
+    # other token is unchanged.
+    segs <- strsplit(s, ",", fixed = TRUE)[[1]]
+    keep_segs <- lapply(segs, function(seg) {
+      parts <- strsplit(seg, "[[:space:]]+")[[1]]
+      parts <- parts[nzchar(parts)]
+      if (!length(parts)) return(character(0))
+      bare <- toupper(gsub("[.]", "", parts))
+      is_noise <- bare %in% NAME_NOISE
+      do_idx <- which(bare == "DO")
+      if (length(do_idx)) {
+        protect <- (length(parts) == 2L) | (parts[do_idx] == "Do")
+        is_noise[do_idx[protect]] <- FALSE
+      }
+      parts[!is_noise]
+    })
+    keep <- unlist(keep_segs, use.names = FALSE)
     out <- gsub("[.]", " ", paste(keep, collapse = " "))
     gsub("[[:space:]]+", " ", trimws(out))
   }, character(1), USE.NAMES = FALSE)

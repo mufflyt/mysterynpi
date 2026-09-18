@@ -1,3 +1,29 @@
+# mysterynpi (development version)
+
+* `strip_name_noise()`/`parse_person()`: the Vietnamese surname "Do" is no
+  longer deleted as the DO credential (Doctor of Osteopathic Medicine).
+  `NAME_NOISE` cannot record two answers for one token, and unconditional
+  stripping turned `parse_person("Anh Do")` into `last = ""`  --  silent, not
+  an error, and since callers thread the result through
+  `has_name_information()`, a downstream consumer (isochrones'
+  `resolve_dea_action_to_npi()`) was reading the empty surname as
+  unqueryable and dropping DEA-action records for practitioners actually
+  named "Do" before they ever reached NPI lookup. A `"do"`/`"DO"`/`"Do"`
+  token is now read as the surname, not the credential, when it is one of
+  exactly two tokens within its own comma-delimited segment (`"Anh Do"`,
+  or the one-token segment `"Do"` in `"Do, Anh"`), or written in
+  unambiguous title case regardless of token count (`"Nguyen Van Do"`).
+  Segment-scoped: `"Do, Anh, M.D."` still protects `"Do"` even though the
+  credential segment brings the whole string's token count to three. The
+  credential reading is unchanged everywhere else -- `"John Smith DO"` and
+  `"Smith, John, MD"` still strip to `"John Smith"`/`"Smith John"`. Found
+  during an isochrones QA pass on honorific/credential disambiguation;
+  isochrones had already independently discovered and fixed the same defect
+  once, locally, in one of its own three call sites
+  (`R/state_boards/normalize_state_board_roster.R`) before this was ported
+  upstream to fix it for every consumer of this package. 19 new assertions
+  in `test-parse-person.R`; full suite (1,540 assertions) green.
+
 # mysterynpi 0.4.0
 
 * `sql_npi_name()` now folds German digraphs (`ü`/`ö`/`ä`/`ß` -> `ue`/`oe`/

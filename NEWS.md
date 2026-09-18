@@ -1,5 +1,17 @@
 # mysterynpi (development version)
 
+* `sql_npi_name()` now folds German digraphs (`ü`/`ö`/`ä`/`ß` -> `ue`/`oe`/
+  `ae`/`ss`) before handing the column to `strip_accents()`, matching
+  `normalize_string()`'s own ordering. `strip_accents()` alone only drops a
+  diacritic, so it turned `"Müller"` into `"MULLER"` while
+  `normalize_string("Müller")` gives `"MUELLER"` -- a silent R/SQL parity
+  break for exactly the population the function's own docstring promises
+  parity for. Confirmed against a live DuckDB connection and caught by
+  isochrones' own downstream parity test (`test-sql-npi-name-helper.R`),
+  which now passes. `duckdb`/`DBI` added to Suggests for an executable
+  parity test in this package's own suite (`test-normalize.R`), not just a
+  claim in a docstring.
+
 * `graduation_year_agreement()` (new, with `graduation_year_band()` and the
   `GRADUATION_YEAR_BANDS` table): the package's first identity axis that is not
   a name. Names are the axis registries agree on because they copy one another

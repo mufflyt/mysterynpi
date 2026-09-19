@@ -2,24 +2,17 @@
 # the same corpus the verdict rule reads, and equivalence is the verdict
 # rule's own one-hop relation. These tests pin the consolidation -- including
 # the repairs it deliberately made to the old hand-rolled dictionary's
-# quirks -- and the dark-by-default gate on the fuzzy path.
+# quirks. The dark-by-default fence and the closure factory retired
+# 2026-09-19 when similarity became a first-class governed primitive
+# (R/similarity.R); the deprecated shim's compatibility contract is pinned
+# here and in test-similarity.R.
 
-skip_if_not_installed("stringdist")
 dict <- create_nickname_dictionary(verbose = FALSE)
 
-test_that("similarity scoring is dark by default, and says how to opt in", {
-  old <- options(mysterynpi.enable_similarity_scoring = NULL)
-  on.exit(options(old))
-  expect_error(calculate_enhanced_first_name_similarity("Robert", "Bob", dict),
-               "OFF by default.*enable_similarity_scoring")
-  f <- create_nickname_aware_similarity(dict)
-  expect_error(f("Robert", "Bob"), "OFF by default")
-  # deterministic dictionary lookups need no gate: they contain no fuzz
+test_that("deterministic dictionary lookups never needed a gate, and still work", {
   expect_true(are_nickname_equivalents("Bob", "Robert", dict))
   expect_true(are_nickname_equivalents("Beth", "Liz", dict))
 })
-
-old_opt <- options(mysterynpi.enable_similarity_scoring = TRUE)
 
 test_that("the dictionary IS the corpus, both directions", {
   expect_identical(dict$source,
@@ -38,13 +31,10 @@ test_that("the consolidation repaired the old dictionary's quirks", {
   expect_true(are_nickname_equivalents("RICK", "RICHARD", dict))
   expect_true(are_nickname_equivalents("RICK", "ERIC", dict))
   # JULIE-as-formal shadowed its nickname role; the corpus records the edge
-  expect_identical(
-    calculate_enhanced_first_name_similarity("JULIA", "JULIE", dict), 0.98)
+  expect_identical(given_name_similarity("JULIA", "JULIE"), NICKNAME_SIMILARITY)
 })
 
 test_that("canonical is a display label; the corpus has no hierarchy", {
-  # cycles are REAL: BOB and ROBERT each record the other as a nickname,
-  # so "the" canonical does not exist; the label is sorted-first, stable
   expect_true("ROBERT" %in% dict$nickname_to_formal[["BOB"]])
   expect_true("BOB" %in% dict$nickname_to_formal[["ROBERT"]])
   expect_identical(get_canonical_name("Bob", dict),
@@ -56,7 +46,6 @@ test_that("hub nicknames carry all their roots; display picks one stably", {
   roots <- dict$nickname_to_formal[["AL"]]
   expect_true(all(c("ALBERT", "ALEXANDER", "ALAN") %in% roots))
   expect_identical(get_canonical_name("AL", dict), sort(roots)[1])
-  # one hop in scores exactly as in verdicts
   expect_true(are_nickname_equivalents("AL", "ALBERT", dict))
   expect_true(are_nickname_equivalents("AL", "ALEXANDER", dict))
   expect_false(are_nickname_equivalents("ALBERT", "ALEXANDER", dict))
@@ -74,26 +63,30 @@ test_that("equivalence is the verdict rule's relation, by construction", {
   expect_identical(nickname_agreement("JANE", "JOAN"), "conflicts")
 })
 
-test_that("the score tiers are exact, one-hop, neutral, or Jaro-Winkler", {
-  expect_identical(calculate_enhanced_first_name_similarity("Robert", "Robert", dict), 1.0)
-  expect_identical(calculate_enhanced_first_name_similarity("Bob", "Rob", dict), 0.98)
-  expect_identical(calculate_enhanced_first_name_similarity("Robert", "Bob", dict), 0.98)
-  expect_identical(calculate_enhanced_first_name_similarity(NA, "Bob", dict), 0.5)
+test_that("the primitive's tiers are exact, one-hop, NA, or pinned Jaro-Winkler", {
+  expect_identical(given_name_similarity("Robert", "Robert"), 1)
+  expect_identical(given_name_similarity("Bob", "Rob"), NICKNAME_SIMILARITY)
+  expect_identical(given_name_similarity("Robert", "Bob"), NICKNAME_SIMILARITY)
+  expect_identical(given_name_similarity(NA_character_, "Bob"), NA_real_)
+  # the engine pins the WINKLER prefix (p = JW_PREFIX_WEIGHT); the retired
+  # call sites used stringdist's default p = 0 (plain Jaro) - a documented,
+  # versioned score change, pinned here so it can never drift silently
   expect_identical(
-    calculate_enhanced_first_name_similarity("ELISABETH", "ELIZABETH", dict),
-    1 - stringdist::stringdist("ELISABETH", "ELIZABETH", method = "jw"))
-  jw <- calculate_enhanced_first_name_similarity("Robert", "Xzqk", dict)
+    given_name_similarity("ELISABETH", "ELIZABETH", nickname_aware = FALSE),
+    1 - stringdist::stringdist("ELISABETH", "ELIZABETH", method = "jw",
+                               p = JW_PREFIX_WEIGHT))
+  jw <- given_name_similarity("Robert", "Xzqk")
   expect_true(jw >= 0 && jw < 0.94)
 })
 
 test_that("umlaut digraphs get the second Jaro-Winkler chance", {
-  a <- calculate_enhanced_first_name_similarity("MUELLER", "MULLER", dict)
-  b <- 1 - stringdist::stringdist("MUELLER", "MULLER", method = "jw")
+  a <- given_name_similarity("MUELLER", "MULLER", nickname_aware = FALSE)
+  b <- 1 - stringdist::stringdist("MUELLER", "MULLER", method = "jw",
+                                  p = JW_PREFIX_WEIGHT)
   expect_gte(a, b)
 })
 
-test_that("no dictionary means plain Jaro-Winkler, and NULL-safety holds", {
-  expect_identical(calculate_enhanced_first_name_similarity("A", "A"), 1.0)
+test_that("NULL-safety holds across the dictionary utilities", {
   expect_false(are_nickname_equivalents("Bob", "Rob", NULL))
   expect_identical(get_nicknames_for_name("ELIZABETH", NULL), character(0))
   expect_identical(get_canonical_name("Bob", NULL), "Bob")
@@ -109,17 +102,10 @@ test_that("the cache returns one dictionary, and refresh rebuilds", {
   expect_identical(a$formal_count, c$formal_count)
 })
 
-test_that("the factory binds the dictionary", {
-  f <- create_nickname_aware_similarity(dict)
-  expect_identical(f("Robert", "Bob"), 0.98)
-})
-
-test_that("scores rank and verdicts decide: the fence in one assertion", {
+test_that("scores inform and verdicts decide: the separation in one assertion", {
   # the score puts BETH/LIZ at 0.98; the middle-name VERDICT still
   # conflicts on the same pair -- both true at once is the entire design
-  expect_identical(calculate_enhanced_first_name_similarity("BETH", "LIZ", dict), 0.98)
+  expect_identical(given_name_similarity("BETH", "LIZ"), NICKNAME_SIMILARITY)
   expect_identical(middle_agreement(middle_tokens("BETH"),
                                     middle_tokens("LIZ")), "conflicts")
 })
-
-options(old_opt)

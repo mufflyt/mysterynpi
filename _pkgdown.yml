@@ -76,7 +76,7 @@ reference:
   - taxonomy_tiebreak_rank
   - taxonomy_family_pattern
   - TAXONOMY_FAMILY_PATTERNS
-- title: Similarity scoring (candidate ranking, never verdicts)
+- title: Similarity primitives (governed numeric scores; verdicts stay categorical)
   desc: The fenced exception; extracted from isochrones, quirks pinned.
   contents:
   - create_nickname_dictionary
@@ -85,7 +85,12 @@ reference:
   - are_nickname_equivalents
   - get_nicknames_for_name
   - calculate_enhanced_first_name_similarity
-  - create_nickname_aware_similarity
+  - surname_similarity
+  - middle_name_similarity
+  - given_name_similarity
+  - assert_similarity_contract
+  - JW_PREFIX_WEIGHT
+  - NICKNAME_SIMILARITY
 - title: Clerical review
   desc: A blinded, class-stratified sample, and the precision it buys.
   contents:

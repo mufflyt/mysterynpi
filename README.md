@@ -143,21 +143,22 @@ never coexisted — rather than evidence the threshold was right.
 
 Two specific exclusions worth naming:
 
-- **Similarity is first-class and governed (2026-09-19, owner ruling).**
-  Jaro-Winkler and Levenshtein are deterministic functions; the defect was
-  never fuzz itself but hand-rolled, inconsistent, unaudited fuzz spread
-  across downstream pipelines. `surname_similarity()`,
-  `middle_name_similarity()` and `given_name_similarity()` are the one
-  governed home: one normalisation (the package's own keys), pinned method
-  parameters (`JW_PREFIX_WEIGHT`), and a missing contract callers can pin
-  with `assert_similarity_contract()` -- missing + present is `NA`, never
-  zero and never a neutral constant, because "we do not know" must never
-  score like "utterly different". What remains machine-enforced by the
-  call-graph guard: the categorical `*_agreement()` verdicts cannot reach
-  any similarity engine through any call chain -- a score informs the
-  governed decision layer, it never silently flips a verdict. There is
-  still ONE nickname system: `given_name_similarity()` and
-  `nickname_agreement()` read the same `NICKNAME_EDGES` truth.
+- **Fuzzy person-name matching is REMOVED, not fenced (2026-09-19, owner
+  ruling).** A Jaro-Winkler scoring pair briefly lived here behind an
+  opt-in fence; both the pair and the fence are gone, because the fence
+  legitimized the wrong thing. The identity architecture is: exact
+  normalisation, explicit equivalence, declared aliases (the recorded
+  `NICKNAME_EDGES` corpus - JULIA/JULIE is a declared edge, not a spelling
+  tolerance), initials, documented surname history, credentials, gender
+  evidence, and structured identity evidence. Approximate spelling
+  similarity is not - a spelling difference no named deterministic rule
+  explains remains a conflict (LEE/LEA conflicts, and nothing numeric
+  exists to soften it). `test-no-fuzzy.R` asserts there is NOTHING to
+  reach: zero fuzzy references anywhere in the package, no exempt module,
+  no fuzzy dependency in any tier of DESCRIPTION, and a mutation proves
+  the guard fires on a direct reintroduction. The categorical verdicts -
+  including `given_name_agreement()` with its named detail states - carry
+  everything the scores were doing that was worth keeping.
 - **No edit-distance tolerance on the middle name.** One was added and removed
   the same day. Measured: it changed 64 of 30,740 candidate pairs and was worth
   22 records, while admitting pairs that are genuinely different given names

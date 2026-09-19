@@ -136,16 +136,14 @@ CATALOGUE <- list(
        repl = "if (min_match_rate > 1 && !is.na(ledger$match_rate_x) &&",
        why  = "the coverage contract silently checks nothing; the deprecated safe_join defect returns"),
   # RETIRED 2026-09-19 with its subject: `similarity-gate-removed` mutated the
-  # dark-by-default option fence, which was itself retired when similarity
-  # became a first-class governed primitive (owner ruling; see NEWS 0.6.0).
-  # A mutant whose target line no longer exists measures nothing, and the
-  # protection that mattered was never the option - it is the reachability
-  # guard, which the mutant below still proves fires.
-  list(id = "middle-agreement-smuggles-similarity",
+  # dark-by-default option fence, and the fence is gone because THE ENGINE is
+  # gone (owner ruling: no fuzzy person-name matching in any form). A mutant
+  # whose target line no longer exists measures nothing.
+  list(id = "middle-agreement-reintroduces-edit-distance",
        file = "R/agreement.R",
        find = "    \"conflicts\"\n  }, character(1))",
-       repl = "    if (given_name_similarity(a[1], b[1]) > 0.9) \"corroborates\" else \"conflicts\"\n  }, character(1))",
-       why  = "the verdict path reaches the similarity engine; JULIA corroborates JULIE and the reachability guard must fire"),
+       repl = "    if (utils::adist(a[1], b[1]) <= 1) \"corroborates\" else \"conflicts\"\n  }, character(1))",
+       why  = "a direct edit-distance reintroduction in a verdict; the no-fuzzy source, parse-tree and reachability guards must all fire"),
   list(id = "npi-search-alias-back-on",
        file = "R/npi_search.R",
        find = 'if (!is.null(fn)) params <- c(params, use_first_name_alias = "False")',

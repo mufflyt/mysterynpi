@@ -1,39 +1,25 @@
 # =============================================================================
-# Nickname dictionary utilities + one deprecated scoring shim
+# Nickname dictionary: deterministic equivalence from the one pinned corpus
 # =============================================================================
 #
-# HISTORY: this file was the package's "fenced exception" while the package
-# refused numeric similarity outright. That posture was REVERSED by owner
-# ruling on 2026-09-19 - Jaro-Winkler and Levenshtein are deterministic
-# functions, and the real defect was hand-rolled, inconsistent, unaudited
-# fuzz downstream. First-class similarity primitives now live in
-# R/similarity.R with a pinned missing-aware contract. What REMAINS true,
-# and is still proven by test-no-fuzzy.R's call-graph reachability guard:
-# the categorical *_agreement() verdicts are similarity-free - an
-# edit-distance tolerance that silently converts "conflicts" to
-# "corroborates" is still a defect, because similarity informs the governed
-# decision layer, it never flips a verdict.
+# HISTORY: this file once held the package's "fenced exception" - a
+# Jaro-Winkler scoring pair walled off from the verdicts. The fence is gone
+# because THE MACHINERY IS GONE (owner ruling, 2026-09-19): mysterynpi must
+# not provide fuzzy person-name matching in any form - no option, no
+# deprecated export, no dark-by-default capability. Approximate spelling
+# similarity is not part of the identity architecture; exact normalisation,
+# declared nickname equivalence, initials, documented surname history and
+# structured evidence are. test-no-fuzzy.R now asserts there is NOTHING to
+# reach: zero fuzzy references anywhere in the package, with no exempt
+# module.
 #
-# What lives here now: the nickname dictionary utilities (deterministic
-# table reads over NICKNAME_EDGES) and the deprecated single-pair scoring
-# shim retained for signature compatibility.
-#
-# ONE NICKNAME SYSTEM (2026-09-05, by owner decision). The scoring API was
-# first extracted verbatim from mufflyt/isochrones R/nickname_system.R and
-# proven byte-identical; it was then CONSOLIDATED onto NICKNAME_EDGES -- the
-# same pinned corpus the nickname_agreement() verdict reads -- because two
-# nickname tables is how two layers quietly disagree about what a name may
-# stand for. Consolidation is a deliberate, versioned score change: the
-# hand-rolled dictionary's quirks (RICK resolving to ERIC by last-write,
-# shadowed duplicate entries, JULIE-as-formal hiding its nickname role) are
-# FIXED here, not preserved, and the old byte-identical behaviour remains
-# available only in history. Equivalence now uses the verdict rule's own
+# ONE NICKNAME SYSTEM (2026-09-05, by owner decision). What remains here is
+# the deterministic dictionary derived from NICKNAME_EDGES - the same pinned
+# corpus nickname_agreement() reads - so every consumer shares ONE truth
+# about what a name may stand for. Equivalence is the verdict rule's own
 # one-hop relation: a recorded edge or a shared formal root, never
 # transitive closure, so AL may stand for ALBERT or ALEXANDER without ever
-# welding ALBERT to ALEXANDER -- in scores exactly as in verdicts.
-#
-# stringdist is a Suggests, required at the point of use only, so the
-# package's verdict machinery installs and runs without it.
+# welding ALBERT to ALEXANDER.
 # =============================================================================
 
 .nickname_cache <- new.env(parent = emptyenv())
@@ -148,39 +134,4 @@ get_nicknames_for_name <- function(formal_name, nickname_dict) {
     return(nickname_dict$formal_to_nicknames[[formal_clean]])
   }
   character(0)
-}
-
-#' Deprecated: use [given_name_similarity()]
-#'
-#' Superseded 2026-09-19 when similarity became a first-class governed
-#' primitive (owner ruling: the defect was hand-rolled fuzz, not fuzz). The
-#' replacement differs in exactly one semantic: MISSING input returns
-#' `NA_real_`, never this function's `0.5` neutral scalar - a neutral
-#' constant for absence is the absence-into-evidence conversion the package
-#' forbids everywhere else. This wrapper preserves the old single-pair
-#' contract (including the 0.5) so a deprecation period cannot silently
-#' change scores; migrate to [given_name_similarity()] and handle `NA`.
-#' The `options(mysterynpi.enable_similarity_scoring)` opt-in fence is
-#' retired with the same ruling.
-#'
-#' @param name1,name2 names to compare.
-#' @param nickname_dict ignored (the consolidated corpus is always used);
-#'   accepted for signature compatibility.
-#' @return numeric in `[0, 1]`; `0.5` for missing input (old contract).
-#' @keywords internal
-#' @export
-calculate_enhanced_first_name_similarity <- function(name1, name2,
-                                                     nickname_dict = NULL) {
-  .Deprecated("given_name_similarity", package = "mysterynpi",
-              msg = paste0(
-    "calculate_enhanced_first_name_similarity() is deprecated: use ",
-    "given_name_similarity(), which is vectorized and returns NA (not 0.5) ",
-    "for missing input."))
-  if (is.null(name1) || is.null(name2) || is.na(name1) || is.na(name2)) {
-    return(0.5)
-  }
-  # old contract: a NULL dictionary meant plain Jaro-Winkler, no nickname step
-  out <- given_name_similarity(as.character(name1)[1], as.character(name2)[1],
-                               nickname_aware = !is.null(nickname_dict))
-  if (is.na(out)) 0.5 else out
 }

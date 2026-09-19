@@ -1,42 +1,36 @@
 # mysterynpi 0.6.0
 
-* PRINCIPLE CORRECTED (owner ruling, 2026-09-19): the package is the
-  canonical DETERMINISTIC identity-resolution layer, and numeric similarity
-  is deterministic. The no-fuzzy posture was aimed at the right defect --
-  an edit-distance tolerance silently flipping a verdict -- but drew the
-  line in the wrong place: the 2026-09-19 isochrones survey found ~24
-  hand-rolled similarity call sites, each with its own normalisation, its
-  own missing-value behaviour (usually missing-scores-as-zero), and its own
-  thresholds. The cure is one governed home, not prohibition.
+* The package contains NO fuzzy person-name matching. Unreleased similarity
+  APIs introduced after 0.5.0 were removed before this release, along with
+  the 0.5.0-era fenced scoring pair
+  (`calculate_enhanced_first_name_similarity()`,
+  `create_nickname_aware_similarity()`), its opt-in option, and the
+  stringdist dependency. The architectural rule: exact normalization,
+  explicit equivalence, declared aliases, initials, documented surname
+  history, credentials, gender evidence, and structured identity evidence
+  are allowed; approximate spelling similarity is not. `test-no-fuzzy.R`
+  enforces it with no exempt module (source scan, parse-tree scan,
+  namespace reachability, dependency assertion, structural absence of the
+  deleted names), and a mutation proves the guards fire on a direct
+  `adist()` reintroduction.
 
-* New first-class similarity primitives (`surname_similarity()`,
-  `middle_name_similarity()`, `given_name_similarity()`): vectorized,
-  length-disciplined (no silent recycling), computed on the package's own
-  compact keys so punctuation and case never masquerade as distance, with
-  configurable Jaro-Winkler (`p` pinned as `JW_PREFIX_WEIGHT = 0.1` -- note
-  the retired call sites used stringdist's default p = 0, a documented
-  score change) and normalised Levenshtein. THE MISSING CONTRACT IS THE
-  FEATURE: missing + present = `NA_real_`, missing + missing = `NA_real_`,
-  only two observed values produce a number. `assert_similarity_contract()`
-  lets downstream suites pin all of it. `given_name_similarity()` is
-  nickname-aware via the one corpus (`NICKNAME_SIMILARITY = 0.98` on a
-  one-hop edge), with the umlaut-digraph second chance retained.
+* New: `given_name_agreement()` - categorical three-valued given-name
+  verdict returning `data.frame(verdict, reason)`: verdict in the house
+  vocabulary (`corroborates` / `conflicts` / `uninformative`), reason
+  naming the deterministic rule behind a corroboration (`exact`,
+  `nickname` for a RECORDED one-hop `NICKNAME_EDGES` relation, `initial`).
+  Missing is always `uninformative` - never a bad match, never a number.
+  JULIA/JULIE corroborates because the corpus records the edge; LEE/LEA
+  conflicts because nothing does. A full-corpus invariant test pins that
+  `are_nickname_equivalents()`, `nickname_agreement()` and
+  `given_name_agreement()` can never give opposite answers to the same
+  recorded relationship. `assert_given_name_agreement_contract()` ships
+  alongside, falsifiable by construction.
 
-* `calculate_enhanced_first_name_similarity()` is DEPRECATED (its 0.5
-  neutral scalar for missing input is exactly the absence-into-evidence
-  conversion the contract forbids; the wrapper preserves the old contract
-  verbatim so deprecation cannot silently change scores).
-  `create_nickname_aware_similarity()` is removed (the new signature
-  obsoletes the closure factory). The dark-by-default
-  `options(mysterynpi.enable_similarity_scoring)` fence is retired --
-  similarity is a first-class primitive now, and the protection that
-  mattered was never the option: it is the call-graph reachability guard,
-  which is RETARGETED, not retired. `test-no-fuzzy.R` still proves no
-  `*_agreement()` verdict can reach a similarity engine transitively.
-
-* stringdist moves Suggests -> Imports (>= 0.9.10): the one similarity
-  engine is a declared, pinned dependency, and the guard proves the verdict
-  machinery still cannot reach it.
+* `R/similarity_scoring.R` is renamed `R/nickname_dictionary.R`: what
+  remains there is the deterministic dictionary derived from
+  `NICKNAME_EDGES` (five table-read utilities), and the old filename
+  implied machinery that no longer exists.
 
 # mysterynpi 0.5.0
 

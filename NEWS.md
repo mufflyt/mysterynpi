@@ -1,5 +1,18 @@
 # mysterynpi (development version)
 
+* Documented (not changed) a third instance of the `"Do"` collision
+  class: `SURNAME_PARTICLES` lists `"DO"` as a genuine Portuguese/
+  Lusophone particle (as in `"do Carmo"`), which collides with `"Do"` as
+  a standalone Vietnamese surname. `parse_person("Do Nguyen Van", format
+  = "surname_first")` reads leading `"Do"` as a particle and walks one
+  token further, corrupting the real surname into a false compound
+  (`"Do Nguyen"`) while losing the real given name. Removing `"DO"` from
+  the list would equally break the genuine Portuguese case. No evidence
+  either population is rarer in this package's target data, so -- same
+  precedent as the all-caps DO/Ma limitations already documented --
+  this is a documented known limitation, not an unproven directional
+  fix. See `SURNAME_PARTICLES`'s docs.
+
 * The `"Do"` surname/credential carve-out is generalised to `"Ma"`
   (`SURNAME_CREDENTIAL_COLLISIONS`, new export). `"Ma"` is a top-20 Chinese
   surname (Yo-Yo Ma, Jack Ma) that is ALSO `NAME_NOISE`'s spelling for the

@@ -13,7 +13,7 @@ and comparability is the whole point of the middle-name axis."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,20 @@ and comparability is the whole point of the middle-name axis.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>list of character vectors, one per input.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A HYPHEN NEVER SPLITS A TOKEN HERE, for the same reason [name_key()]'s
+`fold_hyphens` must default `FALSE` and must never apply before
+[split_given()]: "Anne-Marie" is ONE compound name, not "Anne" plus an
+incidental, droppable "Marie". Splitting it produced a real false
+corroboration – `middle_agreement(middle_tokens("Anne-Marie"),
+middle_tokens("Marie"))` returned `"corroborates"` against a middle name
+that is a DIFFERENT, unrelated person's, sharing only the second half of
+the compound. This is the identical defect class [name_key()]'s
+`fold_hyphens` documentation describes for given names (three cross-state
+false identity matches), just not yet applied to this tokeniser when that
+policy was set.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

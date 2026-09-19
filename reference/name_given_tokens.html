@@ -15,7 +15,7 @@ does carry information.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,19 @@ be `NULL`.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>`list` of `character` token vectors, one per input element.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="a-hyphen-never-splits-a-token">A hyphen never splits a token<a class="anchor" aria-label="anchor" href="#a-hyphen-never-splits-a-token"></a></h2>
+
+
+<p>"Mary-Jane" is ONE given name. Splitting it into `"MARY"`/`"JANE"` let a
+compound given name satisfy [names_have_compatible_given()]'s
+`mode = "any_token"` shared-token test against an unrelated "Jane" who
+shares nothing but the second half of the compound – the same false-
+corroboration defect [name_key()]'s `fold_hyphens` documentation
+describes for given names generally (three cross-state false identity
+matches), just not yet applied to this tokeniser. Consistent with
+[split_given()], which already never folds a given-name hyphen.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -21,6 +21,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ORG_NOISE.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ROSTER_BENCHMARK.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SOURCE_CLASSES.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_CREDENTIAL_COLLISIONS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_FREQUENCIES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_PARTICLES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/TAXONOMY_FAMILY_PATTERNS.html</loc></url>
@@ -33,6 +34,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_org_name_matches_person_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/award_contested.html</loc></url>

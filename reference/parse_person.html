@@ -11,7 +11,7 @@ returns, verbatim:"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,7 +135,10 @@ path, not two. The surname span is the first token plus any leading
 `"JUAN DE LA CRUZ"`. Strings already carrying a comma are left to the
 comma logic. Limitation: an unhyphenated compound surname with no
 particle (`"SMITH JONES MARY"`) reads as surname `SMITH` – there is no
-signal to do better without a recorded surname to check against.</p>
+signal to do better without a recorded surname to check against.
+[SURNAME_PARTICLES] has its own documented limitation for a leading
+`"Do"`: a genuine Portuguese particle and a standalone Vietnamese
+surname are indistinguishable from the string alone, see its docs.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

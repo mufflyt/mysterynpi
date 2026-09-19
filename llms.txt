@@ -272,6 +272,8 @@ Drop-in replacements for the pipelines this was extracted from.
   : Strip credential and title TOKENS from a personal-name string
 - [`NAME_NOISE`](https://mufflyt.github.io/mysterynpi/reference/NAME_NOISE.md)
   : Credential and title tokens seen in provider directories.
+- [`SURNAME_CREDENTIAL_COLLISIONS`](https://mufflyt.github.io/mysterynpi/reference/SURNAME_CREDENTIAL_COLLISIONS.md)
+  : \`NAME_NOISE\` tokens that are ALSO common real surnames.
 
 ## Parsing and tokens
 
@@ -489,6 +491,9 @@ Assertions a caller runs in its own suite.
 - [`assert_license_status_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_license_status_contract.md)
   : Assert that license-status normalisation still refuses the 4x
   inflation.
+- [`assert_org_name_matches_person_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_org_name_matches_person_contract.md)
+  : Assert that the person/organization name bridge still behaves as
+  relied on.
 
 # Articles
 

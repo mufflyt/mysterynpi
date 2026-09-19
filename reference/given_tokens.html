@@ -9,7 +9,7 @@ W; they remain available in the parsed columns for reporting.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,6 +67,16 @@ W; they remain available in the parsed columns for reporting.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>list of character vectors.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A HYPHEN NEVER SPLITS A TOKEN HERE. "Mary-Jane" is ONE given name; splitting
+it into `"MARY"`/`"JANE"` let it satisfy [person_matches()]'s shared-token
+requirement against an unrelated "Jane" who shares nothing but the second
+half of the compound – `person_matches("SMITH", given_tokens("Mary-Jane"),
+"SMITH", given_tokens("Jane"))` returned `TRUE` before this fix. Consistent
+with [split_given()], which already never folds a given-name hyphen for
+exactly this reason.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

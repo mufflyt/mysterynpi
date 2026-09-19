@@ -4,7 +4,9 @@ The first token of the given-name field, INCLUDING a single-letter
 initial. This is the one place an initial must survive: "Dowdle, S.
 Addreina" has leading given \`S\`, and dropping it would leave
 \`ADDREINA\` – the middle name – masquerading as the first, which is
-exactly the collision the positional mode exists to prevent.
+exactly the collision the positional mode exists to prevent. As in
+\[name_given_tokens()\], a hyphen never splits the leading token:
+"Mary-Jane" is the whole leading given name, not "Mary".
 
 ## Usage
 

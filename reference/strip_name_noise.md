@@ -23,3 +23,61 @@ strip_name_noise(x)
 ## Value
 
 character vector with credential and title tokens removed.
+
+## Details
+
+THE "DO" CARVE-OUT. \`"Do"\` is both the \`DO\` credential (Doctor of
+Osteopathic Medicine) and a common Vietnamese surname, and
+\`NAME_NOISE\` cannot record both answers for one token. Unconditional
+stripping deletes the surname from every \`"Anh Do"\`/\`"Do,
+Anh"\`-shaped name – \`strip_name_noise("Anh Do")\` returned \`"Anh"\`
+before this carve-out, and since \[parse_person()\] threads its result
+through \[has_name_information()\], the record then read as unqueryable
+and was silently dropped rather than resolved. First found in an
+isochrones consumer (\`resolve_dea_action_to_npi()\`,
+\`federal_register_dea_actions.R\`) whose DEA-action records for
+practitioners actually named "Do" were vanishing before ever reaching
+NPI lookup.
+
+A \`"do"\`/\`"DO"\`/\`"Do"\` token (case-insensitive) is read as a
+SURNAME, not the credential, when EITHER (a) it is one of exactly two
+tokens within its own comma-delimited segment of the string – a
+plausible \`given surname\` pair, e.g. \`"Anh Do"\`, or, since
+\[parse_person()\] hands this function each \`"Last, First"\` segment
+separately, a plausible lone surname segment, e.g. the \`"Do"\` in
+\`"Do, Anh"\` – or (b) it is written in unambiguous title case \`"Do"\`
+(never \`"DO"\`), regardless of token count, e.g. \`"Nguyen Van Do"\`.
+Segment-scoped, not string-scoped: \`"Do, Anh, M.D."\` protects the
+one-token \`"Do"\` segment even though the credential segment \`"M.D."\`
+brings the WHOLE string's token count to three, because each comma
+segment is judged on its own, matching how \[parse_person()\] itself
+decides \`"Last, First"\` reversal segment-by-segment. All-caps \`"DO"\`
+in a three-or-more-token segment is still read as the credential (e.g.
+\`"John Michael Smith DO"\`, one segment, three tokens) – this carve-out
+narrows \`NAME_NOISE\`'s reach for exactly the ambiguous case, it does
+not widen it, and every other \`NAME_NOISE\` token is unaffected.
+
+THE SAME CARVE-OUT, GENERALISED. \`"Do"\` is not the only \`NAME_NOISE\`
+token that is also a common real surname – see
+\[SURNAME_CREDENTIAL_COLLISIONS\] for the full curated set (currently
+\`DO\` and \`MA\`) and the rule for exactly which tokens qualify. Every
+entry gets the identical two-part protection described above, keyed on
+its own title-case spelling.
+
+KNOWN LIMITATION: A SEGMENT THAT IS ENTIRELY UPPERCASE HAS NO CASE
+SIGNAL LEFT TO GIVE. Case is the only thing that distinguishes a genuine
+three-or-more-token compound surname (\`"Nguyen Van Do"\`) from a
+genuine three-or-more-token credentialed name (\`"John Michael Smith
+DO"\`) once both are past the two-token rule. A source that uppercases
+the whole record – common in bulk exports – erases that signal for BOTH
+directions at once: \`"NGUYEN VAN DO"\` reads as credentialed and loses
+its real surname (\`strip_name_noise("NGUYEN VAN DO")\` returns
+\`"NGUYEN VAN"\`, not \`"NGUYEN VAN DO"\`), and there is no available
+string-only fix, since any rule that recovers the surname in that case
+would just as wrongly protect \`"JOHN MICHAEL SMITH DO"\`'s real
+credential. Deciding which failure to prefer needs a prior on which is
+more common in a given pipeline's source data, which this package
+deliberately does not assume. A caller feeding it known-uppercase-only
+source data and needing better than this should resolve the ambiguity
+before calling in, e.g. by checking a name/roster field the source
+already disambiguates elsewhere.

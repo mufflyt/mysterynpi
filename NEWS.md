@@ -1,5 +1,23 @@
 # mysterynpi 0.6.0
 
+* New: `blocking_key()` - one governed construction for the keys candidate
+  generation joins on, with named modes `surname_initial`
+  (`<compact surname>|<first initial>`, delimiter part of the contract so
+  field boundaries can never collide), `prefix_n` (explicit `n` required -
+  the audited call sites used 2, 3 and 4 with materially different pools,
+  so no default is safe), and `compact`. Built from the primitives whose
+  semantics match blocking: `compact_name_key()` and
+  `extract_first_initial()` (which refuses to emit a non-letter, where
+  `first_initial()`'s join-key contract would hand back `-` for a
+  punctuation-only name). Insufficient input is `NA_character_`, never a
+  partial key. Parity with the nine legacy state-extractor constructions
+  is characterized at the level of the RESULTING KEY: all nine agree with
+  each other everywhere (the first-token truncation two sites skip cannot
+  change an initial), the canonical key agrees with them on plain-ASCII
+  names, and the four genuine canonicalization deltas (punctuation
+  compacts, spaces compact, accents transliterate, German digraphs
+  romanise) each ship as a tested legacy-vs-canonical fixture.
+
 * The package contains NO fuzzy person-name matching. Unreleased similarity
   APIs introduced after 0.5.0 were removed before this release, along with
   the 0.5.0-era fenced scoring pair

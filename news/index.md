@@ -1,6 +1,6 @@
 # Changelog
 
-## mysterynpi (development version)
+## mysterynpi 0.6.0
 
 - Documented (not changed) a third instance of the `"Do"` collision
   class: `SURNAME_PARTICLES` lists `"DO"` as a genuine Portuguese/
@@ -149,8 +149,6 @@
   was ported upstream to fix it for every consumer of this package. 19
   new assertions in `test-parse-person.R`; full suite (1,540 assertions)
   green.
-
-## mysterynpi 0.6.0
 
 - New UDF-free SQL builders in the join-key family, both proven by
   execution against a real DuckDB:

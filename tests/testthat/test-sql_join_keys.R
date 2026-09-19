@@ -65,9 +65,62 @@ test_that("sql_middle_initial_guard: absence passes, contradiction fails (execut
   })
 })
 
+test_that("sql_first_initial agrees with extract_first_initial on ASCII (parity)", {
+  with_duck(function(con) {
+    inputs <- c("Mary", "mary ann", "(Sandra) Theresa", " 'Anne", "J",
+                "---", "", NA_character_, "  ", "j. robert")
+    duckdb::duckdb_register(con, "t3", data.frame(x = inputs, stringsAsFactors = FALSE))
+    sql_side <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v FROM t3",
+                                             sql_first_initial("x")))$v
+    r_side <- extract_first_initial(inputs)
+    expect_identical(sql_side, unname(r_side))
+    # and the shape contract explicitly: no '', no punctuation byte, ever
+    expect_false(any(sql_side %in% c("", "(", "-", "'"), na.rm = TRUE))
+    expect_true(all(is.na(sql_side) | grepl("^[A-Z]$", sql_side)))
+  })
+})
+
+test_that("KNOWN DIVERGENCE: accented first letters split R and UDF-free SQL", {
+  # NOT a parity claim - the documented ASCII boundary, pinned so it cannot
+  # silently change. R transliterates via normalize_string(); UDF-free SQL
+  # strips the non-ASCII letter and yields the first letter of the REMAINDER.
+  with_duck(function(con) {
+    duckdb::duckdb_register(con, "t4", data.frame(x = "Émile", stringsAsFactors = FALSE))
+    sql_side <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v FROM t4",
+                                             sql_first_initial("x")))$v
+    expect_identical(extract_first_initial("Émile"), "E")  # transliterated
+    expect_identical(sql_side, "M")                         # 'MILE' remainder
+  })
+})
+
+test_that("sql_quote_literal round-trips values through a real database", {
+  with_duck(function(con) {
+    values <- c("O'Brien", "D'Angelo-Smith", "already ''doubled''",
+                "", "with;semicolon -- and comment", "back\\slash",
+                "  padded  ")
+    for (v in values) {
+      got <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v", sql_quote_literal(v)))$v
+      expect_identical(got, v, label = sprintf("round-trip of %s", deparse(v)))
+    }
+    # NA is the SQL keyword NULL, not the string 'NA'
+    got_na <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v", sql_quote_literal(NA_character_)))$v
+    expect_true(is.na(got_na))
+  })
+})
+
+test_that("sql_quote_literal is vectorised and refuses non-character input", {
+  expect_identical(sql_quote_literal(c("a", NA, "o'b")),
+                   c("'a'", "NULL", "'o''b'"))
+  expect_identical(sql_quote_literal(character(0)), character(0))
+  expect_error(sql_quote_literal(1L), "character vector")
+  expect_error(sql_quote_literal(factor("a")), "character vector")
+})
+
 test_that("builders refuse malformed column expressions", {
   expect_error(sql_name_clean(""), "non-empty")
   expect_error(sql_name_clean(c("a", "b")), "non-empty")
   expect_error(sql_name_compact(NA_character_), "non-empty")
   expect_error(sql_middle_initial_guard("a", ""), "non-empty")
+  expect_error(sql_first_initial(""), "non-empty")
+  expect_error(sql_first_initial(c("a", "b")), "non-empty")
 })

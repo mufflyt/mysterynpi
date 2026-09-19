@@ -74,6 +74,71 @@ sql_name_compact <- function(col) {
   sprintf("REGEXP_REPLACE(%s, '[^A-Z]', '', 'g')", sql_name_clean(col))
 }
 
+#' SQL: first initial of a name column (UDF-free, DuckDB/RE2)
+#'
+#' The database-side twin of [extract_first_initial()]: strips non-letters
+#' BEFORE taking the character, so `"(Sandra) Theresa"` yields `'S'` and a
+#' punctuation-only or empty value yields `NULL` -- never `''`, never a
+#' punctuation byte. The 2026-09-19 isochrones survey found candidate
+#' queries hand-rolling `SUBSTR(UPPER(TRIM(col)), 1, 1)`, which hands back
+#' `'('` or `'-'` for exactly the inputs above and then blocks that person
+#' against nobody.
+#'
+#' PARITY DOMAIN IS ASCII, same as [sql_name_compact()]: UDF-free SQL cannot
+#' transliterate, so an accented FIRST letter diverges from the R side
+#' (`"Émile"`: R gives `"E"` via [normalize_string()]'s transliteration; this
+#' expression strips the non-ASCII letter and yields `'M'` from `"MILE"`).
+#' The parity test pins agreement on ASCII AND pins that divergence
+#' explicitly, so it is a documented boundary, not a surprise. For accented
+#' columns use the [sql_npi_name()] UDF path.
+#'
+#' @param col character(1): a SQL column expression.
+#' @return character(1) SQL expression yielding a single upper-case letter,
+#'   `NULL` where no ASCII letter is present.
+#' @family sql-join-keys
+#' @export
+sql_first_initial <- function(col) {
+  if (!is.character(col) || length(col) != 1L || is.na(col) || !nzchar(col)) {
+    stop("sql_first_initial() requires a non-empty single-string column expression",
+         call. = FALSE)
+  }
+  sprintf(
+    "NULLIF(SUBSTR(REGEXP_REPLACE(UPPER(TRIM(%s)), '[^A-Z]', '', 'g'), 1, 1), '')",
+    col)
+}
+
+#' SQL: a character value as a SQL string literal
+#'
+#' Doubles embedded single quotes and wraps in quotes; `NA` becomes the SQL
+#' keyword `NULL`. The defect class is a CORRECTNESS one measured in this
+#' data, not a security posture: physician rosters are full of `O'Brien` and
+#' `D'Angelo`, and an extractor that pastes a name into SQL with
+#' `sprintf("... = '%s'", name)` either dies on the apostrophe or gets
+#' patched with a one-off `gsub` that the next call site forgets. One
+#' governed literal-builder, tested by ROUND-TRIP (the value comes back out
+#' of a real DuckDB byte-identical), replaces the per-site patches.
+#'
+#' Vectorised: a character vector in, one literal per element out.
+#'
+#' @param x character vector of values (NOT column expressions).
+#' @return character vector of SQL literals; `"NULL"` where `x` is `NA`.
+#' @family sql-join-keys
+#' @export
+sql_quote_literal <- function(x) {
+  if (!is.character(x)) {
+    stop("sql_quote_literal() requires a character vector; got ",
+         paste(class(x), collapse = "/"),
+         ". Coercing silently would turn factor levels or numbers into ",
+         "literals nobody reviewed.", call. = FALSE)
+  }
+  # paste0() recycles a zero-length vector against its scalar quotes to "''"
+  # on this R (caught by the executable test), so the empty case is explicit.
+  if (length(x) == 0L) return(character(0))
+  out <- paste0("'", gsub("'", "''", x, fixed = TRUE), "'")
+  out[is.na(x)] <- "NULL"
+  out
+}
+
 #' SQL: middle initials must not contradict (absence is never contradiction)
 #'
 #' Boolean predicate for a join: passes when EITHER side lacks a middle

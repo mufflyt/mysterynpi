@@ -113,6 +113,16 @@
 
 # mysterynpi 0.6.0
 
+* New UDF-free SQL builders in the join-key family, both proven by
+  execution against a real DuckDB: `sql_first_initial()` (database twin of
+  `extract_first_initial()`: non-letters stripped BEFORE the character, so
+  `"(Sandra) Theresa"` blocks as `'S'` and punctuation-only is `NULL`,
+  never `''` or a punctuation byte; parity pinned on ASCII with the
+  accented-letter divergence pinned explicitly as the documented boundary)
+  and `sql_quote_literal()` (a governed string literal - `O'Brien` round-
+  trips byte-identical, `NA` becomes SQL `NULL` - replacing per-call-site
+  `sprintf`/`gsub` patches).
+
 * New: `blocking_key()` - one governed construction for the keys candidate
   generation joins on, with named modes `surname_initial`
   (`<compact surname>|<first initial>`; the delimiter makes the component

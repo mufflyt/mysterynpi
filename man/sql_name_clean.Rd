@@ -20,7 +20,9 @@ non-letter with a space and trims again.
 }
 \seealso{
 Other sql-join-keys:
+\code{\link[=sql_first_initial]{sql_first_initial()}},
 \code{\link[=sql_middle_initial_guard]{sql_middle_initial_guard()}},
-\code{\link[=sql_name_compact]{sql_name_compact()}}
+\code{\link[=sql_name_compact]{sql_name_compact()}},
+\code{\link[=sql_quote_literal]{sql_quote_literal()}}
 }
 \concept{sql-join-keys}

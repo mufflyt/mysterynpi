@@ -24,5 +24,7 @@ character(1) SQL expression.
 ## See also
 
 Other sql-join-keys:
+[`sql_first_initial()`](https://mufflyt.github.io/mysterynpi/reference/sql_first_initial.md),
 [`sql_middle_initial_guard()`](https://mufflyt.github.io/mysterynpi/reference/sql_middle_initial_guard.md),
-[`sql_name_clean()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_clean.md)
+[`sql_name_clean()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_clean.md),
+[`sql_quote_literal()`](https://mufflyt.github.io/mysterynpi/reference/sql_quote_literal.md)

@@ -266,6 +266,10 @@ Drop-in replacements for the pipelines this was extracted from.
 - [`sql_middle_initial_guard()`](https://mufflyt.github.io/mysterynpi/reference/sql_middle_initial_guard.md)
   : SQL: middle initials must not contradict (absence is never
   contradiction)
+- [`sql_first_initial()`](https://mufflyt.github.io/mysterynpi/reference/sql_first_initial.md)
+  : SQL: first initial of a name column (UDF-free, DuckDB/RE2)
+- [`sql_quote_literal()`](https://mufflyt.github.io/mysterynpi/reference/sql_quote_literal.md)
+  : SQL: a character value as a SQL string literal
 - [`needs_normalization()`](https://mufflyt.github.io/mysterynpi/reference/needs_normalization.md)
   : Would normalising this vector change it?
 - [`extract_first_initial()`](https://mufflyt.github.io/mysterynpi/reference/extract_first_initial.md)

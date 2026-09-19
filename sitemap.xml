@@ -23,6 +23,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SOURCE_CLASSES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_FREQUENCIES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SURNAME_PARTICLES.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/TAXONOMY_FAMILY_PATTERNS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/WINKLER_CENSUS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/are_nickname_equivalents.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.html</loc></url>
@@ -39,6 +40,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/clerical_precision.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/clerical_sample.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/collapse_candidates.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/compact_name_key.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/count_rivals.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/create_nickname_aware_similarity.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/create_nickname_dictionary.html</loc></url>
@@ -96,14 +98,21 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/resolve_best_class.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/resolve_ordered_classes.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/split_given.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/sql_middle_initial_guard.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/sql_name_clean.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/sql_name_compact.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/sql_npi_name.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_med_suffix.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_name_noise.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/strip_parenthetical.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/suffix_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_agreement.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_key_variants.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_rarity.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_token_table.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_tokens.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_consistent.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_family_pattern.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_tiebreak_rank.html</loc></url>
 </urlset>
 

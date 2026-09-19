@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,6 +89,20 @@
 
         </dt>
         <dd>Split a fused given-name field into given name and trailing middle tokens.</dd>
+
+        <dt>
+
+          <code><a href="compact_name_key.html">compact_name_key()</a></code>
+
+        </dt>
+        <dd>Letters-only compact key for equality joins</dd>
+
+        <dt>
+
+          <code><a href="surname_key_variants.html">surname_key_variants()</a></code>
+
+        </dt>
+        <dd>Both equality-join key variants of a surname</dd>
       </dl></div><div class="section level2">
       <h2 id="the-normalisation-surface">The normalisation surface<a class="anchor" aria-label="anchor" href="#the-normalisation-surface"></a></h2>
 
@@ -126,6 +140,27 @@
 
         </dt>
         <dd>SQL expression normalising a name column the same way R does</dd>
+
+        <dt>
+
+          <code><a href="sql_name_clean.html">sql_name_clean()</a></code>
+
+        </dt>
+        <dd>SQL: normalise a name column for matching (UDF-free, DuckDB/RE2)</dd>
+
+        <dt>
+
+          <code><a href="sql_name_compact.html">sql_name_compact()</a></code>
+
+        </dt>
+        <dd>SQL: letters-only compact join key (UDF-free, DuckDB/RE2)</dd>
+
+        <dt>
+
+          <code><a href="sql_middle_initial_guard.html">sql_middle_initial_guard()</a></code>
+
+        </dt>
+        <dd>SQL: middle initials must not contradict (absence is never contradiction)</dd>
 
         <dt>
 
@@ -438,6 +473,34 @@
 
         </dt>
         <dd>Calibrated bands for [graduation_year_agreement()].</dd>
+
+        <dt>
+
+          <code><a href="taxonomy_consistent.html">taxonomy_consistent()</a></code>
+
+        </dt>
+        <dd>Is a record's taxonomy consistent with a board specialty? Three-valued.</dd>
+
+        <dt>
+
+          <code><a href="taxonomy_tiebreak_rank.html">taxonomy_tiebreak_rank()</a></code>
+
+        </dt>
+        <dd>Tie-break rank from a three-valued consistency verdict</dd>
+
+        <dt>
+
+          <code><a href="taxonomy_family_pattern.html">taxonomy_family_pattern()</a></code>
+
+        </dt>
+        <dd>Expected taxonomy pattern for a board specialty, or `NA`</dd>
+
+        <dt>
+
+          <code><a href="TAXONOMY_FAMILY_PATTERNS.html">TAXONOMY_FAMILY_PATTERNS</a></code>
+
+        </dt>
+        <dd>NUCC family patterns for board specialties (identity screen only)</dd>
       </dl></div><div class="section level2">
       <h2 id="similarity-scoring-candidate-ranking-never-verdicts-">Similarity scoring (candidate ranking, never verdicts)<a class="anchor" aria-label="anchor" href="#similarity-scoring-candidate-ranking-never-verdicts-"></a></h2>
 

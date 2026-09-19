@@ -1,0 +1,88 @@
+# Canonical blocking key, by named mode
+
+One governed construction for the keys candidate generation joins on.
+Modes:
+
+- \`surname_initial\`:
+
+  \`\<compact surname\>\|\<first initial\>\` via \[compact_name_key()\]
+  and \[extract_first_initial()\]. The \`\|\` delimiter makes the
+  component boundary EXPLICIT. It is not needed to prevent collisions -
+  with a fixed one-character second field, \`surname + initial\` is
+  already uniquely separable - it is kept for readability, auditability
+  (a human reading a ledger sees the two components), and
+  future-proofing against any mode whose second field is not
+  fixed-width. The serialized contract is pinned by test, so the
+  delimiter cannot drift silently.
+
+- \`prefix_n\`:
+
+  the first \`n\` letters of the compact surname. \`n\` is REQUIRED for
+  this mode - the audited call sites used 2, 3 and 4 with materially
+  different candidate pools, so a silent default would pick a pool width
+  nobody chose - and must be a single finite whole number \>= 1 (1.5,
+  Inf, NaN, "3" and TRUE are caller mistakes, rejected loudly rather
+  than coerced). A surname shorter than \`n\` keys as its full compact
+  form, never padded.
+
+- \`compact\`:
+
+  the compact surname alone (\[compact_name_key()\]).
+
+## Usage
+
+``` r
+blocking_key(
+  last,
+  first = NULL,
+  mode = c("surname_initial", "prefix_n", "compact"),
+  n = NULL
+)
+```
+
+## Arguments
+
+- last:
+
+  character vector of surnames. Required by every mode.
+
+- first:
+
+  character vector of given names. Required by \`surname_initial\`;
+  ignored by the other modes.
+
+- mode:
+
+  \`"surname_initial"\`, \`"prefix_n"\`, or \`"compact"\`.
+
+- n:
+
+  prefix length: required for \`prefix_n\` (single finite whole number
+  \>= 1); an ERROR with any other mode.
+
+## Value
+
+character vector of blocking keys, \`NA_character\_\` where the mode's
+required components are insufficient.
+
+## Details
+
+Supplying \`n\` with any mode other than \`prefix_n\` is an error: an
+argument that would be silently discarded is a caller mistake the API
+should catch, not swallow.
+
+MISSING IS INSUFFICIENT, NEVER PARTIAL: if any component a mode requires
+normalises to nothing (missing, whitespace-only, punctuation-only), the
+key is \`NA_character\_\`. No \`"SMITH\|"\`, no \`"\|M"\`, no
+empty-string keys - a partial key silently blocks a person against
+everyone sharing the observed half. The audited legacy extractors kept
+the components as SEPARATE columns and filtered missing rows before any
+join, so for plain missing values this changes the API representation,
+not their missing-value candidate behavior. The exception is a
+PUNCTUATION-ONLY given name: \`nzchar("-")\` is TRUE, so the legacy
+filter was blind to it and a \`-\` initial reached candidate generation,
+where the canonical key is \`NA\` - a potential candidate-set delta,
+characterized in test-blocking.R.
+
+Length discipline: \`last\` and \`first\` must be equal length or
+scalar; anything else refuses to recycle.

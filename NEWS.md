@@ -111,6 +111,90 @@
   upstream to fix it for every consumer of this package. 19 new assertions
   in `test-parse-person.R`; full suite (1,540 assertions) green.
 
+# mysterynpi 0.6.0
+
+* PRINCIPLE CORRECTED (owner ruling, 2026-09-19): the package is the
+  canonical DETERMINISTIC identity-resolution layer, and numeric similarity
+  is deterministic. The no-fuzzy posture was aimed at the right defect --
+  an edit-distance tolerance silently flipping a verdict -- but drew the
+  line in the wrong place: the 2026-09-19 isochrones survey found ~24
+  hand-rolled similarity call sites, each with its own normalisation, its
+  own missing-value behaviour (usually missing-scores-as-zero), and its own
+  thresholds. The cure is one governed home, not prohibition.
+
+* New first-class similarity primitives (`surname_similarity()`,
+  `middle_name_similarity()`, `given_name_similarity()`): vectorized,
+  length-disciplined (no silent recycling), computed on the package's own
+  compact keys so punctuation and case never masquerade as distance, with
+  configurable Jaro-Winkler (`p` pinned as `JW_PREFIX_WEIGHT = 0.1` -- note
+  the retired call sites used stringdist's default p = 0, a documented
+  score change) and normalised Levenshtein. THE MISSING CONTRACT IS THE
+  FEATURE: missing + present = `NA_real_`, missing + missing = `NA_real_`,
+  only two observed values produce a number. `assert_similarity_contract()`
+  lets downstream suites pin all of it. `given_name_similarity()` is
+  nickname-aware via the one corpus (`NICKNAME_SIMILARITY = 0.98` on a
+  one-hop edge), with the umlaut-digraph second chance retained.
+
+* `calculate_enhanced_first_name_similarity()` is DEPRECATED (its 0.5
+  neutral scalar for missing input is exactly the absence-into-evidence
+  conversion the contract forbids; the wrapper preserves the old contract
+  verbatim so deprecation cannot silently change scores).
+  `create_nickname_aware_similarity()` is removed (the new signature
+  obsoletes the closure factory). The dark-by-default
+  `options(mysterynpi.enable_similarity_scoring)` fence is retired --
+  similarity is a first-class primitive now, and the protection that
+  mattered was never the option: it is the call-graph reachability guard,
+  which is RETARGETED, not retired. `test-no-fuzzy.R` still proves no
+  `*_agreement()` verdict can reach a similarity engine transitively.
+
+* stringdist moves Suggests -> Imports (>= 0.9.10): the one similarity
+  engine is a declared, pinned dependency, and the guard proves the verdict
+  machinery still cannot reach it.
+
+# mysterynpi 0.5.0
+
+* Equality-join surname keys (`compact_name_key()`, `surname_key_variants()`):
+  letters-only keys emitting BOTH surname conventions (particles glued and
+  bare final token), for the join that cannot come into R -- millions of
+  registry rows on the database side, where the candidate set is built by
+  hash-join equality before any pairwise rule can run. Measured origin
+  (isochrones ABMS-to-NPI matcher, 2026-09-18): punctuated/particled
+  surnames matched at 80.1% against 97.5% for plain names, a glued-only
+  repair would have traded 42 matched Vietnamese-name physicians for the
+  recovered Dutch/Hispanic ones, and dual variants recovered 475 of 765
+  missing physicians while losing zero. A trailing single letter never
+  becomes a surname key (positional rule; deliberately NOT a generation
+  claim -- `normalize_suffix()` still refuses to read `V` as a suffix).
+
+* UDF-free SQL builders proven against the R side (`sql_name_clean()`,
+  `sql_name_compact()`, `sql_middle_initial_guard()`): DuckDB/RE2
+  expressions for suffix-stripped, letters-only join keys and a
+  middle-initial contradiction guard, executable-parity-tested against a
+  live DuckDB connection in this package's own suite. They exist because
+  R/SQL normaliser drift has two documented specimens: a suffix regex whose
+  doubled backslashes made it match NOTHING for twenty months while the
+  comment beside it claimed otherwise, and a SQL side that spaced
+  punctuation while the R side kept it, so `JONES-COX` could never equal
+  `JONES COX`. RE2 has no lookahead, so the suffix strip is
+  trailing-anchored -- which is also why a bare surname `DO`, a bare `JR`,
+  or `DOOLEY` can never be eaten. Complements `sql_npi_name()`, which
+  handles accents but requires a `strip_accents` UDF.
+
+* Taxonomy identity screen (`taxonomy_consistent()`,
+  `taxonomy_tiebreak_rank()`, `taxonomy_family_pattern()`,
+  `TAXONOMY_FAMILY_PATTERNS`): three-valued profession-level consistency of
+  an NPI record against a board specialty -- an IDENTITY axis beside
+  license/gender/graduation-year agreement, never a subspecialty classifier
+  (taxonomy runs 57-82% sensitivity / 58-65% PPV for subspecialty).
+  Inspects the FULL pipe-concatenated code string, because a record may
+  retain a residency code ahead of its 207V and a first-segment shortcut
+  misreads that clinician as a non-physician (a real review-tool defect
+  from the 2026-09-19 promotion audit). `NA` can never read as clean, and
+  the tie-break rank is documented for use AFTER every stronger ordering
+  criterion: in its origin deployment it changed 360 of 22,002 selections,
+  every one tied on recency and confidence, zero rank regressions and zero
+  recency/confidence overrides.
+
 # mysterynpi 0.4.0
 
 * `sql_npi_name()` now folds German digraphs (`ü`/`ö`/`ä`/`ß` -> `ue`/`oe`/

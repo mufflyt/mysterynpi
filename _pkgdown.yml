@@ -13,6 +13,8 @@ reference:
   - first_initial
   - strip_parenthetical
   - split_given
+  - compact_name_key
+  - surname_key_variants
 - title: The normalisation surface
   desc: Drop-in replacements for the pipelines this was extracted from.
   contents:
@@ -20,6 +22,9 @@ reference:
   - normalize_name_columns
   - normalize_physician_names
   - sql_npi_name
+  - sql_name_clean
+  - sql_name_compact
+  - sql_middle_initial_guard
   - needs_normalization
   - extract_first_initial
   - strip_name_noise
@@ -68,7 +73,11 @@ reference:
   - graduation_year_agreement
   - graduation_year_band
   - GRADUATION_YEAR_BANDS
-- title: Similarity scoring (candidate ranking, never verdicts)
+  - taxonomy_consistent
+  - taxonomy_tiebreak_rank
+  - taxonomy_family_pattern
+  - TAXONOMY_FAMILY_PATTERNS
+- title: Similarity primitives (governed numeric scores; verdicts stay categorical)
   desc: The fenced exception; extracted from isochrones, quirks pinned.
   contents:
   - create_nickname_dictionary
@@ -77,7 +86,12 @@ reference:
   - are_nickname_equivalents
   - get_nicknames_for_name
   - calculate_enhanced_first_name_similarity
-  - create_nickname_aware_similarity
+  - surname_similarity
+  - middle_name_similarity
+  - given_name_similarity
+  - assert_similarity_contract
+  - JW_PREFIX_WEIGHT
+  - NICKNAME_SIMILARITY
 - title: Clerical review
   desc: A blinded, class-stratified sample, and the precision it buys.
   contents:

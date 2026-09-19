@@ -1,6 +1,6 @@
 Package: mysterynpi
 Title: Name Keys and Agreement Rules for Linking Person Rosters to NPI
-Version: 0.4.0.9000
+Version: 0.6.0.9000
 Authors@R: person("Tyler", "Muffly", email = "tyler.muffly@dhha.org",
                   role = c("aut", "cre"))
 Description: One definition of the name-handling a provider linkage needs:
@@ -16,9 +16,9 @@ URL: https://mufflyt.github.io/mysterynpi/, https://github.com/mufflyt/mysterynp
 BugReports: https://github.com/mufflyt/mysterynpi/issues
 Encoding: UTF-8
 Depends: R (>= 4.1)
-Imports: stringi, stats
+Imports: stringi, stats, stringdist (>= 0.9.10)
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown, humaniformat, jsonlite,
-    stringdist, duckdb, DBI
+    duckdb, DBI
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true

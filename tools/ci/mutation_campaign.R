@@ -135,17 +135,16 @@ CATALOGUE <- list(
        find = "if (min_match_rate > 0 && !is.na(ledger$match_rate_x) &&",
        repl = "if (min_match_rate > 1 && !is.na(ledger$match_rate_x) &&",
        why  = "the coverage contract silently checks nothing; the deprecated safe_join defect returns"),
-  # RETIRED 2026-09-19 with its subject: `similarity-gate-removed` mutated the
-  # dark-by-default option fence, which was itself retired when similarity
-  # became a first-class governed primitive (owner ruling; see NEWS 0.6.0).
-  # A mutant whose target line no longer exists measures nothing, and the
-  # protection that mattered was never the option - it is the reachability
-  # guard, which the mutant below still proves fires.
+  list(id = "similarity-gate-removed",
+       file = "R/similarity_scoring.R",
+       find = 'if (!isTRUE(getOption("mysterynpi.enable_similarity_scoring", FALSE))) {',
+       repl = 'if (FALSE) {',
+       why  = "fuzzy scoring runs without anyone having decided it should; the default is no longer off"),
   list(id = "middle-agreement-smuggles-similarity",
        file = "R/agreement.R",
        find = "    \"conflicts\"\n  }, character(1))",
-       repl = "    if (given_name_similarity(a[1], b[1]) > 0.9) \"corroborates\" else \"conflicts\"\n  }, character(1))",
-       why  = "the verdict path reaches the similarity engine; JULIA corroborates JULIE and the reachability guard must fire"),
+       repl = "    if (calculate_enhanced_first_name_similarity(a[1], b[1]) > 0.9) \"corroborates\" else \"conflicts\"\n  }, character(1))",
+       why  = "the verdict path reaches the similarity score; JULIA corroborates JULIE and the fence is gone"),
   list(id = "npi-search-alias-back-on",
        file = "R/npi_search.R",
        find = 'if (!is.null(fn)) params <- c(params, use_first_name_alias = "False")',

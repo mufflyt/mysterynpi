@@ -29,6 +29,7 @@ reference:
   - extract_first_initial
   - strip_name_noise
   - NAME_NOISE
+  - SURNAME_CREDENTIAL_COLLISIONS
 - title: Parsing and tokens
   contents:
   - parse_person
@@ -134,3 +135,4 @@ reference:
   - assert_license_agreement_contract
   - assert_surname_agreement_contract
   - assert_license_status_contract
+  - assert_org_name_matches_person_contract

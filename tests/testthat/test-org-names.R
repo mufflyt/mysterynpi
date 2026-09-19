@@ -27,6 +27,22 @@ test_that("corporate form and credentials alone are never a match", {
   expect_identical(org_name_matches_person("SMITH MEDICAL GROUP", "Dr Smith"), TRUE)
 })
 
+test_that("a surname colliding with a credential token still carries the org's identity", {
+  # THE DEFECT: .identity_tokens() used to strip NAME_NOISE with a bare
+  # setdiff() on the already-uppercased string, so a practice literally
+  # named after the physician's own "DO"-colliding surname (the Vietnamese
+  # surname "Do", vs. the Doctor of Osteopathic Medicine credential -- see
+  # strip_name_noise()'s DO carve-out) lost its only shared identity token.
+  # org_name_matches_person("Do Family Medicine Clinic", "Anh Do") returned
+  # FALSE before this fix.
+  expect_true(org_name_matches_person("Do Family Medicine Clinic", "Anh Do"))
+  expect_true(org_name_matches_person("Do, Anh, M.D., INC.", "Anh Do"))
+  # the control case (a non-colliding surname in the identical structure)
+  # already worked and must keep working
+  expect_true(org_name_matches_person("Nguyen Family Medicine Clinic",
+                                      "Anh Nguyen"))
+})
+
 test_that("hyphens fold for the org comparison, accents transliterate", {
   expect_true(org_name_matches_person("ABBAS-RODRIGUEZ MEDICAL GROUP",
                                       "Maria Abbas Rodriguez"))
@@ -42,4 +58,10 @@ test_that("absence and length are handled", {
     c(TRUE, FALSE)
   )
   expect_error(org_name_matches_person("A B", c("x", "y")), "same length")
+})
+
+test_that("the shipped contract passes, and can fail", {
+  expect_true(assert_org_name_matches_person_contract())
+  never_match <- function(org, person) rep(FALSE, length(org))
+  expect_error(assert_org_name_matches_person_contract(never_match))
 })

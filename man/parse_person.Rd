@@ -89,4 +89,7 @@ path, not two. The surname span is the first token plus any leading
 comma logic. Limitation: an unhyphenated compound surname with no
 particle (`"SMITH JONES MARY"`) reads as surname `SMITH` -- there is no
 signal to do better without a recorded surname to check against.
+[SURNAME_PARTICLES] has its own documented limitation for a leading
+`"Do"`: a genuine Portuguese particle and a standalone Vietnamese
+surname are indistinguishable from the string alone, see its docs.
 }

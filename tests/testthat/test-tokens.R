@@ -21,3 +21,29 @@ test_that("person matching needs a surname AND a shared full given token", {
   expect_false(person_matches("SMITH", g("MARY"), "JONES", g("MARY")))
   expect_false(person_matches("", g("MARY"), "", g("MARY")))
 })
+
+test_that("a hyphen never splits a given- or middle-name token", {
+  # THE DEFECT: given_tokens()/middle_tokens() split on "-" like any other
+  # delimiter, so a genuinely compound name ("Mary-Jane", "Anne-Marie") -- ONE
+  # name, exactly like split_given() already treats it -- broke into two
+  # separate tokens. Because person_matches()/middle_agreement() corroborate
+  # on ANY shared token, that let a compound name satisfy a match against an
+  # unrelated person sharing only the SECOND half of the compound:
+  # person_matches("SMITH", given_tokens("Mary-Jane"), "SMITH",
+  # given_tokens("Jane")) returned TRUE, and middle_agreement() on
+  # "Anne-Marie" vs the unrelated "Marie" returned "corroborates".
+  expect_identical(given_tokens("Mary-Jane")[[1]], "MARY-JANE")
+  expect_identical(middle_tokens("Anne-Marie")[[1]], "ANNE-MARIE")
+
+  expect_false(person_matches("SMITH", given_tokens("Mary-Jane"),
+                              "SMITH", given_tokens("Jane")))
+  expect_identical(
+    middle_agreement(middle_tokens("Anne-Marie"), middle_tokens("Marie")),
+    "conflicts")
+
+  # the same compound name on both sides still matches
+  expect_true(person_matches("SMITH", given_tokens("Mary-Jane"),
+                             "SMITH", given_tokens("Mary-Jane")))
+  # a genuinely space-separated given+middle combination still splits
+  expect_identical(given_tokens("Julie Ann")[[1]], c("JULIE", "ANN"))
+})

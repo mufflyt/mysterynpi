@@ -70,6 +70,22 @@ testthat::test_that("unequal-length vectors are refused, not recycled", {
     mysterynpi::names_have_compatible_surname(c("A", "B", "C"), c("A", "B")))
 })
 
+testthat::test_that("a hyphen never splits a given-name token", {
+  # name_given_tokens()/name_leading_given() used to split on "-" like any
+  # other delimiter, so "Mary-Jane" (one compound given name, exactly like
+  # split_given() already treats it) became two tokens and satisfied
+  # names_have_compatible_given(mode = "any_token")'s shared-token test
+  # against an unrelated "Jane" sharing only the second half.
+  testthat::expect_identical(mysterynpi::name_given_tokens("Mary-Jane")[[1]],
+                             "MARY-JANE")
+  testthat::expect_identical(mysterynpi::name_leading_given("Mary-Jane"),
+                             "MARY-JANE")
+  testthat::expect_false(mysterynpi::names_have_compatible_given(
+    "Mary-Jane", "Jane", mode = "any_token"))
+  testthat::expect_true(mysterynpi::names_have_compatible_given(
+    "Mary-Jane", "Mary-Jane", mode = "any_token"))
+})
+
 testthat::test_that("identical raw keys are exact even with zero components", {
   # name_surname_components() drops anything under 2 letters, so "A." (an
   # initial-with-period, or any other short/non-alphabetic surname) yields

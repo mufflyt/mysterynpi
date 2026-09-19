@@ -20,6 +20,18 @@ nobody, so it must never enter a set that is compared by intersection.
 [name_leading_given()] retains them for the one comparison where an initial
 does carry information.
 }
+\section{A hyphen never splits a token}{
+
+"Mary-Jane" is ONE given name. Splitting it into `"MARY"`/`"JANE"` let a
+compound given name satisfy [names_have_compatible_given()]'s
+`mode = "any_token"` shared-token test against an unrelated "Jane" who
+shares nothing but the second half of the compound -- the same false-
+corroboration defect [name_key()]'s `fold_hyphens` documentation
+describes for given names generally (three cross-state false identity
+matches), just not yet applied to this tokeniser. Consistent with
+[split_given()], which already never folds a given-name hyphen.
+}
+
 \seealso{
 Other name-matching:
 \code{\link{NAME_SURNAME_PARTICLES}},

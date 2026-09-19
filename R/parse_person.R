@@ -17,6 +17,24 @@
 #' slot. Short ambiguous tokens (PA, OD, DC) follow the precedent already
 #' set by MS, MA, DO and LM: in a PROVIDER-DIRECTORY name string the
 #' credential reading is overwhelmingly the correct one.
+#'
+#' THAT "MA" PRECEDENT WAS WRONG. `"Ma"` is a top-20 Chinese surname (Yo-Yo
+#' Ma, Jack Ma) with the same shape as the `"Do"` collision below -- a
+#' single token that is BOTH a real NAME_NOISE credential (Master of Arts)
+#' AND a common real surname -- and it was carrying none of `"Do"`'s
+#' protection: `strip_name_noise("John Ma")` silently returned `"John"`,
+#' and since [parse_person()] threads its result through
+#' [has_name_information()], that record read as unqueryable and would be
+#' silently dropped exactly like the pre-fix `"Do"` case (see
+#' [strip_name_noise()]'s "THE DO CARVE-OUT" docs for the DEA-action
+#' provenance of that original defect). Found 2026-09-18; given the SAME
+#' carve-out `"Do"` already has, via [SURNAME_CREDENTIAL_COLLISIONS]. The
+#' other short, ambiguous tokens named above (PA, OD, DC, MS, LM, BA) are
+#' NOT known common surnames the way "Do" and "Ma" are -- protecting them
+#' would invent a fake surname for a genuinely credential-only input rather
+#' than recover a real one, so they are deliberately left stripped
+#' unconditionally. This is a claim about which token spellings are real
+#' surnames, not a general policy reversal for the vocabulary.
 #' @export
 NAME_NOISE <- c(
   "DNP","DNSC","DNS","PHD","EDD","MD","DO","MSN","MSC","MS","MA","MPH",
@@ -28,6 +46,27 @@ NAME_NOISE <- c(
   "DDS","DMD","DC","DPM","OD","PA","PAC","PA-C","LPN","LVN","PSYD",
   "PHARMD","RPH","LCSW","DPT")
 
+#' `NAME_NOISE` tokens that are ALSO common real surnames.
+#'
+#' A single token cannot mean both things in [NAME_NOISE]'s flat
+#' vocabulary, so each entry here gets the SAME two-part protection inside
+#' [strip_name_noise()]: kept as a surname when it is one of exactly two
+#' tokens in its comma segment, or written in the exact title-case spelling
+#' recorded here (the value), regardless of token count. The name (the
+#' vector's names) is the `NAME_NOISE` spelling the protection applies to.
+#'
+#' Membership bar: the token must be a WELL-KNOWN, common real surname --
+#' not merely conceivable. `"DO"` (Vietnamese, e.g. the DEA-action records
+#' that motivated this file) and `"MA"` (Chinese -- Yo-Yo Ma, Jack Ma) both
+#' clear that bar. Most other short `NAME_NOISE` tokens (`PA`, `OD`, `DC`,
+#' `MS`, `LM`, `BA`) do NOT -- protecting one of those would invent a fake
+#' surname for a genuinely credential-only input rather than recover a real
+#' one, so they stay unconditionally stripped. Add a token here only with
+#' the same standard of evidence: a real, common surname, not a hypothetical
+#' one.
+#' @export
+SURNAME_CREDENTIAL_COLLISIONS <- c(DO = "Do", MA = "Ma")
+
 #' Strip credential and title TOKENS from a personal-name string
 #'
 #' TOKEN-BASED ON PURPOSE. A `\\b`-delimited regex alternation destroys accented
@@ -37,16 +76,87 @@ NAME_NOISE <- c(
 #' meant to help it. Splitting on delimiters and dropping whole tokens cannot
 #' match a substring, so no name can be truncated here.
 #'
+#' THE "DO" CARVE-OUT. `"Do"` is both the `DO` credential (Doctor of
+#' Osteopathic Medicine) and a common Vietnamese surname, and `NAME_NOISE`
+#' cannot record both answers for one token. Unconditional stripping deletes
+#' the surname from every `"Anh Do"`/`"Do, Anh"`-shaped name --
+#' `strip_name_noise("Anh Do")` returned `"Anh"` before this carve-out, and
+#' since [parse_person()] threads its result through
+#' [has_name_information()], the record then read as unqueryable and was
+#' silently dropped rather than resolved. First found in an isochrones
+#' consumer (`resolve_dea_action_to_npi()`, `federal_register_dea_actions.R`)
+#' whose DEA-action records for practitioners actually named "Do" were
+#' vanishing before ever reaching NPI lookup.
+#'
+#' A `"do"`/`"DO"`/`"Do"` token (case-insensitive) is read as a SURNAME, not
+#' the credential, when EITHER (a) it is one of exactly two tokens within its
+#' own comma-delimited segment of the string -- a plausible `given surname`
+#' pair, e.g. `"Anh Do"`, or, since [parse_person()] hands this function each
+#' `"Last, First"` segment separately, a plausible lone surname segment, e.g.
+#' the `"Do"` in `"Do, Anh"` -- or (b) it is written in unambiguous title case
+#' `"Do"` (never `"DO"`), regardless of token count, e.g. `"Nguyen Van Do"`.
+#' Segment-scoped, not string-scoped: `"Do, Anh, M.D."` protects the
+#' one-token `"Do"` segment even though the credential segment `"M.D."`
+#' brings the WHOLE string's token count to three, because each comma
+#' segment is judged on its own, matching how [parse_person()] itself
+#' decides `"Last, First"` reversal segment-by-segment. All-caps `"DO"` in a
+#' three-or-more-token segment is still read as the credential (e.g.
+#' `"John Michael Smith DO"`, one segment, three tokens) -- this carve-out
+#' narrows `NAME_NOISE`'s reach for exactly the ambiguous case, it does not
+#' widen it, and every other `NAME_NOISE` token is unaffected.
+#'
+#' THE SAME CARVE-OUT, GENERALISED. `"Do"` is not the only `NAME_NOISE`
+#' token that is also a common real surname -- see
+#' [SURNAME_CREDENTIAL_COLLISIONS] for the full curated set (currently `DO`
+#' and `MA`) and the rule for exactly which tokens qualify. Every entry gets
+#' the identical two-part protection described above, keyed on its own
+#' title-case spelling.
+#'
+#' KNOWN LIMITATION: A SEGMENT THAT IS ENTIRELY UPPERCASE HAS NO CASE SIGNAL
+#' LEFT TO GIVE. Case is the only thing that distinguishes a genuine
+#' three-or-more-token compound surname (`"Nguyen Van Do"`) from a genuine
+#' three-or-more-token credentialed name (`"John Michael Smith DO"`) once
+#' both are past the two-token rule. A source that uppercases the whole
+#' record -- common in bulk exports -- erases that signal for BOTH
+#' directions at once: `"NGUYEN VAN DO"` reads as credentialed and loses its
+#' real surname (`strip_name_noise("NGUYEN VAN DO")` returns `"NGUYEN VAN"`,
+#' not `"NGUYEN VAN DO"`), and there is no available string-only fix, since
+#' any rule that recovers the surname in that case would just as wrongly
+#' protect `"JOHN MICHAEL SMITH DO"`'s real credential. Deciding which
+#' failure to prefer needs a prior on which is more common in a given
+#' pipeline's source data, which this package deliberately does not assume.
+#' A caller feeding it known-uppercase-only source data and needing better
+#' than this should resolve the ambiguity before calling in, e.g. by
+#' checking a name/roster field the source already disambiguates elsewhere.
+#'
 #' @param x character vector.
 #' @return character vector with credential and title tokens removed.
 #' @export
 strip_name_noise <- function(x) {
   vapply(as.character(x), function(s) {
     if (is.na(s)) return(NA_character_)
-    parts <- strsplit(s, "[[:space:],]+")[[1]]
-    parts <- parts[nzchar(parts)]
-    bare <- toupper(gsub("[.]", "", parts))
-    keep <- parts[!(bare %in% NAME_NOISE)]
+    # Segment on comma FIRST so the DO carve-out can be judged per segment
+    # (see "THE DO CARVE-OUT" above); each segment is then space-tokenised
+    # exactly as the original single-pass split did, so behaviour for every
+    # other token is unchanged.
+    segs <- strsplit(s, ",", fixed = TRUE)[[1]]
+    keep_segs <- lapply(segs, function(seg) {
+      parts <- strsplit(seg, "[[:space:]]+")[[1]]
+      parts <- parts[nzchar(parts)]
+      if (!length(parts)) return(character(0))
+      bare <- toupper(gsub("[.]", "", parts))
+      is_noise <- bare %in% NAME_NOISE
+      for (tok in names(SURNAME_CREDENTIAL_COLLISIONS)) {
+        coll_idx <- which(bare == tok)
+        if (length(coll_idx)) {
+          protect <- (length(parts) == 2L) |
+            (parts[coll_idx] == SURNAME_CREDENTIAL_COLLISIONS[[tok]])
+          is_noise[coll_idx[protect]] <- FALSE
+        }
+      }
+      parts[!is_noise]
+    })
+    keep <- unlist(keep_segs, use.names = FALSE)
     out <- gsub("[.]", " ", paste(keep, collapse = " "))
     gsub("[[:space:]]+", " ", trimws(out))
   }, character(1), USE.NAMES = FALSE)
@@ -122,6 +232,9 @@ strip_name_noise <- function(x) {
 #' comma logic. Limitation: an unhyphenated compound surname with no
 #' particle (`"SMITH JONES MARY"`) reads as surname `SMITH` -- there is no
 #' signal to do better without a recorded surname to check against.
+#' [SURNAME_PARTICLES] has its own documented limitation for a leading
+#' `"Do"`: a genuine Portuguese particle and a standalone Vietnamese
+#' surname are indistinguishable from the string alone, see its docs.
 #'
 #' @param x character vector of free-text names.
 #' @param format `"given_first"` (the default: current behaviour, with
@@ -189,6 +302,28 @@ parse_person <- function(x, format = c("given_first", "surname_first")) {
   ok <- !is.na(raw) & nzchar(raw)
   if (any(ok)) {
     p <- humaniformat::parse_names(raw[ok])   # already in First-Last order
+    # humaniformat has its OWN, independent notion of which trailing tokens
+    # are degree suffixes -- unrelated to NAME_NOISE/SURNAME_CREDENTIAL_
+    # COLLISIONS above -- and it includes "Ma" (case-insensitively: "Ma",
+    # "MA" and "ma" all trigger it) once a name has three or more tokens,
+    # discarding it from $last_name entirely: humaniformat::suffix(
+    # "John Michael Ma") returns "Ma", not NA, and this file never reads
+    # humaniformat's own $suffix field (mysterynpi's suffix comes from
+    # extract_suffix() in step 1), so "Ma" was silently lost -- "John
+    # Michael Ma" parsed to last = "Michael", not "Michael Ma". "Do" is
+    # never affected (humaniformat does not treat it as a suffix).
+    #
+    # Reclaimed only for the EXACT title-case spelling recorded in
+    # SURNAME_CREDENTIAL_COLLISIONS (`"Ma"`, not `"MA"`/`"ma"`), matching
+    # the case boundary strip_name_noise() already draws for the identical
+    # ambiguity: an all-caps "MA" in a 3+-token name has no case signal to
+    # read as a surname any more than all-caps "DO" does (see the "KNOWN
+    # LIMITATION" docs above), so reclaiming it here would contradict the
+    # decision already made on the string side.
+    recl <- p$suffix %in% SURNAME_CREDENTIAL_COLLISIONS
+    if (any(recl)) {
+      p$last_name[recl] <- trimws(paste(p$last_name[recl], p$suffix[recl]))
+    }
     blank <- function(v) { k <- name_key(v); k[is.na(k)] <- ""; k }
     out$first[ok]  <- blank(p$first_name)
     out$middle[ok] <- blank(p$middle_name)

@@ -79,6 +79,14 @@ extract_suffix <- function(x) {
     # detection strips punctuation; the KEPT tokens keep theirs, so the
     # commas parse_person() relies on survive
     canon <- normalize_suffix(gsub("[.,]", "", parts))
+    # SUFFIXES TRAIL, NEVER LEAD. A token in the first position is a title,
+    # not a generation -- "Sr." there is the religious title "Sister" (a nun,
+    # e.g. a women-religious clinician: "Sr. Mary Josephine, CNM"), which
+    # collides with the SR spelling of "Senior". No US name suffix leads a
+    # name, so the lead position is excluded from detection entirely rather
+    # than added to NAME_NOISE-style vocabulary, which cannot hold two
+    # answers for one token.
+    if (length(canon)) canon[1] <- NA_character_
     hit <- !is.na(canon)
     nm <- paste(parts[!hit], collapse = " ")
     nm <- gsub("[[:space:]]+", " ", trimws(gsub("[ ,]+$", "", nm)))

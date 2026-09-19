@@ -1,3 +1,116 @@
+# mysterynpi (development version)
+
+* Documented (not changed) a third instance of the `"Do"` collision
+  class: `SURNAME_PARTICLES` lists `"DO"` as a genuine Portuguese/
+  Lusophone particle (as in `"do Carmo"`), which collides with `"Do"` as
+  a standalone Vietnamese surname. `parse_person("Do Nguyen Van", format
+  = "surname_first")` reads leading `"Do"` as a particle and walks one
+  token further, corrupting the real surname into a false compound
+  (`"Do Nguyen"`) while losing the real given name. Removing `"DO"` from
+  the list would equally break the genuine Portuguese case. No evidence
+  either population is rarer in this package's target data, so -- same
+  precedent as the all-caps DO/Ma limitations already documented --
+  this is a documented known limitation, not an unproven directional
+  fix. See `SURNAME_PARTICLES`'s docs.
+
+* The `"Do"` surname/credential carve-out is generalised to `"Ma"`
+  (`SURNAME_CREDENTIAL_COLLISIONS`, new export). `"Ma"` is a top-20 Chinese
+  surname (Yo-Yo Ma, Jack Ma) that is ALSO `NAME_NOISE`'s spelling for the
+  Master of Arts credential, and carried none of `"Do"`'s protection
+  because the earlier fix was scoped to the `DO` token specifically:
+  `strip_name_noise("John Ma")` silently returned `"John"`, reading as
+  unqueryable downstream exactly like the pre-fix `"Do"` case. Fixed with
+  the identical two-part rule (protected as a surname when it is one of
+  exactly two tokens in its comma segment, or spelled in the exact
+  title-case `"Ma"` regardless of token count). Separately, a 3+-token
+  title-case `"Ma"` surname (e.g. `"John Michael Ma"`) hit a SECOND,
+  unrelated bug: `humaniformat::parse_names()` has its own independent
+  notion of degree-suffix tokens that also claims `"Ma"` once a name has
+  three or more tokens (`humaniformat::suffix("John Michael Ma")` returns
+  `"Ma"`, not `NA`), and `parse_person()` never read humaniformat's own
+  `$suffix` field, so the reclaimed-in-the-string token was silently lost
+  a second time by a completely different mechanism. `parse_person()` now
+  reclaims it into the surname when humaniformat's suffix exactly matches
+  a `SURNAME_CREDENTIAL_COLLISIONS` title-case spelling. Other short
+  `NAME_NOISE` tokens (`PA`, `OD`, `DC`, `MS`, `LM`, `BA`) are NOT known
+  common surnames the way `"Do"`/`"Ma"` are and stay unconditionally
+  stripped -- this is a claim about specific token spellings, not a policy
+  reversal for the vocabulary.
+
+* `extract_suffix()` no longer reads a LEADING token as a generational
+  suffix. Suffixes trail; a token in the first position is a title, not a
+  generation. The gap mattered for "Sr." -- also the standard abbreviation
+  for "Sister" (a nun) when it leads a name, e.g. a women-religious
+  clinician's record: `"Sr. Mary Josephine, CNM"`. Before this fix,
+  `extract_suffix()` read that leading "Sr." as `SENIOR`, deleted it from
+  the name, and reported `suffix = "SR"` -- feeding a false generation into
+  `suffix_agreement()`'s father/son veto for someone who was never a
+  "Senior". `extract_suffix()` runs inside `parse_person()`, so every
+  caller of `parse_person()` was exposed, not just direct callers of
+  `extract_suffix()`. `"Sister"` unabbreviated was never affected; a
+  genuine trailing suffix (`"...Smith Jr"`) still is -- the fix is
+  positional, not a vocabulary change.
+
+* `assert_org_name_matches_person_contract()` (new): every other agreement
+  rule (`surname_agreement()`, `suffix_agreement()`, `nickname_agreement()`,
+  `middle_agreement()`, `gender_agreement()`, `license_agreement()`,
+  `normalize_license_status()`) ships a portable contract assertion a
+  downstream fork can run against its own copy; `org_name_matches_person()`
+  did not have one despite being exported with real, previously-undetected
+  failure modes. Pins the professional-corporation pattern, the
+  corporate-form/credential noise floor, hyphen folding, and the DO-surname
+  collision fix.
+
+* `org_name_matches_person()` now runs `strip_name_noise()` on the raw
+  string before normalising it, instead of stripping `NAME_NOISE` with a
+  bare `setdiff()` afterward. The difference matters for exactly the
+  surnames that collide with a credential token (`DO`, the Vietnamese
+  surname vs. the Doctor of Osteopathic Medicine credential):
+  `org_name_matches_person("Do Family Medicine Clinic", "Anh Do")` --  a
+  practice literally named after the physician's own surname -- returned
+  `FALSE` before this fix, because the shared identity token "DO" was
+  stripped as noise on both sides before comparison. `strip_name_noise()`'s
+  DO carve-out must run before `name_key()` uppercases the string, since its
+  title-case heuristic is a case distinction.
+
+* `given_tokens()`, `middle_tokens()`, `name_given_tokens()` and
+  `name_leading_given()` no longer split a token on a hyphen. A genuinely
+  compound given or middle name ("Mary-Jane", "Anne-Marie") is ONE name,
+  exactly like `split_given()` already treats it -- but these four
+  tokenisers split on "-" like any other delimiter, and because
+  `person_matches()`/`middle_agreement()`/`names_have_compatible_given()`
+  corroborate on ANY shared token, that let a compound name satisfy a match
+  against an unrelated person sharing only ONE half of the compound:
+  `person_matches("SMITH", given_tokens("Mary-Jane"), "SMITH",
+  given_tokens("Jane"))` returned `TRUE`. Same defect class `fold_hyphens`'s
+  documentation already describes for given names (three cross-state false
+  identity matches), just not yet applied to these four functions when that
+  policy was set.
+
+* `strip_name_noise()`/`parse_person()`: the Vietnamese surname "Do" is no
+  longer deleted as the DO credential (Doctor of Osteopathic Medicine).
+  `NAME_NOISE` cannot record two answers for one token, and unconditional
+  stripping turned `parse_person("Anh Do")` into `last = ""`  --  silent, not
+  an error, and since callers thread the result through
+  `has_name_information()`, a downstream consumer (isochrones'
+  `resolve_dea_action_to_npi()`) was reading the empty surname as
+  unqueryable and dropping DEA-action records for practitioners actually
+  named "Do" before they ever reached NPI lookup. A `"do"`/`"DO"`/`"Do"`
+  token is now read as the surname, not the credential, when it is one of
+  exactly two tokens within its own comma-delimited segment (`"Anh Do"`,
+  or the one-token segment `"Do"` in `"Do, Anh"`), or written in
+  unambiguous title case regardless of token count (`"Nguyen Van Do"`).
+  Segment-scoped: `"Do, Anh, M.D."` still protects `"Do"` even though the
+  credential segment brings the whole string's token count to three. The
+  credential reading is unchanged everywhere else -- `"John Smith DO"` and
+  `"Smith, John, MD"` still strip to `"John Smith"`/`"Smith John"`. Found
+  during an isochrones QA pass on honorific/credential disambiguation;
+  isochrones had already independently discovered and fixed the same defect
+  once, locally, in one of its own three call sites
+  (`R/state_boards/normalize_state_board_roster.R`) before this was ported
+  upstream to fix it for every consumer of this package. 19 new assertions
+  in `test-parse-person.R`; full suite (1,540 assertions) green.
+
 # mysterynpi 0.6.0
 
 * The package contains NO fuzzy person-name matching. Unreleased similarity

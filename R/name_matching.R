@@ -107,6 +107,29 @@ NULL
 #' No existing particle list was found in this repository (only prose mentions
 #' in the parser pipelines), so this is the definition. Deliberately
 #' conservative: adding a real surname here would silently weaken matching.
+#'
+#' KNOWN LIMITATION: `"DO"` IS BOTH A PARTICLE AND A STANDALONE SURNAME. `"do"`
+#' is a genuine Portuguese/Lusophone particle ("of the", as in surnames built
+#' like "do Carmo"), which is why it is listed here -- but it is ALSO,
+#' unrelatedly, a common standalone Vietnamese surname (the same collision
+#' [strip_name_noise()]'s DO carve-out and `SURNAME_CREDENTIAL_COLLISIONS`
+#' exist for, and the same collision documented on [SURNAME_PARTICLES] in
+#' `tokens.R`, in a different function each time). The particle guard here
+#' means a standalone Vietnamese "Do" cannot be recognised as the shared
+#' surname of a compound like "Do Nguyen":
+#' `name_surname_match_type("Do", "Do Nguyen")` returns `"none"`, not
+#' `"component_subset"`, because the guard specifically excludes a component
+#' set of the particle alone from counting as identity evidence -- yet
+#' removing `"DO"` from this list would reopen the exact false-positive this
+#' guard exists to prevent for the Portuguese case: two unrelated people
+#' named "Do Carmo" and "Do Silva" would then wrongly nest as
+#' `"component_subset"` via the shared particle alone, the same shape as
+#' "Van Dyke"/"Van Buren" this guard is built to reject. Both are real
+#' populations in a US provider directory and this package has no evidence
+#' either is rarer than the other, so -- matching the precedent already set
+#' for the identical shape in `tokens.R`'s `SURNAME_PARTICLES` -- this is
+#' documented rather than resolved with an unproven directional guess. Found
+#' 2026-09-18.
 #' @family name-matching
 #' @keywords internal
 NAME_SURNAME_PARTICLES <- c(
@@ -195,6 +218,16 @@ name_surname_components <- function(x) {
 #' @param first,middle `character`: given and middle name fields. `middle` may
 #'   be `NULL`.
 #' @return `list` of `character` token vectors, one per input element.
+#'
+#' @section A hyphen never splits a token:
+#' "Mary-Jane" is ONE given name. Splitting it into `"MARY"`/`"JANE"` let a
+#' compound given name satisfy [names_have_compatible_given()]'s
+#' `mode = "any_token"` shared-token test against an unrelated "Jane" who
+#' shares nothing but the second half of the compound -- the same false-
+#' corroboration defect [name_key()]'s `fold_hyphens` documentation
+#' describes for given names generally (three cross-state false identity
+#' matches), just not yet applied to this tokeniser. Consistent with
+#' [split_given()], which already never folds a given-name hyphen.
 #' @family name-matching
 #' @export
 name_given_tokens <- function(first, middle = NULL) {
@@ -205,7 +238,7 @@ name_given_tokens <- function(first, middle = NULL) {
   f2 <- f; f2[is.na(f2)] <- ""
   both <- trimws(paste(f2, m))
   lapply(both, function(s) {
-    t <- strsplit(s, "[^A-Za-z]+")[[1]]
+    t <- strsplit(s, "[^A-Za-z-]+")[[1]]
     t <- toupper(t[nzchar(t)])
     unique(t[nchar(t) >= 2L])
   })
@@ -218,7 +251,8 @@ name_given_tokens <- function(first, middle = NULL) {
 #' This is the one place an initial must survive: "Dowdle, S. Addreina" has
 #' leading given `S`, and dropping it would leave `ADDREINA` -- the middle name
 #' -- masquerading as the first, which is exactly the collision the positional
-#' mode exists to prevent.
+#' mode exists to prevent. As in [name_given_tokens()], a hyphen never splits
+#' the leading token: "Mary-Jane" is the whole leading given name, not "Mary".
 #'
 #' @param first `character`: the given-name field.
 #' @return `character` of the same length; `NA` where absent.
@@ -228,7 +262,7 @@ name_leading_given <- function(first) {
   k <- .nm_key(first)
   vapply(k, function(s) {
     if (is.na(s) || !nzchar(s)) return(NA_character_)
-    t <- strsplit(s, "[^A-Za-z]+")[[1]]
+    t <- strsplit(s, "[^A-Za-z-]+")[[1]]
     t <- t[nzchar(t)]
     if (length(t) == 0L) NA_character_ else toupper(t[1])
   }, character(1), USE.NAMES = FALSE)

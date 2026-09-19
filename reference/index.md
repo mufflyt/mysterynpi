@@ -105,6 +105,10 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
   : Normalise recorded gender codes to \`"M"\`, \`"F"\`, or \`NA\`
 - [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
   : Do two given-name tokens agree once recorded nicknames are admitted?
+- [`given_name_agreement()`](https://mufflyt.github.io/mysterynpi/reference/given_name_agreement.md)
+  : Categorical given-name agreement: verdict plus named reason
+- [`assert_given_name_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_given_name_agreement_contract.md)
+  : Assert the given-name agreement contract
 - [`nickname_dictionary_version()`](https://mufflyt.github.io/mysterynpi/reference/nickname_dictionary_version.md)
   : Version of the governed nickname dictionary
 - [`NICKNAME_EDGES`](https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.md)
@@ -152,7 +156,7 @@ Three verdicts; “uninformative” is load-bearing and is not agreement.
 - [`TAXONOMY_FAMILY_PATTERNS`](https://mufflyt.github.io/mysterynpi/reference/TAXONOMY_FAMILY_PATTERNS.md)
   : NUCC family patterns for board specialties (identity screen only)
 
-## Similarity primitives (governed numeric scores; verdicts stay categorical)
+## Nickname dictionary (deterministic table reads)
 
 The fenced exception; extracted from isochrones, quirks pinned.
 
@@ -166,21 +170,6 @@ The fenced exception; extracted from isochrones, quirks pinned.
   : Are two names one-hop equivalent under the corpus?
 - [`get_nicknames_for_name()`](https://mufflyt.github.io/mysterynpi/reference/get_nicknames_for_name.md)
   : All recorded nicknames for a formal name
-- [`calculate_enhanced_first_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/calculate_enhanced_first_name_similarity.md)
-  : Deprecated: use \[given_name_similarity()\]
-- [`surname_similarity()`](https://mufflyt.github.io/mysterynpi/reference/surname_similarity.md)
-  : Numeric surname similarity, missing-aware and vectorized
-- [`middle_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/middle_name_similarity.md)
-  : Numeric middle-name similarity, missing-aware and vectorized
-- [`given_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/given_name_similarity.md)
-  : Numeric given-name similarity: nickname-aware, missing-aware,
-  vectorized
-- [`assert_similarity_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_similarity_contract.md)
-  : Assert the similarity contract on a similarity function
-- [`JW_PREFIX_WEIGHT`](https://mufflyt.github.io/mysterynpi/reference/JW_PREFIX_WEIGHT.md)
-  : Pinned Jaro-Winkler prefix weight
-- [`NICKNAME_SIMILARITY`](https://mufflyt.github.io/mysterynpi/reference/NICKNAME_SIMILARITY.md)
-  : Pinned nickname-equivalence similarity
 
 ## Clerical review
 

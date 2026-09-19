@@ -11,7 +11,6 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/news/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/paper.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/GRADUATION_YEAR_BANDS.html</loc></url>
-<url><loc>https://mufflyt.github.io/mysterynpi/reference/JW_PREFIX_WEIGHT.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/LICENSE_STATUS_LEVELS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MEDICAL_UNIT_PATTERNS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/MIN_SURNAME_TOKEN.html</loc></url>
@@ -19,7 +18,6 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NAME_SURNAME_PARTICLES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_POLICY.html</loc></url>
-<url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_SIMILARITY.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ORG_NOISE.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ROSTER_BENCHMARK.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SOURCE_CLASSES.html</loc></url>
@@ -29,17 +27,16 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/WINKLER_CENSUS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/are_nickname_equivalents.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_gender_agreement_contract.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_given_name_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_license_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_license_status_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_nickname_policy.html</loc></url>
-<url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_similarity_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_suffix_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/award_contested.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/blank_na.html</loc></url>
-<url><loc>https://mufflyt.github.io/mysterynpi/reference/calculate_enhanced_first_name_similarity.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/clerical_precision.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/clerical_sample.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/collapse_candidates.html</loc></url>
@@ -54,7 +51,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/get_canonical_name.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/get_nickname_dictionary.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/get_nicknames_for_name.html</loc></url>
-<url><loc>https://mufflyt.github.io/mysterynpi/reference/given_name_similarity.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/given_name_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/given_tokens.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/graduation_year_band.html</loc></url>
@@ -67,7 +64,6 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_conformance.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_status_audit.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_agreement.html</loc></url>
-<url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_name_similarity.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_tokens.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/name_given_match_position.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/name_given_tokens.html</loc></url>
@@ -113,7 +109,6 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_key_variants.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_rarity.html</loc></url>
-<url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_similarity.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_token_table.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_tokens.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_consistent.html</loc></url>

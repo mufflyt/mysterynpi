@@ -2,7 +2,7 @@
 % Please edit documentation in R/sql_join_keys.R
 \name{sql_quote_literal}
 \alias{sql_quote_literal}
-\title{SQL: a character value as a SQL string literal}
+\title{SQL: a character value as a DuckDB SQL string literal}
 \usage{
 sql_quote_literal(x)
 }
@@ -23,6 +23,14 @@ governed literal-builder, tested by ROUND-TRIP (the value comes back out
 of a real DuckDB byte-identical), replaces the per-site patches.
 }
 \details{
+SCOPE: this is a DuckDB SQL literal builder for GENERATED SQL text -
+deterministic correctness where the query has to be assembled as a
+string. It is not a database-independent quoting or sanitization
+abstraction; other engines have other literal rules. Where the caller
+holds a live connection, prefer DBI parameter binding
+(`DBI::dbBind()` / parameterised `dbGetQuery()`) over pasting literals
+at all.
+
 Vectorised: a character vector in, one literal per element out.
 }
 \seealso{
@@ -30,6 +38,7 @@ Other sql-join-keys:
 \code{\link[=sql_first_initial]{sql_first_initial()}},
 \code{\link[=sql_middle_initial_guard]{sql_middle_initial_guard()}},
 \code{\link[=sql_name_clean]{sql_name_clean()}},
-\code{\link[=sql_name_compact]{sql_name_compact()}}
+\code{\link[=sql_name_compact]{sql_name_compact()}},
+\code{\link[=sql_strip_parenthetical]{sql_strip_parenthetical()}}
 }
 \concept{sql-join-keys}

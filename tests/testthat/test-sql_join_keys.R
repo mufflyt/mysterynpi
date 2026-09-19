@@ -34,17 +34,26 @@ test_that("REGRESSION: the pattern reaches RE2 with SINGLE backslashes", {
   expect_true(grepl("\\\\s\\+", sql))           # \s+ present, single-escaped
 })
 
-test_that("sql_name_compact agrees with compact_name_key on ASCII inputs (parity)", {
+test_that("sql_name_compact IS compact_name_key: no preprocessing carve-out", {
+  # This test previously had to manufacture an R reference by hand-stripping
+  # suffixes first - evidence the two APIs had different contracts wearing
+  # one "twin" name. Now the twins are unconditional per mode, and the
+  # reference IS the R primitive, called directly.
   with_duck(function(con) {
     inputs <- c("Jones-Cox", "JONES COX", "JonesCox", "O'Brien", "O BRIEN",
                 "VAN HOUTEN", "VANHOUTEN", "van de Ven", "SMITH JR",
                 "  Della  Badia ", "MC CARTHY-DERVIN")
     duckdb::duckdb_register(con, "t2", data.frame(x = inputs, stringsAsFactors = FALSE))
-    sql_side <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v FROM t2", sql_name_compact("x")))$v
-    # R reference: suffix-strip then compact, the same contract the SQL claims.
-    r_side <- compact_name_key(sub("(\\s+(MD|M\\.D\\.|DO|D\\.O\\.|JR|SR|III|II|IV|PH\\.\\s?D\\.)\\.?)+$",
-                                   "", toupper(trimws(inputs)), perl = TRUE))
-    expect_identical(sql_side, unname(r_side))
+    sql_off <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v FROM t2",
+                                            sql_name_compact("x")))$v
+    expect_identical(sql_off, unname(compact_name_key(inputs)))
+    sql_on <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v FROM t2",
+                                           sql_name_compact("x", strip_suffixes = TRUE)))$v
+    expect_identical(sql_on,
+                     unname(compact_name_key(inputs, strip_suffixes = TRUE)))
+    # the modes differ exactly where a trailing suffix exists
+    expect_identical(sql_off[inputs == "SMITH JR"], "SMITHJR")
+    expect_identical(sql_on[inputs == "SMITH JR"], "SMITH")
   })
 })
 
@@ -80,16 +89,19 @@ test_that("sql_first_initial agrees with extract_first_initial on ASCII (parity)
   })
 })
 
-test_that("KNOWN DIVERGENCE: accented first letters split R and UDF-free SQL", {
-  # NOT a parity claim - the documented ASCII boundary, pinned so it cannot
-  # silently change. R transliterates via normalize_string(); UDF-free SQL
-  # strips the non-ASCII letter and yields the first letter of the REMAINDER.
+test_that("RETRACTION PIN: accented first letters key the SAME block on both sides", {
+  # An earlier revision of this file pinned "Émile" -> R "E" vs SQL "M" as a
+  # documented ASCII parity boundary. Retracted by owner review 2026-09-19:
+  # a documented disagreement is still a disagreement, and blocking is
+  # exactly where R and SQL must agree byte-for-byte. The full Unicode
+  # parity contract lives in test-sql-r-parity-contract.R; this pin stays
+  # here so the old divergence can never quietly return.
   with_duck(function(con) {
     duckdb::duckdb_register(con, "t4", data.frame(x = "Émile", stringsAsFactors = FALSE))
     sql_side <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v FROM t4",
                                              sql_first_initial("x")))$v
-    expect_identical(extract_first_initial("Émile"), "E")  # transliterated
-    expect_identical(sql_side, "M")                         # 'MILE' remainder
+    expect_identical(extract_first_initial("Émile"), "E")
+    expect_identical(sql_side, "E")
   })
 })
 

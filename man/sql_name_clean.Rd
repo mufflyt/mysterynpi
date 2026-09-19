@@ -2,7 +2,7 @@
 % Please edit documentation in R/sql_join_keys.R
 \name{sql_name_clean}
 \alias{sql_name_clean}
-\title{SQL: normalise a name column for matching (UDF-free, DuckDB/RE2)}
+\title{SQL: normalise a name column for matching (DuckDB/RE2)}
 \usage{
 sql_name_clean(col)
 }
@@ -13,16 +13,27 @@ sql_name_clean(col)
 character(1) SQL expression.
 }
 \description{
-Upper-cases and trims, strips TRAILING credential and generation suffixes
-(`MD`, `M.D.`, `DO`, `D.O.`, `JR`, `SR`, `II`, `III`, `IV`, `PH.D.`,
-iterated so `"SMITH JR MD"` fully unwinds), then replaces every remaining
+Transliterates on the shared base every SQL twin uses (NFC, German
+digraphs and Latin special letters mapped as [normalize_string()] maps
+them, then `strip_accents(UPPER(TRIM(...)))` - see the parity contract
+note on [sql_npi_name()]), strips parenthesised alternate names (the
+same `strip_alternates` behaviour [name_key()] applies, so
+`"SMITH (JONES)"` cleans to `"SMITH"`, never `"SMITH JONES"`), strips
+TRAILING credential and generation suffixes (`MD`, `M.D.`, `DO`,
+`D.O.`, `JR`, `SR`, `II`, `III`, `IV`, `PH.D.`, iterated so
+`"SMITH JR MD"` fully unwinds), then replaces every remaining
 non-letter with a space and trims again.
+}
+\details{
+`strip_accents()` and `nfc_normalize()` are DuckDB built-ins; no
+user-registered UDF is needed on a bare DuckDB connection.
 }
 \seealso{
 Other sql-join-keys:
 \code{\link[=sql_first_initial]{sql_first_initial()}},
 \code{\link[=sql_middle_initial_guard]{sql_middle_initial_guard()}},
 \code{\link[=sql_name_compact]{sql_name_compact()}},
-\code{\link[=sql_quote_literal]{sql_quote_literal()}}
+\code{\link[=sql_quote_literal]{sql_quote_literal()}},
+\code{\link[=sql_strip_parenthetical]{sql_strip_parenthetical()}}
 }
 \concept{sql-join-keys}

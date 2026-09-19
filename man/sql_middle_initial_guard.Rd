@@ -30,6 +30,7 @@ Other sql-join-keys:
 \code{\link[=sql_first_initial]{sql_first_initial()}},
 \code{\link[=sql_name_clean]{sql_name_clean()}},
 \code{\link[=sql_name_compact]{sql_name_compact()}},
-\code{\link[=sql_quote_literal]{sql_quote_literal()}}
+\code{\link[=sql_quote_literal]{sql_quote_literal()}},
+\code{\link[=sql_strip_parenthetical]{sql_strip_parenthetical()}}
 }
 \concept{sql-join-keys}

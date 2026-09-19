@@ -176,17 +176,75 @@ sql_npi_name <- function(col) {
     stop("sql_npi_name() requires a non-empty single-string column expression",
          call. = FALSE)
   }
-  # Order matches normalize_string(): German digraphs before the generic
-  # accent strip, so "u"-with-umlaut becomes "ue", not a bare "u". \uxxxx
-  # escapes, not literal characters, so this code file stays ASCII-portable
-  # (R CMD check: "checking code files for non-ASCII characters").
-  digraphs <- c("\u00df" = "ss",
-                "\u00fc" = "ue", "\u00dc" = "ue",
-                "\u00f6" = "oe", "\u00d6" = "oe",
-                "\u00e4" = "ae", "\u00c4" = "ae")
-  expr <- col
-  for (ch in names(digraphs)) {
-    expr <- sprintf("REPLACE(%s, '%s', '%s')", expr, ch, digraphs[[ch]])
+  .sql_translit_upper(col)
+}
+
+# The ONE transliterating SQL base every database twin of an R identity
+# primitive builds on (sql_npi_name, sql_name_clean/compact,
+# sql_first_initial). PACKAGE-LEVEL PARITY CONTRACT: executing this on a
+# supported input must produce what normalize_string() produces, and the
+# per-pair tests in test-sql-r-parity-contract.R prove it by execution, on
+# a Unicode corpus, against a live DuckDB. Mirrors normalize_string()'s own
+# order exactly:
+#
+#   1. nfc_normalize(): normalize_string() runs stri_trans_nfc() FIRST, so a
+#      DECOMPOSED umlaut (u + combining diaeresis) reaches the digraph table
+#      as one character. Without this the SQL side fell through to
+#      strip_accents() and emitted a bare vowel for decomposed input - a
+#      silent parity break invisible on composed test data.
+#   2. The REPLACE chain, BEFORE UPPER, in two measured families:
+#      - German digraphs (u-umlaut -> "ue", sharp-s -> "ss"): strip_accents()
+#        only drops the diacritic ("MULLER"), and UPPER of a sharp-s is
+#        U+1E9E, which strip_accents() KEEPS (measured: "Gross" with sharp-s
+#        upper-cased to "GRO<U+1E9E>") - so both substitutions must run on
+#        the raw lower/mixed-case text.
+#      - Latin SPECIAL LETTERS that are not accents at all, so
+#        strip_accents() leaves them whole (measured on DuckDB: OYVIND with
+#        O-slash, LUKASZ with L-stroke, DORDE with D-stroke and AESA with
+#        the AE ligature all came back UNCHANGED): O-slash -> "o",
+#        L-stroke -> "l", D-stroke -> "d", AE -> "ae", OE ligature -> "oe",
+#        thorn -> "th" - each mapping taken from what
+#        stringi's Latin-ASCII actually produces, not assumed.
+#   3. strip_accents(UPPER(TRIM(...))) for everything that IS an accent.
+#
+# strip_accents() and nfc_normalize() are DuckDB built-ins - no
+# user-registered UDF is needed on a bare DuckDB connection.
+# \uxxxx escapes keep this file ASCII-portable (R CMD check).
+.sql_translit_map <- c(
+  "\u00df" = "ss",
+  "\u00fc" = "ue", "\u00dc" = "ue",
+  "\u00f6" = "oe", "\u00d6" = "oe",
+  "\u00e4" = "ae", "\u00c4" = "ae",
+  "\u00f8" = "o",  "\u00d8" = "o",
+  "\u0142" = "l",  "\u0141" = "l",
+  "\u0111" = "d",  "\u0110" = "d",
+  "\u00e6" = "ae", "\u00c6" = "ae",
+  "\u0153" = "oe", "\u0152" = "oe",
+  "\u00fe" = "th", "\u00de" = "th",
+  # The remainder of the mechanically-measured gap over the DECLARED PARITY
+  # DOMAIN (ASCII + U+00C0..U+017F, Latin-1 Supplement + Latin Extended-A):
+  # a systematic differential of every character in that range -
+  # normalize_string() vs the executed SQL - found exactly these families
+  # unmapped (test-sql-r-parity-contract.R runs that differential on every
+  # build, so the map is mechanically governed, not hand-curated). Each
+  # replacement is what stringi's Latin-ASCII actually produced.
+  "\u00f0" = "d",  "\u00d0" = "d",    # eth
+  "\u0127" = "h",  "\u0126" = "h",    # H-stroke
+  "\u0133" = "ij", "\u0132" = "ij",   # IJ ligature
+  "\u0138" = "q",               # kra (Latin-ASCII maps it to Q)
+  "\u0140" = "l",  "\u013f" = "l",    # L-middle-dot
+  "\u0149" = "'n",              # apostrophe-n
+  "\u014b" = "n",  "\u014a" = "n",    # eng
+  "\u0167" = "t",  "\u0166" = "t",    # T-stroke
+  "\u00d7" = "*",  "\u00f7" = "/")    # not letters; mapped so sql_npi_name() stays an
+                              # EXACT normalize_string() twin on the domain
+                              # (both symbols then strip from any key)
+
+.sql_translit_upper <- function(col) {
+  q <- function(s) gsub("'", "''", s, fixed = TRUE)   # 'n needs SQL doubling
+  expr <- sprintf("nfc_normalize(%s)", col)
+  for (ch in names(.sql_translit_map)) {
+    expr <- sprintf("REPLACE(%s, '%s', '%s')", expr, q(ch), q(.sql_translit_map[[ch]]))
   }
   sprintf("strip_accents(UPPER(TRIM(%s)))", expr)
 }

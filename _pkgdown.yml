@@ -24,6 +24,7 @@ reference:
   - extract_first_initial
   - strip_name_noise
   - NAME_NOISE
+  - SURNAME_CREDENTIAL_COLLISIONS
 - title: Parsing and tokens
   contents:
   - parse_person

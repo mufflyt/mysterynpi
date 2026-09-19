@@ -146,3 +146,76 @@ test_that("the DO credential is still stripped -- the carve-out narrows NAME_NOI
   expect_identical(parse_person("John Michael Smith DO")$last, "SMITH")
   expect_false(grepl("DO", parse_person("John Smith DO")$last, fixed = TRUE))
 })
+
+test_that("the 'Ma' surname is protected from the MA (Master of Arts) credential", {
+  # THE DEFECT: strip_name_noise("John Ma") returned "John" -- the same
+  # silent-drop failure mode as the pre-fix "Do" case, for a common Chinese
+  # surname (Yo-Yo Ma, Jack Ma) that carried none of "Do"'s protection
+  # because the earlier fix was scoped to the DO token specifically, not
+  # generalised. Found 2026-09-18 during a QA pass on honorific parsing.
+  expect_identical(strip_name_noise("John Ma"), "John Ma")
+  expect_identical(strip_name_noise("Yo-Yo Ma"), "Yo-Yo Ma")
+  expect_identical(strip_name_noise("John Michael Ma"), "John Michael Ma")
+  expect_identical(parse_person("John Ma")$last, "MA")
+  expect_identical(parse_person("Yo-Yo Ma")$last, "MA")
+  # humaniformat's OWN independent suffix heuristic treats a trailing "Ma"
+  # as a degree-suffix token once a name has 3+ tokens (unrelated to this
+  # carve-out -- see parse_person()'s "reclaimed" comment) and would
+  # otherwise silently drop it; reclaimed into a compound last name, same
+  # shape as humaniformat's own "Van Do" compound-surname grouping.
+  expect_identical(parse_person("John Michael Ma")$last, "MICHAEL MA")
+  expect_true(has_name_information(parse_person("John Ma")$last))
+})
+
+test_that("the 'Ma' surname is protected surname-first, including with a trailing credential", {
+  expect_identical(strip_name_noise("Ma, John"), "Ma John")
+  expect_identical(strip_name_noise("Ma, John, M.D."), "Ma John")
+  expect_identical(parse_person("Ma, John")$last, "MA")
+  expect_identical(parse_person("Ma, John, M.D.")$last, "MA")
+})
+
+test_that("the MA credential is still stripped -- the collision list narrows NAME_NOISE, it does not widen it", {
+  expect_identical(strip_name_noise("John Smith MA"), "John Smith")
+  expect_identical(strip_name_noise("John Michael Smith MA"), "John Michael Smith")
+  expect_identical(parse_person("John Smith MA")$last, "SMITH")
+  expect_false(grepl("MA", parse_person("John Smith MA")$last, fixed = TRUE))
+})
+
+test_that("a trailing 'Ma' is reclaimed from humaniformat's own suffix detection", {
+  # THE DEFECT: humaniformat::parse_names() has its OWN internal notion of
+  # degree-suffix tokens, entirely independent of NAME_NOISE/
+  # SURNAME_CREDENTIAL_COLLISIONS -- humaniformat::suffix("John Michael Ma")
+  # returns "Ma", not NA, once a name has 3+ tokens. strip_name_noise()'s
+  # carve-out correctly kept "Ma" IN the string handed to humaniformat, but
+  # this file never reads humaniformat's own $suffix column (mysterynpi's
+  # suffix comes from extract_suffix() in step 1), so the reclaimed token
+  # was silently dropped anyway: "John Michael Ma" parsed to last =
+  # "Michael" before this fix, losing the surname a second time via a
+  # completely different mechanism than the one already fixed.
+  expect_identical(parse_person("John Michael Ma")$last, "MICHAEL MA")
+  expect_true(has_name_information(parse_person("John Michael Ma")$last))
+
+  # NEGATIVE CONTROL: all-caps "MA" is NOT reclaimed -- matches the case
+  # boundary strip_name_noise() already draws (see its "KNOWN LIMITATION"
+  # docs): there is no case signal left to read all-caps "MA" as a surname
+  # any more than all-caps "DO" is, so reclaiming it would contradict the
+  # decision already made on the string side.
+  expect_identical(parse_person("JOHN MICHAEL MA")$last, "MICHAEL")
+
+  # NEGATIVE CONTROL: genuine credentials that humaniformat also treats as
+  # its own internal suffix (MD, PhD) are NOT reclaimed -- only the curated
+  # SURNAME_CREDENTIAL_COLLISIONS tokens are.
+  expect_identical(parse_person("John Michael MD")$last, "MICHAEL")
+  expect_identical(parse_person("John Michael PhD")$last, "MICHAEL")
+})
+
+test_that("other short NAME_NOISE tokens (PA, OD, DC, MS, LM, BA) stay unconditionally stripped", {
+  # Deliberately NOT in SURNAME_CREDENTIAL_COLLISIONS: not well-known common
+  # surnames the way "Do"/"Ma" are, so protecting them would invent a fake
+  # surname for a genuinely credential-only input rather than recover a
+  # real one. Pins that the generalisation didn't overreach.
+  expect_identical(parse_person("John Smith PA")$last, "SMITH")
+  expect_identical(parse_person("John Smith OD")$last, "SMITH")
+  expect_identical(parse_person("John Smith DC")$last, "SMITH")
+  expect_identical(parse_person("John Smith LM")$last, "SMITH")
+})

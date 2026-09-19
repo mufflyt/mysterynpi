@@ -50,6 +50,13 @@ three-or-more-token segment is still read as the credential (e.g.
 narrows `NAME_NOISE`'s reach for exactly the ambiguous case, it does not
 widen it, and every other `NAME_NOISE` token is unaffected.
 
+THE SAME CARVE-OUT, GENERALISED. `"Do"` is not the only `NAME_NOISE`
+token that is also a common real surname -- see
+[SURNAME_CREDENTIAL_COLLISIONS] for the full curated set (currently `DO`
+and `MA`) and the rule for exactly which tokens qualify. Every entry gets
+the identical two-part protection described above, keyed on its own
+title-case spelling.
+
 KNOWN LIMITATION: A SEGMENT THAT IS ENTIRELY UPPERCASE HAS NO CASE SIGNAL
 LEFT TO GIVE. Case is the only thing that distinguishes a genuine
 three-or-more-token compound surname (`"Nguyen Van Do"`) from a genuine

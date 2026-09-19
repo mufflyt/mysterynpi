@@ -1,5 +1,29 @@
 # mysterynpi (development version)
 
+* The `"Do"` surname/credential carve-out is generalised to `"Ma"`
+  (`SURNAME_CREDENTIAL_COLLISIONS`, new export). `"Ma"` is a top-20 Chinese
+  surname (Yo-Yo Ma, Jack Ma) that is ALSO `NAME_NOISE`'s spelling for the
+  Master of Arts credential, and carried none of `"Do"`'s protection
+  because the earlier fix was scoped to the `DO` token specifically:
+  `strip_name_noise("John Ma")` silently returned `"John"`, reading as
+  unqueryable downstream exactly like the pre-fix `"Do"` case. Fixed with
+  the identical two-part rule (protected as a surname when it is one of
+  exactly two tokens in its comma segment, or spelled in the exact
+  title-case `"Ma"` regardless of token count). Separately, a 3+-token
+  title-case `"Ma"` surname (e.g. `"John Michael Ma"`) hit a SECOND,
+  unrelated bug: `humaniformat::parse_names()` has its own independent
+  notion of degree-suffix tokens that also claims `"Ma"` once a name has
+  three or more tokens (`humaniformat::suffix("John Michael Ma")` returns
+  `"Ma"`, not `NA`), and `parse_person()` never read humaniformat's own
+  `$suffix` field, so the reclaimed-in-the-string token was silently lost
+  a second time by a completely different mechanism. `parse_person()` now
+  reclaims it into the surname when humaniformat's suffix exactly matches
+  a `SURNAME_CREDENTIAL_COLLISIONS` title-case spelling. Other short
+  `NAME_NOISE` tokens (`PA`, `OD`, `DC`, `MS`, `LM`, `BA`) are NOT known
+  common surnames the way `"Do"`/`"Ma"` are and stay unconditionally
+  stripped -- this is a claim about specific token spellings, not a policy
+  reversal for the vocabulary.
+
 * `extract_suffix()` no longer reads a LEADING token as a generational
   suffix. Suffixes trail; a token in the first position is a title, not a
   generation. The gap mattered for "Sr." -- also the standard abbreviation

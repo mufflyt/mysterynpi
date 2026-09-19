@@ -1,6 +1,6 @@
 Package: mysterynpi
 Title: Name Keys and Agreement Rules for Linking Person Rosters to NPI
-Version: 0.5.0
+Version: 0.6.0
 Authors@R: person("Tyler", "Muffly", email = "tyler.muffly@dhha.org",
                   role = c("aut", "cre"))
 Description: One definition of the name-handling a provider linkage needs:
@@ -18,7 +18,7 @@ Encoding: UTF-8
 Depends: R (>= 4.1)
 Imports: stringi, stats
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown, humaniformat, jsonlite,
-    stringdist, duckdb, DBI
+    duckdb, DBI
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true

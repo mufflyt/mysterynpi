@@ -1,3 +1,53 @@
+# mysterynpi 0.6.0
+
+* FUZZY PERSON-NAME MATCHING IS REMOVED FROM THE PACKAGE ENTIRELY (owner
+  ruling, 2026-09-19). The architectural rule, verbatim: exact
+  normalization, explicit equivalence, declared aliases, initials,
+  documented surname history, credentials, gender evidence, and structured
+  identity evidence are allowed; approximate spelling similarity is not.
+  Two corrections land together:
+
+  (1) A set of first-class similarity primitives (surname/middle/given
+  Jaro-Winkler and Levenshtein, merged as PR #31) was REVERTED before any
+  tag or consumer existed - it was built on a misread that the audit asked
+  for fuzz to be governed, when the requirement is for fuzz to disappear
+  from identity resolution.
+
+  (2) The pre-existing "fenced exception" is gone too:
+  `calculate_enhanced_first_name_similarity()` and
+  `create_nickname_aware_similarity()` are DELETED (no deprecation period,
+  no option fence - they were never a disabled capability, they were
+  unwanted), the `options(mysterynpi.enable_similarity_scoring)` gate is
+  retired with them, and stringdist leaves DESCRIPTION entirely.
+
+* `test-no-fuzzy.R` returns to its original, stronger shape: NO fuzzy
+  machinery anywhere in the package, with NO exempt module - source scan,
+  parse-tree scan, and call-graph reachability over the installed
+  namespace, plus a DESCRIPTION assertion covering every dependency tier.
+  The mutation campaign's smuggling mutant now injects a literal `adist()`
+  call into a verdict, proving the guards fire on direct reintroduction;
+  the mutant that targeted the deleted option fence is retired with a
+  recorded reason (a mutant with no target measures nothing).
+
+* New: `given_name_agreement()` - the categorical three-valued given-name
+  verdict (`corroborates` / `conflicts` / `uninformative`) with named
+  deterministic detail states: `corroborates_nickname` (a RECORDED
+  one-hop NICKNAME_EDGES relation - JULIA/JULIE and ANN/ANNE are declared
+  edges, verified against the corpus rather than assumed from spelling)
+  and `corroborates_initial` (a bare initial matching the other side's
+  first letter - a distinct, deliberately WEAK state so policy can weigh
+  it without a number). LEE/LEA and JANE/JOAN conflict: one edit apart,
+  no recorded edge, and nothing numeric exists to soften them. The
+  missingness contract is pinned exactly: SMITH/SMITH corroborates,
+  SMITH/JONES conflicts, NA/SMITH uninformative, NA/NA uninformative -
+  a missing name is never a bad match.
+  `assert_given_name_agreement_contract()` ships alongside, falsifiable
+  by construction (it accepts a stand-in).
+
+* The five deterministic nickname dictionary utilities remain unchanged:
+  they are table reads over the one pinned corpus, shared with
+  `nickname_agreement()`, and contain no fuzz.
+
 # mysterynpi 0.5.0
 
 * Equality-join surname keys (`compact_name_key()`, `surname_key_variants()`):

@@ -143,16 +143,22 @@ never coexisted — rather than evidence the threshold was right.
 
 Two specific exclusions worth naming:
 
-- **Similarity scoring is fenced, not forbidden (2026-09).** The package
-  now carries isochrones' nickname-aware Jaro-Winkler scoring — RANKING
-  machinery for candidate generation, the stage fuzz was always legitimate
-  at. The fence is machine-enforced: no agreement verdict can reach the
-  scoring module through any call chain (a call-graph guard asserts it; a
-  mutation proves the guard fires), the Jaro-Winkler path is OFF by default
-  (`options(mysterynpi.enable_similarity_scoring = TRUE)` is the reviewable
-  opt-in), and there is ONE nickname system: the scoring dictionary derives
-  from `NICKNAME_EDGES`, so verdicts and scores read the same truth and the
-  fence -- not a second table -- is what keeps scores from deciding.
+- **Fuzzy person-name matching is REMOVED, not fenced (2026-09-19, owner
+  ruling).** A Jaro-Winkler scoring pair briefly lived here behind an
+  opt-in fence; both the pair and the fence are gone, because the fence
+  legitimized the wrong thing. The identity architecture is: exact
+  normalisation, explicit equivalence, declared aliases (the recorded
+  `NICKNAME_EDGES` corpus - JULIA/JULIE is a declared edge, not a spelling
+  tolerance), initials, documented surname history, credentials, gender
+  evidence, and structured identity evidence. Approximate spelling
+  similarity is not - a spelling difference no named deterministic rule
+  explains remains a conflict (LEE/LEA conflicts, and nothing numeric
+  exists to soften it). `test-no-fuzzy.R` asserts there is NOTHING to
+  reach: zero fuzzy references anywhere in the package, no exempt module,
+  no fuzzy dependency in any tier of DESCRIPTION, and a mutation proves
+  the guard fires on a direct reintroduction. The categorical verdicts -
+  including `given_name_agreement()` with its named detail states - carry
+  everything the scores were doing that was worth keeping.
 - **No edit-distance tolerance on the middle name.** One was added and removed
   the same day. Measured: it changed 64 of 30,740 candidate pairs and was worth
   22 records, while admitting pairs that are genuinely different given names

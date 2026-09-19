@@ -19,8 +19,8 @@ blocking_key(
 
 \item{mode}{`"surname_initial"`, `"prefix_n"`, or `"compact"`.}
 
-\item{n}{prefix length for `prefix_n` (required for that mode;
-forbidden meaning-free elsewhere and therefore ignored).}
+\item{n}{prefix length: required for `prefix_n` (single finite whole
+number >= 1); an ERROR with any other mode.}
 }
 \value{
 character vector of blocking keys, `NA_character_` where the
@@ -32,28 +32,40 @@ Modes:
 \describe{
   \item{`surname_initial`}{`<compact surname>|<first initial>` via
     [compact_name_key()] and [extract_first_initial()]. The `|`
-    delimiter is part of the contract: legacy sites joined on two
-    separate columns, and a single-string key only reproduces that
-    safely with an explicit field boundary - surname `ANNA` with
-    initial `L` must never collide with surname `ANN` and a first name
-    starting `A` (`"ANNA|L"` vs `"ANN|A"`).}
+    delimiter makes the component boundary EXPLICIT. It is not needed
+    to prevent collisions - with a fixed one-character second field,
+    `surname + initial` is already uniquely separable - it is kept for
+    readability, auditability (a human reading a ledger sees the two
+    components), and future-proofing against any mode whose second
+    field is not fixed-width. The serialized contract is pinned by
+    test, so the delimiter cannot drift silently.}
   \item{`prefix_n`}{the first `n` letters of the compact surname. `n`
     is REQUIRED for this mode - the audited call sites used 2, 3 and 4
     with materially different candidate pools, so a silent default
-    would pick a pool width nobody chose. A surname shorter than `n`
-    keys as its full compact form, never padded.}
+    would pick a pool width nobody chose - and must be a single
+    finite whole number >= 1 (1.5, Inf, NaN, "3" and TRUE are caller
+    mistakes, rejected loudly rather than coerced). A surname shorter
+    than `n` keys as its full compact form, never padded.}
   \item{`compact`}{the compact surname alone ([compact_name_key()]).}
 }
 }
 \details{
+Supplying `n` with any mode other than `prefix_n` is an error: an
+argument that would be silently discarded is a caller mistake the API
+should catch, not swallow.
+
 MISSING IS INSUFFICIENT, NEVER PARTIAL: if any component a mode
 requires normalises to nothing (missing, whitespace-only,
 punctuation-only), the key is `NA_character_`. No `"SMITH|"`, no
 `"|M"`, no empty-string keys - a partial key silently blocks a person
-against everyone sharing the observed half. (The legacy sites built
-partial keys and filtered them immediately afterward, so for them this
-is an API cleanup with no effective matching change; the fixtures in
-test-blocking.R record that classification explicitly.)
+against everyone sharing the observed half. The audited legacy
+extractors kept the components as SEPARATE columns and filtered
+missing rows before any join, so for plain missing values this changes
+the API representation, not their missing-value candidate behavior.
+The exception is a PUNCTUATION-ONLY given name: `nzchar("-")` is TRUE,
+so the legacy filter was blind to it and a `-` initial reached
+candidate generation, where the canonical key is `NA` - a potential
+candidate-set delta, characterized in test-blocking.R.
 
 Length discipline: `last` and `first` must be equal length or scalar;
 anything else refuses to recycle.

@@ -10,12 +10,20 @@
 # legacy implementations agree with each other in every case (the
 # first-token truncation two sites skip cannot change a first initial), so
 # the duplication was pure drift surface with no behavioral spread. What a
-# canonical key DOES change is canonicalization, and each such change is a
-# documented, tested delta (see test-blocking.R): punctuation compacts
-# (O'BRIEN and OBRIEN share a block), accents transliterate (MUNOZ finds
-# its unaccented registry spelling - the exact 30%-vs-10.4% unmatched
-# defect name_key() was built for), German digraphs romanise (MULLER /
-# MUELLER), and insufficient input is NA_character_, never a partial key.
+# canonical key DOES change is canonicalization - on BOTH sides of the
+# key, each change a documented, tested fixture (see test-blocking.R):
+# surname punctuation/spaces compact, accents transliterate (the exact
+# 30%-vs-10.4% unmatched defect name_key() was built for), German
+# digraphs romanise, parenthetical alternates strip; the GIVEN-name side
+# canonicalizes through extract_first_initial(), so a legacy "É"/"("/"'"
+# initial becomes the first normalized LETTER; and insufficient input is
+# NA_character_, never a partial key. Classification discipline: these
+# are intentional KEY-LEVEL canonicalization deltas and POTENTIAL
+# candidate-set deltas - whether a candidate set actually changes is
+# measured against frozen data at migration, never inferred from a
+# changed key. SCOPE: the nine state-extractor surname_initial sites are
+# behaviorally characterized here; prefix_n and compact are canonical
+# APIs whose call-site parity is characterized when those sites migrate.
 #
 # EACH MODE IS BUILT FROM THE PRIMITIVE WHOSE SEMANTICS MATCH IT:
 # compact_name_key() for the surname component (blocking must be
@@ -33,27 +41,39 @@
 #' \describe{
 #'   \item{`surname_initial`}{`<compact surname>|<first initial>` via
 #'     [compact_name_key()] and [extract_first_initial()]. The `|`
-#'     delimiter is part of the contract: legacy sites joined on two
-#'     separate columns, and a single-string key only reproduces that
-#'     safely with an explicit field boundary - surname `ANNA` with
-#'     initial `L` must never collide with surname `ANN` and a first name
-#'     starting `A` (`"ANNA|L"` vs `"ANN|A"`).}
+#'     delimiter makes the component boundary EXPLICIT. It is not needed
+#'     to prevent collisions - with a fixed one-character second field,
+#'     `surname + initial` is already uniquely separable - it is kept for
+#'     readability, auditability (a human reading a ledger sees the two
+#'     components), and future-proofing against any mode whose second
+#'     field is not fixed-width. The serialized contract is pinned by
+#'     test, so the delimiter cannot drift silently.}
 #'   \item{`prefix_n`}{the first `n` letters of the compact surname. `n`
 #'     is REQUIRED for this mode - the audited call sites used 2, 3 and 4
 #'     with materially different candidate pools, so a silent default
-#'     would pick a pool width nobody chose. A surname shorter than `n`
-#'     keys as its full compact form, never padded.}
+#'     would pick a pool width nobody chose - and must be a single
+#'     finite whole number >= 1 (1.5, Inf, NaN, "3" and TRUE are caller
+#'     mistakes, rejected loudly rather than coerced). A surname shorter
+#'     than `n` keys as its full compact form, never padded.}
 #'   \item{`compact`}{the compact surname alone ([compact_name_key()]).}
 #' }
+#'
+#' Supplying `n` with any mode other than `prefix_n` is an error: an
+#' argument that would be silently discarded is a caller mistake the API
+#' should catch, not swallow.
 #'
 #' MISSING IS INSUFFICIENT, NEVER PARTIAL: if any component a mode
 #' requires normalises to nothing (missing, whitespace-only,
 #' punctuation-only), the key is `NA_character_`. No `"SMITH|"`, no
 #' `"|M"`, no empty-string keys - a partial key silently blocks a person
-#' against everyone sharing the observed half. (The legacy sites built
-#' partial keys and filtered them immediately afterward, so for them this
-#' is an API cleanup with no effective matching change; the fixtures in
-#' test-blocking.R record that classification explicitly.)
+#' against everyone sharing the observed half. The audited legacy
+#' extractors kept the components as SEPARATE columns and filtered
+#' missing rows before any join, so for plain missing values this changes
+#' the API representation, not their missing-value candidate behavior.
+#' The exception is a PUNCTUATION-ONLY given name: `nzchar("-")` is TRUE,
+#' so the legacy filter was blind to it and a `-` initial reached
+#' candidate generation, where the canonical key is `NA` - a potential
+#' candidate-set delta, characterized in test-blocking.R.
 #'
 #' Length discipline: `last` and `first` must be equal length or scalar;
 #' anything else refuses to recycle.
@@ -62,8 +82,8 @@
 #' @param first character vector of given names. Required by
 #'   `surname_initial`; ignored by the other modes.
 #' @param mode `"surname_initial"`, `"prefix_n"`, or `"compact"`.
-#' @param n prefix length for `prefix_n` (required for that mode;
-#'   forbidden meaning-free elsewhere and therefore ignored).
+#' @param n prefix length: required for `prefix_n` (single finite whole
+#'   number >= 1); an ERROR with any other mode.
 #' @return character vector of blocking keys, `NA_character_` where the
 #'   mode's required components are insufficient.
 #' @family blocking
@@ -72,6 +92,11 @@ blocking_key <- function(last, first = NULL,
                          mode = c("surname_initial", "prefix_n", "compact"),
                          n = NULL) {
   mode <- match.arg(mode)
+  if (mode != "prefix_n" && !is.null(n)) {
+    stop("blocking_key: `n` is only meaningful with mode = \"prefix_n\"; ",
+         "an argument that would be silently discarded is a caller ",
+         "mistake, not a request.", call. = FALSE)
+  }
   surname_key <- compact_name_key(last)
 
   if (mode == "compact") {
@@ -79,11 +104,14 @@ blocking_key <- function(last, first = NULL,
   }
 
   if (mode == "prefix_n") {
-    if (is.null(n) || length(n) != 1L || is.na(n) || n < 1L) {
-      stop("blocking_key(mode = \"prefix_n\") requires an explicit n >= 1: ",
-           "the audited call sites used 2, 3 and 4 with materially ",
-           "different candidate pools, so no default is safe.",
-           call. = FALSE)
+    n_ok <- !is.null(n) && length(n) == 1L && is.numeric(n) && !is.na(n) &&
+      is.finite(n) && n >= 1 && n == trunc(n)
+    if (!n_ok) {
+      stop("blocking_key(mode = \"prefix_n\") requires an explicit n: a ",
+           "single finite whole number >= 1. The audited call sites used ",
+           "2, 3 and 4 with materially different candidate pools, so no ",
+           "default is safe, and 1.5/Inf/NaN/\"3\"/TRUE are caller ",
+           "mistakes rejected rather than coerced.", call. = FALSE)
     }
     return(substr(surname_key, 1L, as.integer(n)))
   }

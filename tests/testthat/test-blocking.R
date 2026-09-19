@@ -43,14 +43,17 @@ test_that("AGREEMENT DOMAIN: plain ASCII single-token names, canonical == legacy
                    legacy_key_A(first, last))
 })
 
-test_that("CANONICALIZATION DELTAS: each documented with the full trail", {
-  # classification: intentional effective delta - the KEY changes, so the
-  # candidate pool changes (blocks merge that legacy kept apart).
+test_that("CANONICALIZATION DELTAS: surname side, full trail per fixture", {
+  # classification: intentional KEY-LEVEL canonicalization delta; POTENTIAL
+  # candidate-set delta. A changed key creates the potential for the
+  # candidate set to change; whether it actually changes depends on what
+  # else occupies the canonicalized block, and is measured against frozen
+  # data during downstream migration - never inferred here.
   fixtures <- data.frame(
-    raw_first = c("Mary", "Laura", "Jose", "Hans"),
-    raw_last = c("O'Brien", "Van Houten", "Muñoz", "MÜLLER"),
+    raw_first = c("Mary", "Laura", "Jose", "Hans", "Ann"),
+    raw_last = c("O'Brien", "Van Houten", "Muñoz", "MÜLLER", "Smith (Jones)"),
     legacy_expected = c("O'BRIEN|M", "VAN HOUTEN|L", "MUÑOZ|J",
-                        "MÜLLER|H"),
+                        "MÜLLER|H", "SMITH (JONES)|A"),
     stringsAsFactors = FALSE
   )
   legacy <- legacy_key_A(fixtures$raw_first, fixtures$raw_last)
@@ -61,38 +64,72 @@ test_that("CANONICALIZATION DELTAS: each documented with the full trail", {
   derived <- paste0(compact_name_key(fixtures$raw_last), "|",
                     extract_first_initial(fixtures$raw_first))
   expect_identical(canonical, derived)
-  # and every fixture is a GENUINE delta: the final keys differ
+  # and every fixture is a GENUINE key-level delta: the final keys differ
   expect_true(all(canonical != legacy))
   # the specific canonicalizations, stated once for the reader:
   expect_identical(canonical,
                    c("OBRIEN|M",      # punctuation compacts
                      "VANHOUTEN|L",   # spaces compact
                      "MUNOZ|J",       # accents transliterate
-                     "MUELLER|H"))    # German digraphs romanise
+                     "MUELLER|H",     # German digraphs romanise
+                     "SMITH|A"))      # parenthetical alternates strip
 })
 
-test_that("MISSINGNESS: function-level delta, pipeline-level NO effective delta", {
-  # function-level: legacy built a partial key; canonical is NA outright.
-  # (paste0 coerces the NA component to the STRING "NA" - the partial keys
-  # legacy could construct are "SMITH|NA" and "NA|M".)
-  expect_identical(legacy_key_A(NA, "Smith"), "SMITH|NA")
-  expect_identical(legacy_key_A("Mary", NA), "NA|M")
+test_that("CANONICALIZATION DELTAS: first-name side, via extract_first_initial", {
+  # surname_initial also deliberately canonicalizes the GIVEN-name side:
+  # extract_first_initial() normalizes and strips non-letters BEFORE taking
+  # the initial, where legacy substr() took whatever byte came first.
+  # classification: intentional key-level canonicalization delta; potential
+  # candidate-set delta.
+  fixtures <- data.frame(
+    raw_first = c("Émile", "(Sandra) Theresa", "'Anne"),
+    raw_last = c("Smith", "Smith", "Smith"),
+    legacy_expected = c("SMITH|É", "SMITH|(", "SMITH|'"),
+    stringsAsFactors = FALSE
+  )
+  legacy <- legacy_key_A(fixtures$raw_first, fixtures$raw_last)
+  expect_identical(legacy, fixtures$legacy_expected)
+  canonical <- blocking_key(fixtures$raw_last, fixtures$raw_first,
+                            mode = "surname_initial")
+  derived <- paste0(compact_name_key(fixtures$raw_last), "|",
+                    extract_first_initial(fixtures$raw_first))
+  expect_identical(canonical, derived)
+  expect_identical(canonical, c("SMITH|E", "SMITH|S", "SMITH|A"))
+  expect_true(all(canonical != legacy))
+})
+
+test_that("punctuation-only given name: the legacy filter was BLIND to it", {
+  # nzchar("-") is TRUE, so the audited legacy filter
+  # (!is.na(first_up), nzchar(first_up)) did NOT remove a punctuation-only
+  # given name - legacy emitted "SMITH|-" into candidate generation, where
+  # the canonical key is NA. Unlike plain missing values, this one is a
+  # potential candidate-set delta at PIPELINE level too; measure it against
+  # frozen data during migration.
+  expect_true(nzchar("-"))
+  expect_identical(legacy_key_A("---", "Smith"), "SMITH|-")
+  expect_identical(blocking_key("Smith", "---", "surname_initial"),
+                   NA_character_)
+})
+
+test_that("MISSINGNESS: API representation changes; audited candidate behavior does not", {
+  # The canonical API returns NA when either required component is
+  # insufficient. The audited legacy extractors did NOT serialize a
+  # combined key at all: they kept surname and initial as SEPARATE columns
+  # and filtered missing rows before the join
+  # (extract_florida_retirement_signals.R:122,
+  #  extract_washington_retirement_signals.R:87:
+  #   filter(!is.na(first_up), !is.na(last_up),
+  #          nzchar(first_up), nzchar(last_up))),
+  # and dplyr's toupper/trimws keep NA as NA:
+  expect_true(is.na(toupper(trimws(NA_character_))))
+  # So for plain missing values this changes the API representation, not
+  # their missing-value candidate behavior. (legacy_key_A() above is this
+  # TEST's serialization helper; its paste0() NA-coercion is a harness
+  # artifact, not something any audited call site constructed.)
   expect_identical(blocking_key("Smith", NA_character_, "surname_initial"),
                    NA_character_)
   expect_identical(blocking_key(NA_character_, "Mary", "surname_initial"),
                    NA_character_)
-  # pipeline-level: the legacy sites filtered those rows out before any
-  # join (e.g. extract_florida_retirement_signals.R:122,
-  # extract_washington_retirement_signals.R:87:
-  #   filter(!is.na(first_up), !is.na(last_up), nzchar(first_up), nzchar(last_up)))
-  # NOTE the quoted filter catches NA and "" but NOT the "SMITH|N" / "NA|M"
-  # coercion above - legacy is only safe because upstream readers deliver
-  # real NA, and dplyr::mutate() keeps NA as NA through toupper/trimws (the
-  # base-R paste0 coercion shown here is the test harness's own artifact).
-  # Classification: API cleanup; no effective matching delta on the legacy
-  # inputs, and the canonical NA removes the coercion hazard class entirely.
-  legacy_na_via_dplyr <- toupper(trimws(NA_character_))   # NA, not "NA"
-  expect_true(is.na(legacy_na_via_dplyr))
 })
 
 test_that("insufficient input is NA, never a partial key", {
@@ -108,20 +145,37 @@ test_that("insufficient input is NA, never a partial key", {
   expect_identical(keys, c(NA, NA, "SMITH|M"))
 })
 
-test_that("the delimiter prevents field-boundary collisions", {
-  a <- blocking_key("ANNA", "L", "surname_initial")
-  b <- blocking_key("ANN", "AL", "surname_initial")
-  expect_identical(a, "ANNA|L")
-  expect_identical(b, "ANN|A")
-  expect_false(a == b)
+test_that("the delimiter makes component boundaries explicit", {
+  # NOT collision prevention: with a fixed one-character second field,
+  # surname + initial is already uniquely separable (ANNAL vs ANNA do not
+  # collide). The delimiter is kept for readability, auditability, and
+  # future-proofing against modes without a fixed-width field - and this
+  # test pins the SERIALIZED CONTRACT so it cannot drift silently.
+  k <- blocking_key(c("ANNA", "ANN"), c("L", "AL"), "surname_initial")
+  expect_identical(k, c("ANNA|L", "ANN|A"))
+  parts <- strsplit(k, "|", fixed = TRUE)
+  expect_identical(vapply(parts, `[`, "", 1), c("ANNA", "ANN"))
+  expect_identical(vapply(parts, `[`, "", 2), c("L", "A"))
+  expect_identical(vapply(parts, length, 0L), c(2L, 2L))
 })
 
-test_that("prefix_n requires an explicit n and never pads", {
+test_that("prefix_n requires a single finite whole number >= 1; never pads", {
   expect_error(blocking_key("Smith", mode = "prefix_n"), "explicit n")
+  for (bad in list(1.5, Inf, NaN, "3", TRUE, 0L, -2L, c(2L, 3L))) {
+    expect_error(blocking_key("Smith", mode = "prefix_n", n = bad),
+                 "explicit n", label = paste("n =", deparse(bad)))
+  }
   expect_identical(blocking_key(c("Garcia", "Li", "O'Brien"), mode = "prefix_n", n = 4),
                    c("GARC", "LI", "OBRI"))
   expect_identical(blocking_key("Muñoz", mode = "prefix_n", n = 3), "MUN")
   expect_identical(blocking_key(NA_character_, mode = "prefix_n", n = 3), NA_character_)
+})
+
+test_that("supplying n outside prefix_n is an error, not silently discarded", {
+  expect_error(blocking_key("Smith", "Mary", "surname_initial", n = 3),
+               "only meaningful")
+  expect_error(blocking_key("Smith", mode = "compact", n = 3),
+               "only meaningful")
 })
 
 test_that("compact mode is the compact surname, first ignored", {

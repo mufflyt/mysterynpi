@@ -265,6 +265,32 @@ assert_surname_agreement_contract <- function(fn = surname_agreement) {
     stop("surname_agreement contract: mismatched lengths must error, not recycle",
          call. = FALSE)
   }
+  # detail mode is a PROJECTION of the same decision, never a second opinion:
+  # same verdicts as coarse mode on the same inputs, reason present exactly
+  # where the verdict corroborates, vocabulary closed.
+  ins_a <- vapply(expect, `[[`, "", 1)
+  ins_b <- vapply(expect, `[[`, "", 2)
+  coarse <- fn(ins_a, ins_b)
+  d <- fn(ins_a, ins_b, detail = TRUE)
+  if (!is.data.frame(d) || !identical(names(d), c("verdict", "reason"))) {
+    stop("surname_agreement contract: detail = TRUE must return ",
+         "data.frame(verdict, reason)", call. = FALSE)
+  }
+  if (!identical(d$verdict, coarse)) {
+    stop("surname_agreement contract: detail-mode verdicts diverge from ",
+         "coarse mode on identical inputs", call. = FALSE)
+  }
+  if (!identical(is.na(d$reason), d$verdict != "corroborates")) {
+    stop("surname_agreement contract: reason must be present exactly where ",
+         "the verdict is 'corroborates'", call. = FALSE)
+  }
+  vocab <- c("exact", "separator_equivalent", "concatenated_equivalent",
+             "component_subset", "alternate_recorded", "maiden_as_middle")
+  bad <- setdiff(d$reason[!is.na(d$reason)], vocab)
+  if (length(bad)) {
+    stop("surname_agreement contract: undeclared reason value(s): ",
+         paste(bad, collapse = ", "), call. = FALSE)
+  }
   invisible(TRUE)
 }
 

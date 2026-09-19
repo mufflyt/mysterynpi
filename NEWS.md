@@ -123,6 +123,19 @@
   trips byte-identical, `NA` becomes SQL `NULL` - replacing per-call-site
   `sprintf`/`gsub` patches).
 
+* `surname_agreement()` gains `detail = TRUE`, returning
+  `data.frame(verdict, reason)` in the same shape as
+  `given_name_agreement()`. The coarse three-valued default is untouched
+  (contract-asserted byte-identical), and the reason vocabulary is the
+  measured one `name_surname_match_type()` already reports (`exact`,
+  `separator_equivalent`, `concatenated_equivalent`, `component_subset`)
+  plus the rule's two rescues (`alternate_recorded`, `maiden_as_middle`),
+  so hyphen-subset and rescue evidence become distinguishable from exact
+  identity without flattening any verdict.
+  `assert_surname_agreement_contract()` now also proves the detail
+  projection can never disagree with coarse mode and rejects undeclared
+  reason values.
+
 * New: `blocking_key()` - one governed construction for the keys candidate
   generation joins on, with named modes `surname_initial`
   (`<compact surname>|<first initial>`; the delimiter makes the component

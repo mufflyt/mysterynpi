@@ -150,19 +150,89 @@
   new assertions in `test-parse-person.R`; full suite (1,540 assertions)
   green.
 
-- New UDF-free SQL builders in the join-key family, both proven by
-  execution against a real DuckDB:
+- PACKAGE-LEVEL SQL/R PARITY CONTRACT: if an R function and a SQL helper
+  are called twins, they have the same preprocessing, the same supported
+  input domain, and the same output for every supported input - “parity
+  except for…” means they are not twins. Enforced by execution against a
+  live DuckDB in `test-sql-r-parity-contract.R`, organised one section
+  per semantic rule (NFC, digraphs, accents, special letters, THREE
+  parenthetical branches, punctuation, missingness, suffixes, first
+  initial, end-to-end blocking), with every expectation derived by
+  calling the real R primitive. The declared transliteration domain
+  (ASCII + U+00C0..U+017F) is checked EXHAUSTIVELY - a per-character
+  differential of
+  [`normalize_string()`](https://mufflyt.github.io/mysterynpi/reference/normalize_string.md)
+  vs the executed SQL runs on every build, so the translit map is
+  mechanically governed: a missing character fails the build and must be
+  mapped or the domain narrowed. Beyond the domain (measured over all of
+  Latin Extended-B) disagreement is pinned to be ABSTENTION-shaped - the
+  SQL key strips to `NULL`, never a different populated key - so an
+  unsupported character can cost a candidate but can never place a
+  person in a WRONG block.
+
+- The whole `sql_name_*` family now stands on the one transliterating
+  base
+  [`sql_npi_name()`](https://mufflyt.github.io/mysterynpi/reference/sql_npi_name.md)
+  uses (NFC via `nfc_normalize()`, the digraph/special REPLACE chain
+  before `UPPER`, then `strip_accents()` - all DuckDB built-ins, no
+  user-registered UDF). This RETRACTS the earlier “ASCII parity
+  boundary” posture under which `Émile` keyed `E` in R and `M` in SQL: a
+  documented disagreement is still a disagreement, and blocking is
+  exactly where both sides must agree byte-for-byte.
+  [`sql_npi_name()`](https://mufflyt.github.io/mysterynpi/reference/sql_npi_name.md)
+  also gains NFC handling (a DECOMPOSED umlaut previously emitted
+  `MULLER` where R said `MUELLER`) and the Latin special letters ICU
+  maps but `strip_accents()` keeps whole.
+
+- New:
+  [`sql_strip_parenthetical()`](https://mufflyt.github.io/mysterynpi/reference/sql_strip_parenthetical.md),
+  the exact SQL twin of
+  [`strip_parenthetical()`](https://mufflyt.github.io/mysterynpi/reference/strip_parenthetical.md) -
+  transformation for transformation, because the R rule is NOT “delete
+  everything in brackets”: a standalone `"(Cindi)"` is an alternate name
+  and drops, but word-internal `"C(arolyn)"` is optional letters and
+  UNWRAPS to `"Carolyn"` (a plain delete-the-group regex collapsed those
+  opposite meanings and produced `"C DIANE"`), and an unclosed
+  `"(Jones"` runs to end-of-string. Every branch carries an executed
+  parity fixture.
+  [`sql_name_clean()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_clean.md)
+  and
+  [`sql_name_compact()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_compact.md)
+  build on it.
+
+- SEMANTIC CHANGE, declared:
+  [`sql_name_compact()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_compact.md)
+  is now the UNCONDITIONAL twin of
+  [`compact_name_key()`](https://mufflyt.github.io/mysterynpi/reference/compact_name_key.md) -
+  it no longer silently performs the trailing credential/generation
+  strip its R counterpart does not (that mismatch is why the old parity
+  test had to restrict itself to a “suffix-free domain”). Both sides now
+  carry the same `strip_suffixes` argument (default `FALSE`), reading
+  ONE shared pattern, parity-tested in both modes.
+  [`compact_name_key()`](https://mufflyt.github.io/mysterynpi/reference/compact_name_key.md)
+  gains the argument;
+  [`sql_name_compact()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_compact.md)
+  had no downstream callers yet, so no caller changes.
+  [`sql_name_compact()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_compact.md)
+  also now yields `NULL` (never `''`) when no letter survives, matching
+  [`compact_name_key()`](https://mufflyt.github.io/mysterynpi/reference/compact_name_key.md)’s
+  `NA`: absence cannot join to absence.
+
+- New SQL builders in the join-key family, both proven by execution
+  against a real DuckDB:
   [`sql_first_initial()`](https://mufflyt.github.io/mysterynpi/reference/sql_first_initial.md)
   (database twin of
   [`extract_first_initial()`](https://mufflyt.github.io/mysterynpi/reference/extract_first_initial.md):
-  non-letters stripped BEFORE the character, so `"(Sandra) Theresa"`
-  blocks as `'S'` and punctuation-only is `NULL`, never `''` or a
-  punctuation byte; parity pinned on ASCII with the accented-letter
-  divergence pinned explicitly as the documented boundary) and
+  normalizes exactly as the R side does, strips non-letters BEFORE the
+  character, so `"(Sandra) Theresa"` blocks as `'S'`, `"Émile"` as
+  `'E'`, and punctuation-only is `NULL`, never `''` or a punctuation
+  byte) and
   [`sql_quote_literal()`](https://mufflyt.github.io/mysterynpi/reference/sql_quote_literal.md)
-  (a governed string literal - `O'Brien` round- trips byte-identical,
-  `NA` becomes SQL `NULL` - replacing per-call-site `sprintf`/`gsub`
-  patches).
+  (a governed DuckDB string literal - `O'Brien` round-trips
+  byte-identical, `NA` becomes SQL `NULL` - replacing per-call-site
+  `sprintf`/`gsub` patches; it is a DuckDB literal builder for generated
+  SQL, not a database-independent sanitization layer - prefer DBI
+  parameter binding where a live connection allows it).
 
 - [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
   gains `detail = TRUE`, returning `data.frame(verdict, reason)` in the

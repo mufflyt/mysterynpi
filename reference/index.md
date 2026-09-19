@@ -39,16 +39,18 @@ Drop-in replacements for the pipelines this was extracted from.
 - [`sql_npi_name()`](https://mufflyt.github.io/mysterynpi/reference/sql_npi_name.md)
   : SQL expression normalising a name column the same way R does
 - [`sql_name_clean()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_clean.md)
-  : SQL: normalise a name column for matching (UDF-free, DuckDB/RE2)
+  : SQL: normalise a name column for matching (DuckDB/RE2)
 - [`sql_name_compact()`](https://mufflyt.github.io/mysterynpi/reference/sql_name_compact.md)
-  : SQL: letters-only compact join key (UDF-free, DuckDB/RE2)
+  : SQL: letters-only compact join key (DuckDB/RE2)
 - [`sql_middle_initial_guard()`](https://mufflyt.github.io/mysterynpi/reference/sql_middle_initial_guard.md)
   : SQL: middle initials must not contradict (absence is never
   contradiction)
+- [`sql_strip_parenthetical()`](https://mufflyt.github.io/mysterynpi/reference/sql_strip_parenthetical.md)
+  : SQL: strip parenthesised alternate names (DuckDB/RE2)
 - [`sql_first_initial()`](https://mufflyt.github.io/mysterynpi/reference/sql_first_initial.md)
-  : SQL: first initial of a name column (UDF-free, DuckDB/RE2)
+  : SQL: first initial of a name column (DuckDB/RE2)
 - [`sql_quote_literal()`](https://mufflyt.github.io/mysterynpi/reference/sql_quote_literal.md)
-  : SQL: a character value as a SQL string literal
+  : SQL: a character value as a DuckDB SQL string literal
 - [`needs_normalization()`](https://mufflyt.github.io/mysterynpi/reference/needs_normalization.md)
   : Would normalising this vector change it?
 - [`extract_first_initial()`](https://mufflyt.github.io/mysterynpi/reference/extract_first_initial.md)

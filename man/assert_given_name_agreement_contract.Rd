@@ -17,10 +17,12 @@ invisible TRUE, or an error naming the violated property.
 }
 \description{
 Executable pin, runnable in downstream suites so a semantic drift fails
-their CI: the user's canonical missingness table (SMITH/SMITH
-corroborates, SMITH/JONES conflicts, NA/SMITH uninformative, NA/NA
-uninformative), the named detail states, the no-edit-distance rule
-(JULIA/JULIE conflicts), and the refusal to recycle.
+their CI: the canonical missingness table (SMITH/SMITH corroborates,
+SMITH/JONES conflicts, NA/SMITH uninformative, NA/NA uninformative), the
+named reasons, the declared-alias-versus-spelling distinction
+(JULIA/JULIE corroborates via the recorded edge; LEE/LEA conflicts with
+nothing to soften it), one-hop-only nickname semantics, and the refusal
+to recycle.
 }
 \seealso{
 Other agreement rules:

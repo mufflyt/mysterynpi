@@ -1,5 +1,5 @@
 # =============================================================================
-# Nickname dictionary utilities (deterministic table reads; no fuzz remains)
+# Nickname dictionary: deterministic equivalence from the one pinned corpus
 # =============================================================================
 #
 # HISTORY: this file once held the package's "fenced exception" - a

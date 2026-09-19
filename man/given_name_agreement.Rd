@@ -2,7 +2,7 @@
 % Please edit documentation in R/given_agreement.R
 \name{given_name_agreement}
 \alias{given_name_agreement}
-\title{Categorical given-name agreement, three-valued with named detail states}
+\title{Categorical given-name agreement: verdict plus named reason}
 \usage{
 given_name_agreement(a, b)
 }
@@ -10,39 +10,37 @@ given_name_agreement(a, b)
 \item{a, b}{character vectors of given names.}
 }
 \value{
-character vector over
-  `c("corroborates", "corroborates_nickname", "corroborates_initial",
-     "conflicts", "uninformative")`.
+data.frame with columns `verdict` and `reason`, one row per pair.
 }
 \description{
-Deterministic verdicts only - no edit distance, no thresholds:
-\describe{
-  \item{`corroborates`}{compact keys equal after [name_key()]
-    normalisation: case, punctuation, spacing and accents can never
-    read as difference.}
-  \item{`corroborates_nickname`}{one-hop equivalents under
-    [NICKNAME_EDGES] - a recorded edge or a shared formal root, the same
-    relation [nickname_agreement()] corroborates on, never transitive
-    closure.}
-  \item{`corroborates_initial`}{exactly one side is a single letter and
-    it equals the other side's first letter - an explicit rule about
-    initials, not a similarity band. An initial matches many people;
-    callers must treat this as WEAK corroboration (countable, never
-    rankable), which is why it is a distinct state and not folded into
-    `corroborates`.}
-  \item{`conflicts`}{both sides observed and no named rule above
-    explains the difference. JULIA/JULIE conflicts, deliberately: no
-    edit-distance tolerance exists to convert it.}
-  \item{`uninformative`}{either side missing or empty of letters.
-    Absence is never evidence of difference: NA vs SMITH is
-    uninformative, never a conflict, never a zero.}
-}
+Deterministic rules only - no edit distance, no thresholds, no number of
+any kind. Returns one row per pair with two columns:
 }
 \details{
-Callers needing the coarse three values may collapse every
-`corroborates_*` to `corroborates`; the detail states exist so policy
-can weigh a nickname edge or a bare initial differently from an exact
-match WITHOUT anyone reintroducing a number to do it.
+\describe{
+  \item{`verdict`}{`"corroborates"` / `"conflicts"` / `"uninformative"` -
+    the same three-valued vocabulary as every other `*_agreement()` rule.
+    `uninformative` means either side is missing or empty of letters;
+    absence is never evidence of difference.}
+  \item{`reason`}{the NAMED deterministic rule behind a `corroborates`:
+    \itemize{
+      \item `"exact"` - compact keys equal after [name_key()]
+        normalisation, so case, punctuation, spacing and accents can
+        never read as difference;
+      \item `"nickname"` - a RECORDED one-hop [NICKNAME_EDGES] relation
+        (a recorded edge or a shared formal root, the same relation
+        [nickname_agreement()] corroborates on, never transitive
+        closure). Declared equivalence, not spelling similarity:
+        JULIA/JULIE corroborates because the corpus records the edge,
+        while LEE/LEA - one edit apart, no edge - conflicts;
+      \item `"initial"` - exactly one side is a single letter and it
+        equals the other side's first letter. An explicit rule about
+        initials, and deliberately WEAK evidence (an initial matches
+        many people): callers must treat it as countable, never
+        rankable, which is why the reason travels with the verdict.
+    }
+    `NA_character_` for `conflicts` and `uninformative`.}
+}
 
 Length discipline: equal lengths or scalar broadcast; anything else
 refuses to recycle (comparing person 1 against person 3 and reporting

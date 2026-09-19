@@ -73,6 +73,24 @@ test_that("no function in the namespace can reach fuzzy machinery, transitively"
   expect_gt(length(fns), 40)
 })
 
+test_that("the deleted fuzzy APIs are structurally gone: not exported, not in the namespace", {
+  # Guards against deleting an export while accidentally retaining
+  # executable legacy code - an unexported function is still callable via
+  # ::: and still smuggleable.
+  deleted <- c("calculate_enhanced_first_name_similarity",
+               "create_nickname_aware_similarity",
+               "surname_similarity", "middle_name_similarity",
+               "given_name_similarity")
+  expect_identical(intersect(getNamespaceExports("mysterynpi"), deleted),
+                   character(0))
+  expect_identical(intersect(ls(asNamespace("mysterynpi"), all.names = TRUE),
+                             deleted),
+                   character(0))
+  # and no fence machinery survives as an option or a module concept
+  expect_identical(getOption("mysterynpi.enable_similarity_scoring", "UNSET"),
+                   "UNSET")
+})
+
 test_that("no approximate-matching dependency is declared anywhere", {
   d <- read.dcf(system.file("DESCRIPTION", package = "mysterynpi"))
   all_deps <- paste(d[, intersect(colnames(d),

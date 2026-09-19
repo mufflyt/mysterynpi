@@ -1,52 +1,36 @@
 # mysterynpi 0.6.0
 
-* FUZZY PERSON-NAME MATCHING IS REMOVED FROM THE PACKAGE ENTIRELY (owner
-  ruling, 2026-09-19). The architectural rule, verbatim: exact
-  normalization, explicit equivalence, declared aliases, initials,
-  documented surname history, credentials, gender evidence, and structured
-  identity evidence are allowed; approximate spelling similarity is not.
-  Two corrections land together:
+* The package contains NO fuzzy person-name matching. Unreleased similarity
+  APIs introduced after 0.5.0 were removed before this release, along with
+  the 0.5.0-era fenced scoring pair
+  (`calculate_enhanced_first_name_similarity()`,
+  `create_nickname_aware_similarity()`), its opt-in option, and the
+  stringdist dependency. The architectural rule: exact normalization,
+  explicit equivalence, declared aliases, initials, documented surname
+  history, credentials, gender evidence, and structured identity evidence
+  are allowed; approximate spelling similarity is not. `test-no-fuzzy.R`
+  enforces it with no exempt module (source scan, parse-tree scan,
+  namespace reachability, dependency assertion, structural absence of the
+  deleted names), and a mutation proves the guards fire on a direct
+  `adist()` reintroduction.
 
-  (1) A set of first-class similarity primitives (surname/middle/given
-  Jaro-Winkler and Levenshtein, merged as PR #31) was REVERTED before any
-  tag or consumer existed - it was built on a misread that the audit asked
-  for fuzz to be governed, when the requirement is for fuzz to disappear
-  from identity resolution.
+* New: `given_name_agreement()` - categorical three-valued given-name
+  verdict returning `data.frame(verdict, reason)`: verdict in the house
+  vocabulary (`corroborates` / `conflicts` / `uninformative`), reason
+  naming the deterministic rule behind a corroboration (`exact`,
+  `nickname` for a RECORDED one-hop `NICKNAME_EDGES` relation, `initial`).
+  Missing is always `uninformative` - never a bad match, never a number.
+  JULIA/JULIE corroborates because the corpus records the edge; LEE/LEA
+  conflicts because nothing does. A full-corpus invariant test pins that
+  `are_nickname_equivalents()`, `nickname_agreement()` and
+  `given_name_agreement()` can never give opposite answers to the same
+  recorded relationship. `assert_given_name_agreement_contract()` ships
+  alongside, falsifiable by construction.
 
-  (2) The pre-existing "fenced exception" is gone too:
-  `calculate_enhanced_first_name_similarity()` and
-  `create_nickname_aware_similarity()` are DELETED (no deprecation period,
-  no option fence - they were never a disabled capability, they were
-  unwanted), the `options(mysterynpi.enable_similarity_scoring)` gate is
-  retired with them, and stringdist leaves DESCRIPTION entirely.
-
-* `test-no-fuzzy.R` returns to its original, stronger shape: NO fuzzy
-  machinery anywhere in the package, with NO exempt module - source scan,
-  parse-tree scan, and call-graph reachability over the installed
-  namespace, plus a DESCRIPTION assertion covering every dependency tier.
-  The mutation campaign's smuggling mutant now injects a literal `adist()`
-  call into a verdict, proving the guards fire on direct reintroduction;
-  the mutant that targeted the deleted option fence is retired with a
-  recorded reason (a mutant with no target measures nothing).
-
-* New: `given_name_agreement()` - the categorical three-valued given-name
-  verdict (`corroborates` / `conflicts` / `uninformative`) with named
-  deterministic detail states: `corroborates_nickname` (a RECORDED
-  one-hop NICKNAME_EDGES relation - JULIA/JULIE and ANN/ANNE are declared
-  edges, verified against the corpus rather than assumed from spelling)
-  and `corroborates_initial` (a bare initial matching the other side's
-  first letter - a distinct, deliberately WEAK state so policy can weigh
-  it without a number). LEE/LEA and JANE/JOAN conflict: one edit apart,
-  no recorded edge, and nothing numeric exists to soften them. The
-  missingness contract is pinned exactly: SMITH/SMITH corroborates,
-  SMITH/JONES conflicts, NA/SMITH uninformative, NA/NA uninformative -
-  a missing name is never a bad match.
-  `assert_given_name_agreement_contract()` ships alongside, falsifiable
-  by construction (it accepts a stand-in).
-
-* The five deterministic nickname dictionary utilities remain unchanged:
-  they are table reads over the one pinned corpus, shared with
-  `nickname_agreement()`, and contain no fuzz.
+* `R/similarity_scoring.R` is renamed `R/nickname_dictionary.R`: what
+  remains there is the deterministic dictionary derived from
+  `NICKNAME_EDGES` (five table-read utilities), and the old filename
+  implied machinery that no longer exists.
 
 # mysterynpi 0.5.0
 

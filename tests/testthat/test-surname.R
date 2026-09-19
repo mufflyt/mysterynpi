@@ -126,3 +126,56 @@ test_that("alternates accept a list of several per record, NA means none", {
     "same length"
   )
 })
+
+test_that("detail = TRUE names the rule; coarse mode is byte-identical", {
+  # Reasons are the MEASURED vocabulary name_surname_match_type() reports
+  # plus this rule's two rescues - derived by running the primitives, then
+  # pinned (expectations below were observed, not hand-assumed).
+  a <- c("MCCARTHY-DERVIN", "LEE", "O'BRIEN", "ABU-GHAZALEH", "BARLOW-REED",
+         "DE LA CRUZ", "LEE", "", NA)
+  b <- c("MCCARTHY", "LEE", "OBRIEN", "ABUGHAZALEH", "BARLOW REED",
+         "DE LEON", "SMITH", "SMITH", "SMITH")
+  d <- surname_agreement(a, b, detail = TRUE)
+  expect_s3_class(d, "data.frame")
+  expect_identical(names(d), c("verdict", "reason"))
+  expect_identical(d$verdict, surname_agreement(a, b))   # one decision, two views
+  expect_identical(d$reason,
+                   c("component_subset", "exact", "exact",
+                     "concatenated_equivalent", "separator_equivalent",
+                     NA, NA, NA, NA))
+  # reason exists ONLY for corroborates
+  expect_identical(is.na(d$reason), d$verdict != "corroborates")
+})
+
+test_that("the two rescues carry their own reasons", {
+  expect_identical(
+    surname_agreement("RYE", "REINHARD", middle_a = "REINHARD",
+                      middle_b = "A", detail = TRUE),
+    data.frame(verdict = "corroborates", reason = "maiden_as_middle",
+               stringsAsFactors = FALSE))
+  expect_identical(
+    surname_agreement("MARTIN", "BRASSARD", alternates_b = "MARTIN",
+                      detail = TRUE),
+    data.frame(verdict = "corroborates", reason = "alternate_recorded",
+               stringsAsFactors = FALSE))
+})
+
+test_that("detail is a strict scalar flag; the extended contract holds and can fail", {
+  expect_error(surname_agreement("A", "B", detail = NA), "TRUE or FALSE")
+  expect_error(surname_agreement("A", "B", detail = c(TRUE, TRUE)), "TRUE or FALSE")
+  expect_true(assert_surname_agreement_contract())
+  # falsifiability: a stand-in whose detail projection disagrees must be caught
+  broken <- function(a, b, ..., detail = FALSE) {
+    out <- surname_agreement(a, b, ..., detail = detail)
+    if (isTRUE(detail)) out$verdict[1] <- "conflicts"
+    out
+  }
+  expect_error(assert_surname_agreement_contract(broken), "diverge")
+  # and a reason outside the declared vocabulary must be caught
+  novel <- function(a, b, ..., detail = FALSE) {
+    out <- surname_agreement(a, b, ..., detail = detail)
+    if (isTRUE(detail)) out$reason[out$verdict == "corroborates"][1] <- "vibes"
+    out
+  }
+  expect_error(assert_surname_agreement_contract(novel), "undeclared reason")
+})

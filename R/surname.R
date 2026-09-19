@@ -83,11 +83,35 @@
 #' apostrophe -- it is a join key with its own parity contract -- so the
 #' erasure is local to this rule.
 #'
-#' @return character: `"corroborates"`, `"conflicts"`, or `"uninformative"`
-#'   (either surname absent or reduced to nothing by normalisation).
+#' @param detail logical(1). `FALSE` (the default) returns the coarse
+#'   three-valued character vector unchanged - every existing caller keeps
+#'   its contract. `TRUE` returns a `data.frame(verdict, reason)` in the
+#'   same shape as [given_name_agreement()]: the coarse verdict stays
+#'   three-valued, and `reason` names the RULE that corroborated, `NA`
+#'   otherwise. The reason vocabulary is the measured one
+#'   [name_surname_match_type()] already reports, not a parallel invention:
+#'   `"exact"`, `"separator_equivalent"` (`BARLOW-REED` vs `BARLOW REED`),
+#'   `"concatenated_equivalent"` (`ABU-GHAZALEH` vs `ABUGHAZALEH`),
+#'   `"component_subset"` (`NELSON` in `NELSON-BECKER` - the hyphen-subset
+#'   evidence class, weaker than identity and now distinguishable so a
+#'   caller can weight it), plus this rule's own two rescues:
+#'   `"alternate_recorded"` and `"maiden_as_middle"`. A caller that wants
+#'   to demote subset or rescue evidence filters on `reason`; collapsing
+#'   the verdict itself would re-create the Boolean flattening this family
+#'   exists to avoid.
+#'
+#' @return With `detail = FALSE`: character - `"corroborates"`,
+#'   `"conflicts"`, or `"uninformative"` (either surname absent or reduced
+#'   to nothing by normalisation). With `detail = TRUE`: a
+#'   `data.frame(verdict, reason)`, `reason` non-`NA` exactly where the
+#'   verdict is `"corroborates"`.
 #' @export
 surname_agreement <- function(a, b, middle_a = NULL, middle_b = NULL,
-                              alternates_a = NULL, alternates_b = NULL) {
+                              alternates_a = NULL, alternates_b = NULL,
+                              detail = FALSE) {
+  if (!is.logical(detail) || length(detail) != 1L || is.na(detail)) {
+    stop("detail must be TRUE or FALSE", call. = FALSE)
+  }
   n <- length(a)
   if (length(b) != n) stop("a and b must be the same length", call. = FALSE)
   for (m in list(middle_a, middle_b, alternates_a, alternates_b)) {
@@ -115,24 +139,34 @@ surname_agreement <- function(a, b, middle_a = NULL, middle_b = NULL,
   mtb <- if (is.null(middle_b)) vector("list", n) else deq(middle_tokens(middle_b))
   aa <- alt_list(alternates_a); ab <- alt_list(alternates_b)
   match_type <- name_surname_match_type(a, b)
-  vapply(seq_len(n), function(i) {
+  # verdict and reason are decided TOGETHER, one pass, so detail mode can
+  # never disagree with coarse mode - they are two projections of one row
+  reason <- rep(NA_character_, n)
+  verdict <- vapply(seq_len(n), function(i) {
     if (!has_name_information(ka[i]) || !has_name_information(kb[i])) {
       return("uninformative")
     }
-    if (match_type[i] != "none") return("corroborates")
+    if (match_type[i] != "none") {
+      reason[i] <<- match_type[i]
+      return("corroborates")
+    }
     ta <- deq(surname_tokens(a[i])); tb <- deq(surname_tokens(b[i]))
     # the alternate-surname rescue: the OTHER side's surname matches a
     # RECORDED former/alternate surname of this side (NPPES "Provider
     # Other Last Name" and kin)
     if (length(intersect(c(kb[i], tb), aa[[i]])) ||
         length(intersect(c(ka[i], ta), ab[[i]]))) {
+      reason[i] <<- "alternate_recorded"
       return("corroborates")
     }
     # the maiden-as-middle rescue: a full surname component surviving in the
     # OTHER record's middle slot
     if (length(intersect(tb, mta[[i]])) || length(intersect(ta, mtb[[i]]))) {
+      reason[i] <<- "maiden_as_middle"
       return("corroborates")
     }
     "conflicts"
   }, character(1))
+  if (!detail) return(verdict)
+  data.frame(verdict = verdict, reason = reason, stringsAsFactors = FALSE)
 }

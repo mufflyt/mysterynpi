@@ -113,6 +113,35 @@
 
 # mysterynpi 0.6.0
 
+* New: `blocking_key()` - one governed construction for the keys candidate
+  generation joins on, with named modes `surname_initial`
+  (`<compact surname>|<first initial>`; the delimiter makes the component
+  boundary explicit and pins the serialized contract - it is not needed
+  for collision prevention, since a fixed one-character second field is
+  already uniquely separable), `prefix_n` (explicit `n` required, a
+  single finite whole number >= 1, rejected loudly for 1.5/Inf/NaN/"3"/
+  TRUE; supplying `n` with any other mode errors), and `compact`. Built
+  from the primitives whose semantics match blocking: `compact_name_key()`
+  and `extract_first_initial()` (which refuses to emit a non-letter,
+  where `first_initial()`'s join-key contract would hand back `-` for a
+  punctuation-only name). Insufficient input is `NA_character_`, never a
+  partial key; the audited legacy extractors kept components as separate
+  columns and filtered missing rows pre-join, so plain missingness is an
+  API-representation change only - EXCEPT punctuation-only given names,
+  which the legacy nzchar() filter was blind to (a `-` initial reached
+  candidate generation where the canonical key is NA): a potential
+  candidate-set delta, characterized in the tests. Parity with the nine
+  state-extractor constructions is characterized at the RESULTING-KEY
+  level: all nine agree with each other everywhere, the canonical key
+  agrees with them on plain-ASCII names, and the canonicalization deltas
+  on BOTH key sides (surname punctuation/space compaction, accent
+  transliteration, German digraph romanisation, parenthetical-alternate
+  stripping; given-name initials normalized before extraction) each ship
+  as a legacy-vs-canonical fixture classified as an intentional
+  key-level canonicalization delta and potential candidate-set delta -
+  actual candidate-set changes are measured at migration. prefix_n and
+  compact call-site parity is characterized when those sites migrate.
+
 * The package contains NO fuzzy person-name matching. Unreleased similarity
   APIs introduced after 0.5.0 were removed before this release, along with
   the 0.5.0-era fenced scoring pair

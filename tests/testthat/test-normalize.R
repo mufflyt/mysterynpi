@@ -4,14 +4,26 @@
 # who matched whom.
 # =============================================================================
 
-test_that("sql_npi_name() emits the documented SQL expression", {
-  expect_identical(
-    sql_npi_name("last_name"),
-    paste0(
-      "strip_accents(UPPER(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(",
-      "REPLACE(REPLACE(last_name, 'ß', 'ss'), 'ü', 'ue'), ",
-      "'Ü', 'ue'), 'ö', 'oe'), 'Ö', 'oe'), 'ä', 'ae'), ",
-      "'Ä', 'ae'))))"))
+test_that("sql_npi_name() emits the documented SQL shape", {
+  # Formerly a byte-exact pin of a 7-REPLACE chain; the chain now carries the
+  # full translit map (German digraphs + Latin special letters) plus
+  # nfc_normalize(), and the SEMANTIC contract is proven by execution in
+  # test-sql-r-parity-contract.R. What this pin still owns is the STRUCTURE:
+  # NFC first, every declared mapping present exactly once, accent strip
+  # outermost - so a mapping cannot be dropped or duplicated silently.
+  sql <- sql_npi_name("last_name")
+  expect_match(sql, "^strip_accents\\(UPPER\\(TRIM\\(", perl = TRUE)
+  expect_match(sql, "nfc_normalize\\(last_name\\)", fixed = FALSE)
+  for (ch in names(mysterynpi:::.sql_translit_map)) {
+    hits <- gregexpr(sprintf("'%s', '%s'", ch, mysterynpi:::.sql_translit_map[[ch]]),
+                     sql, fixed = TRUE)[[1]]
+    expect_identical(length(hits[hits > 0]), 1L,
+                     info = sprintf("mapping for %s must appear exactly once", ch))
+  }
+  # replacement targets run BEFORE UPPER: the map's lowercase forms must be
+  # inside the TRIM(...) argument, which starts after the fixed prefix
+  expect_identical(length(gregexpr("REPLACE(", sql, fixed = TRUE)[[1]]),
+                   length(mysterynpi:::.sql_translit_map))
 })
 
 test_that("sql_npi_name() rejects bad inputs", {

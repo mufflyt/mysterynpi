@@ -80,16 +80,19 @@ test_that("sql_first_initial agrees with extract_first_initial on ASCII (parity)
   })
 })
 
-test_that("KNOWN DIVERGENCE: accented first letters split R and UDF-free SQL", {
-  # NOT a parity claim - the documented ASCII boundary, pinned so it cannot
-  # silently change. R transliterates via normalize_string(); UDF-free SQL
-  # strips the non-ASCII letter and yields the first letter of the REMAINDER.
+test_that("RETRACTION PIN: accented first letters key the SAME block on both sides", {
+  # An earlier revision of this file pinned "Émile" -> R "E" vs SQL "M" as a
+  # documented ASCII parity boundary. Retracted by owner review 2026-09-19:
+  # a documented disagreement is still a disagreement, and blocking is
+  # exactly where R and SQL must agree byte-for-byte. The full Unicode
+  # parity contract lives in test-sql-r-parity-contract.R; this pin stays
+  # here so the old divergence can never quietly return.
   with_duck(function(con) {
     duckdb::duckdb_register(con, "t4", data.frame(x = "Émile", stringsAsFactors = FALSE))
     sql_side <- DBI::dbGetQuery(con, sprintf("SELECT %s AS v FROM t4",
                                              sql_first_initial("x")))$v
-    expect_identical(extract_first_initial("Émile"), "E")  # transliterated
-    expect_identical(sql_side, "M")                         # 'MILE' remainder
+    expect_identical(extract_first_initial("Émile"), "E")
+    expect_identical(sql_side, "E")
   })
 })
 

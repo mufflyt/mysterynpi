@@ -27,20 +27,39 @@
 # Vietnamese), a bare `JR`, or `DOOLEY` can never be eaten -- only a genuine
 # trailing credential or generation token preceded by whitespace is.
 #
-# Relationship to [sql_npi_name()]: that builder handles ACCENTS and needs a
-# `strip_accents` UDF registered on the connection. These are UDF-free and
-# letters-only; on ASCII registry data (NPPES name fields are ASCII) the two
-# approaches agree, and the parity tests pin that. Use sql_npi_name() when
-# the database column carries accents and the UDF is available; use these
-# when the join must run on a bare connection.
+# Relationship to [sql_npi_name()]: every builder in this family now stands
+# on the SAME transliterating base (`.sql_translit_upper()`, R/normalize.R)
+# that sql_npi_name() is - NFC, German digraphs and Latin special letters
+# mapped the way normalize_string() maps them, then
+# strip_accents(UPPER(TRIM(...))). PACKAGE-LEVEL PARITY CONTRACT: for every
+# SQL helper advertised as the database twin of an R identity primitive,
+# executing the SQL on a supported input must produce the same normalized
+# value as the R primitive - proven by execution on a Unicode corpus in
+# test-sql-r-parity-contract.R. An earlier revision kept this family
+# "UDF-free" and pinned an ASCII-only parity domain with a DOCUMENTED accent
+# divergence ("Emile"-with-acute keyed E in R and M in SQL); that was
+# retracted by owner review 2026-09-19: a documented disagreement is still a
+# disagreement, and candidate generation is exactly where R/SQL
+# normalization must agree byte-for-byte, or the same person lands in two
+# different blocks. strip_accents() and nfc_normalize() are DuckDB
+# BUILT-INS, so a bare DuckDB connection still needs no user-registered UDF.
 # =============================================================================
 
-#' SQL: normalise a name column for matching (UDF-free, DuckDB/RE2)
+#' SQL: normalise a name column for matching (DuckDB/RE2)
 #'
-#' Upper-cases and trims, strips TRAILING credential and generation suffixes
-#' (`MD`, `M.D.`, `DO`, `D.O.`, `JR`, `SR`, `II`, `III`, `IV`, `PH.D.`,
-#' iterated so `"SMITH JR MD"` fully unwinds), then replaces every remaining
+#' Transliterates on the shared base every SQL twin uses (NFC, German
+#' digraphs and Latin special letters mapped as [normalize_string()] maps
+#' them, then `strip_accents(UPPER(TRIM(...)))` - see the parity contract
+#' note on [sql_npi_name()]), strips parenthesised alternate names (the
+#' same `strip_alternates` behaviour [name_key()] applies, so
+#' `"SMITH (JONES)"` cleans to `"SMITH"`, never `"SMITH JONES"`), strips
+#' TRAILING credential and generation suffixes (`MD`, `M.D.`, `DO`,
+#' `D.O.`, `JR`, `SR`, `II`, `III`, `IV`, `PH.D.`, iterated so
+#' `"SMITH JR MD"` fully unwinds), then replaces every remaining
 #' non-letter with a space and trims again.
+#'
+#' `strip_accents()` and `nfc_normalize()` are DuckDB built-ins; no
+#' user-registered UDF is needed on a bare DuckDB connection.
 #'
 #' @param col character(1): a SQL column expression.
 #' @return character(1) SQL expression.
@@ -51,50 +70,58 @@ sql_name_clean <- function(col) {
     stop("sql_name_clean() requires a non-empty single-string column expression",
          call. = FALSE)
   }
-  # Each token may carry a trailing period ("Jr.", "MD.") - a dotted suffix
-  # is the same suffix, and requiring the bare form silently kept "SMITH JR."
-  # unstripped (caught by this package's own executable test, not by reading).
+  # Order mirrors name_key(): transliterate/upper first, THEN strip
+  # parentheticals, THEN the trailing suffixes. Each suffix token may carry
+  # a trailing period ("Jr.", "MD.") - a dotted suffix is the same suffix,
+  # and requiring the bare form silently kept "SMITH JR." unstripped
+  # (caught by this package's own executable test, not by reading).
   sprintf(
-    "TRIM(REGEXP_REPLACE(REGEXP_REPLACE(UPPER(TRIM(%s)), '(\\s+(MD|M\\.D\\.|DO|D\\.O\\.|JR|SR|III|II|IV|PH\\.\\s?D\\.)\\.?)+$', '', 'g'), '[^A-Z]', ' ', 'g'))",
-    col)
+    "TRIM(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(%s, '\\([^)]*\\)', '', 'g'), '(\\s+(MD|M\\.D\\.|DO|D\\.O\\.|JR|SR|III|II|IV|PH\\.\\s?D\\.)\\.?)+$', '', 'g'), '[^A-Z]', ' ', 'g'))",
+    .sql_translit_upper(col))
 }
 
-#' SQL: letters-only compact join key (UDF-free, DuckDB/RE2)
+#' SQL: letters-only compact join key (DuckDB/RE2)
 #'
 #' [sql_name_clean()] with every non-letter removed instead of spaced:
-#' the database-side twin of [compact_name_key()]. `"JONES-COX"`,
-#' `"JONES COX"` and `"JONESCOX"` all reduce to `"JONESCOX"`; `"VAN HOUTEN"`
-#' and `"VANHOUTEN"` both reduce to `"VANHOUTEN"`.
+#' the database-side twin of [compact_name_key()] (after the same trailing
+#' suffix strip [sql_name_clean()] documents). `"JONES-COX"`,
+#' `"JONES COX"` and `"JONESCOX"` all reduce to `"JONESCOX"`; `"Muñoz"`
+#' and `"Munoz"` both reduce to `"MUNOZ"`; `"Müller"` and `"Mueller"` both
+#' reduce to `"MUELLER"`. An input with no letters is `NULL`, never `''` -
+#' [compact_name_key()] returns `NA` there for the same reason: absence
+#' must not join to absence.
 #'
 #' @param col character(1): a SQL column expression.
 #' @return character(1) SQL expression.
 #' @family sql-join-keys
 #' @export
 sql_name_compact <- function(col) {
-  sprintf("REGEXP_REPLACE(%s, '[^A-Z]', '', 'g')", sql_name_clean(col))
+  sprintf("NULLIF(REGEXP_REPLACE(%s, '[^A-Z]', '', 'g'), '')", sql_name_clean(col))
 }
 
-#' SQL: first initial of a name column (UDF-free, DuckDB/RE2)
+#' SQL: first initial of a name column (DuckDB/RE2)
 #'
-#' The database-side twin of [extract_first_initial()]: strips non-letters
-#' BEFORE taking the character, so `"(Sandra) Theresa"` yields `'S'` and a
+#' The database-side twin of [extract_first_initial()], built on the same
+#' transliterating base as every other SQL twin: normalizes exactly as
+#' [normalize_string()] does (NFC, German digraphs, Latin special letters,
+#' accent strip), strips non-letters BEFORE taking the character, so
+#' `"(Sandra) Theresa"` yields `'S'`, `"Émile"` yields `'E'` (the same
+#' initial the R side produces - a blocking primitive whose two sides
+#' disagree puts the same person in two different blocks), and a
 #' punctuation-only or empty value yields `NULL` -- never `''`, never a
 #' punctuation byte. The 2026-09-19 isochrones survey found candidate
 #' queries hand-rolling `SUBSTR(UPPER(TRIM(col)), 1, 1)`, which hands back
 #' `'('` or `'-'` for exactly the inputs above and then blocks that person
 #' against nobody.
 #'
-#' PARITY DOMAIN IS ASCII, same as [sql_name_compact()]: UDF-free SQL cannot
-#' transliterate, so an accented FIRST letter diverges from the R side
-#' (`"Émile"`: R gives `"E"` via [normalize_string()]'s transliteration; this
-#' expression strips the non-ASCII letter and yields `'M'` from `"MILE"`).
-#' The parity test pins agreement on ASCII AND pins that divergence
-#' explicitly, so it is a documented boundary, not a surprise. For accented
-#' columns use the [sql_npi_name()] UDF path.
+#' Parity with [extract_first_initial()] is proven BY EXECUTION on a
+#' Unicode corpus (acute accents, umlauts, tilde, cedilla, Latin special
+#' letters, decomposed combining marks, punctuation-led and parenthesised
+#' names) in `test-sql-r-parity-contract.R`.
 #'
 #' @param col character(1): a SQL column expression.
 #' @return character(1) SQL expression yielding a single upper-case letter,
-#'   `NULL` where no ASCII letter is present.
+#'   `NULL` where no letter survives normalization.
 #' @family sql-join-keys
 #' @export
 sql_first_initial <- function(col) {
@@ -103,11 +130,11 @@ sql_first_initial <- function(col) {
          call. = FALSE)
   }
   sprintf(
-    "NULLIF(SUBSTR(REGEXP_REPLACE(UPPER(TRIM(%s)), '[^A-Z]', '', 'g'), 1, 1), '')",
-    col)
+    "NULLIF(SUBSTR(REGEXP_REPLACE(%s, '[^A-Z]', '', 'g'), 1, 1), '')",
+    .sql_translit_upper(col))
 }
 
-#' SQL: a character value as a SQL string literal
+#' SQL: a character value as a DuckDB SQL string literal
 #'
 #' Doubles embedded single quotes and wraps in quotes; `NA` becomes the SQL
 #' keyword `NULL`. The defect class is a CORRECTNESS one measured in this
@@ -117,6 +144,14 @@ sql_first_initial <- function(col) {
 #' patched with a one-off `gsub` that the next call site forgets. One
 #' governed literal-builder, tested by ROUND-TRIP (the value comes back out
 #' of a real DuckDB byte-identical), replaces the per-site patches.
+#'
+#' SCOPE: this is a DuckDB SQL literal builder for GENERATED SQL text -
+#' deterministic correctness where the query has to be assembled as a
+#' string. It is not a database-independent quoting or sanitization
+#' abstraction; other engines have other literal rules. Where the caller
+#' holds a live connection, prefer DBI parameter binding
+#' (`DBI::dbBind()` / parameterised `dbGetQuery()`) over pasting literals
+#' at all.
 #'
 #' Vectorised: a character vector in, one literal per element out.
 #'

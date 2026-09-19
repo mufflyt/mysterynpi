@@ -2,7 +2,7 @@
 % Please edit documentation in R/sql_join_keys.R
 \name{sql_name_compact}
 \alias{sql_name_compact}
-\title{SQL: letters-only compact join key (UDF-free, DuckDB/RE2)}
+\title{SQL: letters-only compact join key (DuckDB/RE2)}
 \usage{
 sql_name_compact(col)
 }
@@ -14,9 +14,13 @@ character(1) SQL expression.
 }
 \description{
 [sql_name_clean()] with every non-letter removed instead of spaced:
-the database-side twin of [compact_name_key()]. `"JONES-COX"`,
-`"JONES COX"` and `"JONESCOX"` all reduce to `"JONESCOX"`; `"VAN HOUTEN"`
-and `"VANHOUTEN"` both reduce to `"VANHOUTEN"`.
+the database-side twin of [compact_name_key()] (after the same trailing
+suffix strip [sql_name_clean()] documents). `"JONES-COX"`,
+`"JONES COX"` and `"JONESCOX"` all reduce to `"JONESCOX"`; `"Muñoz"`
+and `"Munoz"` both reduce to `"MUNOZ"`; `"Müller"` and `"Mueller"` both
+reduce to `"MUELLER"`. An input with no letters is `NULL`, never `''` -
+[compact_name_key()] returns `NA` there for the same reason: absence
+must not join to absence.
 }
 \seealso{
 Other sql-join-keys:

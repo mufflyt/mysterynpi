@@ -111,15 +111,36 @@
   upstream to fix it for every consumer of this package. 19 new assertions
   in `test-parse-person.R`; full suite (1,540 assertions) green.
 
-* New UDF-free SQL builders in the join-key family, both proven by
-  execution against a real DuckDB: `sql_first_initial()` (database twin of
-  `extract_first_initial()`: non-letters stripped BEFORE the character, so
-  `"(Sandra) Theresa"` blocks as `'S'` and punctuation-only is `NULL`,
-  never `''` or a punctuation byte; parity pinned on ASCII with the
-  accented-letter divergence pinned explicitly as the documented boundary)
-  and `sql_quote_literal()` (a governed string literal - `O'Brien` round-
-  trips byte-identical, `NA` becomes SQL `NULL` - replacing per-call-site
-  `sprintf`/`gsub` patches).
+* PACKAGE-LEVEL SQL/R PARITY CONTRACT: for every SQL helper advertised as
+  the database twin of an R identity primitive, executing the SQL on a
+  supported input produces the same normalized value as the R primitive -
+  proven by execution on a Unicode corpus (acutes, umlauts, tilde,
+  cedilla, sharp-s, O-slash/L-stroke/D-stroke, AE/OE ligatures, thorn,
+  DECOMPOSED combining marks, punctuation-led and parenthesised names)
+  against a live DuckDB in `test-sql-r-parity-contract.R`. The whole
+  `sql_name_*` family now stands on the one transliterating base
+  `sql_npi_name()` uses (NFC via `nfc_normalize()`, the digraph/special
+  REPLACE chain before `UPPER`, then `strip_accents()` - all DuckDB
+  built-ins, no user-registered UDF). This RETRACTS the earlier "ASCII
+  parity boundary" posture under which `Émile` keyed `E` in R and `M` in
+  SQL: a documented disagreement is still a disagreement, and blocking is
+  exactly where both sides must agree byte-for-byte. Also fixed on the
+  way: `sql_name_compact()` now yields `NULL` (never `''`) when no letter
+  survives, matching `compact_name_key()`'s NA - absence cannot join to
+  absence - and strips parenthesised alternates the way `name_key()` does
+  (`"SMITH (JONES)"` -> `"SMITH"`, previously `"SMITHJONES"`).
+
+* New SQL builders in the join-key family, both proven by execution
+  against a real DuckDB: `sql_first_initial()` (database twin of
+  `extract_first_initial()`: normalizes exactly as the R side does, strips
+  non-letters BEFORE the character, so `"(Sandra) Theresa"` blocks as
+  `'S'`, `"Émile"` as `'E'`, and punctuation-only is `NULL`, never `''`
+  or a punctuation byte) and `sql_quote_literal()` (a governed DuckDB
+  string literal - `O'Brien` round-trips byte-identical, `NA` becomes SQL
+  `NULL` - replacing per-call-site `sprintf`/`gsub` patches; it is a
+  DuckDB literal builder for generated SQL, not a database-independent
+  sanitization layer - prefer DBI parameter binding where a live
+  connection allows it).
 
 * `surname_agreement()` gains `detail = TRUE`, returning
   `data.frame(verdict, reason)` in the same shape as

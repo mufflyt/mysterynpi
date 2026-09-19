@@ -220,12 +220,31 @@ sql_npi_name <- function(col) {
   "\u0111" = "d",  "\u0110" = "d",
   "\u00e6" = "ae", "\u00c6" = "ae",
   "\u0153" = "oe", "\u0152" = "oe",
-  "\u00fe" = "th", "\u00de" = "th")
+  "\u00fe" = "th", "\u00de" = "th",
+  # The remainder of the mechanically-measured gap over the DECLARED PARITY
+  # DOMAIN (ASCII + U+00C0..U+017F, Latin-1 Supplement + Latin Extended-A):
+  # a systematic differential of every character in that range -
+  # normalize_string() vs the executed SQL - found exactly these families
+  # unmapped (test-sql-r-parity-contract.R runs that differential on every
+  # build, so the map is mechanically governed, not hand-curated). Each
+  # replacement is what stringi's Latin-ASCII actually produced.
+  "\u00f0" = "d",  "\u00d0" = "d",    # eth
+  "\u0127" = "h",  "\u0126" = "h",    # H-stroke
+  "\u0133" = "ij", "\u0132" = "ij",   # IJ ligature
+  "\u0138" = "q",               # kra (Latin-ASCII maps it to Q)
+  "\u0140" = "l",  "\u013f" = "l",    # L-middle-dot
+  "\u0149" = "'n",              # apostrophe-n
+  "\u014b" = "n",  "\u014a" = "n",    # eng
+  "\u0167" = "t",  "\u0166" = "t",    # T-stroke
+  "\u00d7" = "*",  "\u00f7" = "/")    # not letters; mapped so sql_npi_name() stays an
+                              # EXACT normalize_string() twin on the domain
+                              # (both symbols then strip from any key)
 
 .sql_translit_upper <- function(col) {
+  q <- function(s) gsub("'", "''", s, fixed = TRUE)   # 'n needs SQL doubling
   expr <- sprintf("nfc_normalize(%s)", col)
   for (ch in names(.sql_translit_map)) {
-    expr <- sprintf("REPLACE(%s, '%s', '%s')", expr, ch, .sql_translit_map[[ch]])
+    expr <- sprintf("REPLACE(%s, '%s', '%s')", expr, q(ch), q(.sql_translit_map[[ch]]))
   }
   sprintf("strip_accents(UPPER(TRIM(%s)))", expr)
 }

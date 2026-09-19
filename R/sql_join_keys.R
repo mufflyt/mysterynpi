@@ -70,33 +70,101 @@ sql_name_clean <- function(col) {
     stop("sql_name_clean() requires a non-empty single-string column expression",
          call. = FALSE)
   }
-  # Order mirrors name_key(): transliterate/upper first, THEN strip
-  # parentheticals, THEN the trailing suffixes. Each suffix token may carry
-  # a trailing period ("Jr.", "MD.") - a dotted suffix is the same suffix,
-  # and requiring the bare form silently kept "SMITH JR." unstripped
-  # (caught by this package's own executable test, not by reading).
+  # Order mirrors name_key(): transliterate/upper first, THEN the full
+  # four-rule parenthetical strip, THEN the trailing suffixes (the ONE
+  # shared pattern .TRAILING_CREDENTIAL_RE; each token may carry a trailing
+  # period - "Jr.", "MD." - a dotted suffix is the same suffix, and
+  # requiring the bare form silently kept "SMITH JR." unstripped, caught by
+  # this package's own executable test, not by reading).
   sprintf(
-    "TRIM(REGEXP_REPLACE(REGEXP_REPLACE(REGEXP_REPLACE(%s, '\\([^)]*\\)', '', 'g'), '(\\s+(MD|M\\.D\\.|DO|D\\.O\\.|JR|SR|III|II|IV|PH\\.\\s?D\\.)\\.?)+$', '', 'g'), '[^A-Z]', ' ', 'g'))",
-    .sql_translit_upper(col))
+    "TRIM(REGEXP_REPLACE(REGEXP_REPLACE(%s, '%s', '', 'g'), '[^A-Z]', ' ', 'g'))",
+    sql_strip_parenthetical(.sql_translit_upper(col)),
+    .TRAILING_CREDENTIAL_RE)
 }
 
-#' SQL: letters-only compact join key (DuckDB/RE2)
+#' SQL: strip parenthesised alternate names (DuckDB/RE2)
 #'
-#' [sql_name_clean()] with every non-letter removed instead of spaced:
-#' the database-side twin of [compact_name_key()] (after the same trailing
-#' suffix strip [sql_name_clean()] documents). `"JONES-COX"`,
-#' `"JONES COX"` and `"JONESCOX"` all reduce to `"JONESCOX"`; `"Muñoz"`
-#' and `"Munoz"` both reduce to `"MUNOZ"`; `"Müller"` and `"Mueller"` both
-#' reduce to `"MUELLER"`. An input with no letters is `NULL`, never `''` -
-#' [compact_name_key()] returns `NA` there for the same reason: absence
-#' must not join to absence.
+#' The database-side twin of [strip_parenthetical()], transformation for
+#' transformation, in the same order - because the R rule is NOT "delete
+#' everything in brackets". Two conventions appear in rosters and they mean
+#' OPPOSITE things, and a single delete-the-group regex collapses them:
+#'
+#' \preformatted{
+#'   "Cynthia (Cindi) A."   separate token  -> an alternate name, DROPPED
+#'   "C(arolyn) Diane"      inside a token  -> optional letters, UNWRAPPED
+#'                                             ("CAROLYN DIANE", never "C DIANE")
+#' }
+#'
+#' The four ordered rules, each mirrored one-for-one from the R body:
+#' word-internal groups unwrap (backreferences `\\1\\2` - executed against
+#' DuckDB to confirm RE2's replacement syntax); standalone groups become a
+#' space; an UNCLOSED group runs to end-of-string and becomes a space; any
+#' residual stray bracket becomes a space. Every branch carries an executed
+#' parity fixture in `test-sql-r-parity-contract.R`, derived by calling the
+#' real R primitive.
 #'
 #' @param col character(1): a SQL column expression.
 #' @return character(1) SQL expression.
 #' @family sql-join-keys
 #' @export
-sql_name_compact <- function(col) {
-  sprintf("NULLIF(REGEXP_REPLACE(%s, '[^A-Z]', '', 'g'), '')", sql_name_clean(col))
+sql_strip_parenthetical <- function(col) {
+  if (!is.character(col) || length(col) != 1L || is.na(col) || !nzchar(col)) {
+    stop("sql_strip_parenthetical() requires a non-empty single-string column expression",
+         call. = FALSE)
+  }
+  # 1. word-internal: unwrap, keeping the letters
+  s <- sprintf(
+    "REGEXP_REPLACE(%s, '([A-Za-z''])\\(([^)]*)\\)', '\\1\\2', 'g')", col)
+  # 2. standalone: drop (a SPACE, as in R, so tokens cannot fuse)
+  s <- sprintf("REGEXP_REPLACE(%s, '\\([^)]*\\)', ' ', 'g')", s)
+  # 3. unclosed: runs to end-of-string
+  s <- sprintf("REGEXP_REPLACE(%s, '\\([^)]*$', ' ', 'g')", s)
+  # 4. residual stray brackets ("]" first in the class = literal, in RE2 as
+  #    in TRE - confirmed by execution)
+  sprintf("REGEXP_REPLACE(%s, '[][()]', ' ', 'g')", s)
+}
+
+#' SQL: letters-only compact join key (DuckDB/RE2)
+#'
+#' The database-side twin of [compact_name_key()], UNCONDITIONALLY: same
+#' preprocessing, same supported domain, same output, in BOTH modes -
+#' `strip_suffixes` mirrors the R primitive's own argument, so "twin" never
+#' means "the same plus preprocessing a caller must remember". (Until
+#' 2026-09-19 this builder silently included the trailing credential strip
+#' the R primitive does not perform, and the parity test had to restrict
+#' itself to a suffix-free domain - evidence of two contracts wearing one
+#' name; retired by owner review.)
+#'
+#' `"JONES-COX"`, `"JONES COX"` and `"JONESCOX"` all reduce to
+#' `"JONESCOX"`; `"Muñoz"` and `"Munoz"` to `"MUNOZ"`; `"Müller"` and
+#' `"Mueller"` to `"MUELLER"`; `"C(arolyn)"` unwraps to `"CAROLYN"`. An
+#' input with no letters is `NULL`, never `''` - [compact_name_key()]
+#' returns `NA` there for the same reason: absence must not join to
+#' absence.
+#'
+#' @param col character(1): a SQL column expression.
+#' @param strip_suffixes logical(1), default `FALSE`: mirror of
+#'   [compact_name_key()]'s `strip_suffixes` - when `TRUE`, trailing
+#'   credential/generation tokens strip first, via the SAME shared pattern
+#'   (`.TRAILING_CREDENTIAL_RE`) the R side applies.
+#' @return character(1) SQL expression.
+#' @family sql-join-keys
+#' @export
+sql_name_compact <- function(col, strip_suffixes = FALSE) {
+  if (!is.character(col) || length(col) != 1L || is.na(col) || !nzchar(col)) {
+    stop("sql_name_compact() requires a non-empty single-string column expression",
+         call. = FALSE)
+  }
+  if (!is.logical(strip_suffixes) || length(strip_suffixes) != 1L ||
+      is.na(strip_suffixes)) {
+    stop("strip_suffixes must be TRUE or FALSE", call. = FALSE)
+  }
+  base <- if (isTRUE(strip_suffixes)) {
+    sql_name_clean(col)
+  } else {
+    sql_strip_parenthetical(.sql_translit_upper(col))
+  }
+  sprintf("NULLIF(REGEXP_REPLACE(%s, '[^A-Z]', '', 'g'), '')", base)
 }
 
 #' SQL: first initial of a name column (DuckDB/RE2)

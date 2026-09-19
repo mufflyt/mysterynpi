@@ -42,18 +42,47 @@
 #'
 #' @param x character vector of names or name fragments.
 #' @param strip_alternates see [name_key()].
+#' @param strip_suffixes logical(1): also strip TRAILING credential and
+#'   generation tokens (`MD`, `M.D.`, `DO`, `D.O.`, `JR`, `SR`, `II`, `III`,
+#'   `IV`, `PH.D.`, dotted or bare, iterated) before compacting. Default
+#'   `FALSE` - the historical behaviour, and what [blocking_key()] uses. The
+#'   flag exists so the R primitive and its SQL twin [sql_name_compact()]
+#'   have IDENTICAL contracts in both modes: "twins" means the same function
+#'   on the other execution engine, never "the same plus preprocessing a
+#'   caller must remember". One pattern serves both engines
+#'   (`.TRAILING_CREDENTIAL_RE`), and the parity tests execute both sides.
 #' @return character vector of A-Z-only keys, `NA` where no letters survive.
 #' @family join-keys
 #' @examples
 #' compact_name_key(c("Jones-Cox", "O'Brien", "van de Ven"))
 #' # "JONESCOX" "OBRIEN" "VANDEVEN"
+#' compact_name_key("Smith Jr. MD", strip_suffixes = TRUE)  # "SMITH"
 #' @export
-compact_name_key <- function(x, strip_alternates = TRUE) {
+compact_name_key <- function(x, strip_alternates = TRUE, strip_suffixes = FALSE) {
+  if (!is.logical(strip_suffixes) || length(strip_suffixes) != 1L ||
+      is.na(strip_suffixes)) {
+    stop("strip_suffixes must be TRUE or FALSE", call. = FALSE)
+  }
   k <- name_key(x, strip_alternates)
+  if (isTRUE(strip_suffixes)) {
+    k <- sub(.TRAILING_CREDENTIAL_RE, "", k, perl = TRUE)
+  }
   out <- gsub("[^A-Z]", "", k)
   out[!is.na(out) & !nzchar(out)] <- NA_character_
   out
 }
+
+# ONE definition of the trailing credential/generation strip, shared verbatim
+# by compact_name_key(strip_suffixes = TRUE) and the SQL builders that
+# sprintf it into DuckDB queries. The pattern deliberately uses only \s, \.,
+# alternation and anchors - constructs that mean the same thing to perl/PCRE
+# and to RE2 - so ONE string can serve both engines, and
+# test-sql-r-parity-contract.R proves it by executing both sides on the same
+# fixtures. TRAILING-ANCHORED, so a bare surname DO (common Vietnamese), a
+# bare JR, or DOOLEY can never be eaten - only a genuine trailing token
+# preceded by whitespace is.
+.TRAILING_CREDENTIAL_RE <-
+  "(\\s+(MD|M\\.D\\.|DO|D\\.O\\.|JR|SR|III|II|IV|PH\\.\\s?D\\.)\\.?)+$"
 
 #' Both equality-join key variants of a surname
 #'

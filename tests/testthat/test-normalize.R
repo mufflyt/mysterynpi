@@ -14,8 +14,10 @@ test_that("sql_npi_name() emits the documented SQL shape", {
   sql <- sql_npi_name("last_name")
   expect_match(sql, "^strip_accents\\(UPPER\\(TRIM\\(", perl = TRUE)
   expect_match(sql, "nfc_normalize\\(last_name\\)", fixed = FALSE)
+  q <- function(s) gsub("'", "''", s, fixed = TRUE)   # the builder SQL-doubles
   for (ch in names(mysterynpi:::.sql_translit_map)) {
-    hits <- gregexpr(sprintf("'%s', '%s'", ch, mysterynpi:::.sql_translit_map[[ch]]),
+    hits <- gregexpr(sprintf("'%s', '%s'", q(ch),
+                             q(mysterynpi:::.sql_translit_map[[ch]])),
                      sql, fixed = TRUE)[[1]]
     expect_identical(length(hits[hits > 0]), 1L,
                      info = sprintf("mapping for %s must appear exactly once", ch))

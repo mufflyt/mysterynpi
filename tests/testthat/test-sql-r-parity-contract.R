@@ -1,17 +1,28 @@
 # =============================================================================
 # THE PACKAGE-LEVEL SQL/R PARITY CONTRACT
 #
-# For every SQL helper advertised as the database twin of an R identity
-# primitive, executing the SQL on a supported input must produce the same
-# normalized value as the R primitive. Candidate generation is exactly where
-# R/SQL normalization has to agree byte-for-byte: a blocking primitive whose
-# two sides disagree puts the same person in two different blocks, and a
-# DOCUMENTED disagreement is still a disagreement (owner review 2026-09-19,
-# retracting the earlier "ASCII parity boundary" posture, under which
-# "Emile"-with-acute keyed E in R and M in SQL).
+# If an R function and a SQL helper are called twins, they must have the same
+# preprocessing, the same supported input domain, and the same output for
+# every supported input. "Parity except for..." means they are not twins
+# (owner review 2026-09-19, twice: first retracting the "ASCII parity
+# boundary" under which Émile keyed E in R and M in SQL, then retracting a
+# single delete-the-group parenthetical regex that collapsed two OPPOSITE
+# roster conventions, and a compact "twin" that silently included a suffix
+# strip its R counterpart does not perform).
 #
-# Every expected value is DERIVED BY CALLING THE REAL R PRIMITIVE inside the
-# test, never hand-coded, and the SQL side is EXECUTED against a live DuckDB.
+# DECLARED SUPPORTED DOMAIN for the transliterating base: ASCII plus
+# U+00C0..U+017F (Latin-1 Supplement + Latin Extended-A). Inside it, parity
+# is not sampled - it is MEASURED EXHAUSTIVELY by the differential below, so
+# the hand-written translit map is mechanically governed: any character the
+# map misses fails the build and must be added or the domain narrowed.
+# Outside it, the measured failure shape is ABSTENTION (the SQL side's key
+# strips to NULL), never a different populated key - also pinned below.
+#
+# Organization: one section per semantic rule, so a change to any R
+# normalization branch demands the matching SQL branch. Every expectation is
+# DERIVED BY CALLING THE REAL R PRIMITIVE; every SQL side is EXECUTED on a
+# live DuckDB. Fixtures are literal UTF-8 (test files may carry it; package
+# code uses \uxxxx).
 # =============================================================================
 
 skip_if_not_installed("DBI")
@@ -23,33 +34,6 @@ with_duck <- function(code) {
   code(con)
 }
 
-# The Unicode corpus: representative characters normalize_string() supports,
-# as literal UTF-8 (test files may carry it; package code uses \uxxxx). The
-# LAST TWO entries are DECOMPOSED sequences (base letter + combining mark),
-# which only agree across R and SQL because both sides NFC-normalize FIRST.
-CORPUS <- c(
-  "Mary", "mary ann", "J",
-  "Émile",                      # E-acute (acute accents)
-  "Álvaro", "García",      # A-acute, i-acute
-  "Ömer", "Ümit",          # O-umlaut, U-umlaut (German digraphs)
-  "Müller", "MÜLLER",      # u-umlaut lower/upper
-  "Ñico", "Muñoz",         # N-tilde, n-tilde
-  "Çetin", "François",     # C-cedilla, c-cedilla
-  "Groß",                       # sharp-s (UPPER gives U+1E9E - measured)
-  "Øyvind", "Ødegaard",    # O-slash: a LETTER, not an accent
-  "Łukasz", "Łak",         # L-stroke
-  "Đorđe",                 # D-stroke, upper and lower
-  "Æsa",                        # AE ligature
-  "Œuvre",                      # OE ligature
-  "Þor",                        # thorn
-  "O'Brien", "Van Houten", "van de Ven", "Jones-Cox",
-  "(Sandra) Theresa", "'Anne",       # punctuation before the first letter
-  "---", "", "  ", NA_character_,
-  paste0("E", "́", "mile"),     # DECOMPOSED E-acute
-  paste0("Mu", "̈", "ller")     # u + COMBINING diaeresis... on the wrong
-)                                    # base here would be a fixture bug - see
-# the decomposed-umlaut fixture check below, which derives the truth from R.
-
 sql_side <- function(con, builder, values) {
   df <- data.frame(x = values, stringsAsFactors = FALSE)
   duckdb::duckdb_register(con, "parity_t", df)
@@ -58,74 +42,66 @@ sql_side <- function(con, builder, values) {
   out
 }
 
-test_that("POSITIVE CONTROL: the corpus actually exercises non-ASCII normalization", {
-  # A corpus that normalization leaves untouched would grant every parity
-  # assertion for free. At least a third of it must CHANGE under
-  # normalize_string() beyond mere upper-casing.
-  changed <- sum(normalize_string(CORPUS) != toupper(trimws(CORPUS)), na.rm = TRUE)
-  expect_gte(changed, 10)
+expect_twin <- function(con, builder, r_fn, values, label) {
+  got <- sql_side(con, builder, values)
+  want <- unname(r_fn(values))
+  expect_identical(got, want, label = label)
+}
+
+# ---------------------------------------------------------------------------
+# THE MECHANICAL GOVERNOR: exhaustive differential over the declared domain
+# ---------------------------------------------------------------------------
+
+test_that("DOMAIN DIFFERENTIAL: every character in U+00C0..U+017F agrees, exhaustively", {
+  # This is what makes .sql_translit_map governed rather than hand-curated:
+  # normalize_string() delegates to ICU's Latin-ASCII, the SQL side is
+  # strip_accents() plus the map, and every single character of the declared
+  # domain is executed on both. A disagreement here has exactly two legal
+  # exits: extend the map, or narrow the declared domain - never a silent
+  # divergent key.
+  cp <- c(0xC0:0xFF, 0x100:0x17F)
+  chars <- vapply(cp, intToUtf8, "")
+  with_duck(function(con) {
+    got <- sql_side(con, function(col) mysterynpi:::.sql_translit_upper(col), chars)
+    want <- unname(normalize_string(chars))
+    mism <- which(got != want)
+    expect_identical(
+      got, want,
+      info = paste("divergent code points:",
+                   paste(sprintf("U+%04X (R=%s SQL=%s)", cp[mism],
+                                 want[mism], got[mism]), collapse = ", ")))
+  })
+  # positive control on the differential itself: the domain genuinely
+  # exercises transliteration (a broken normalizer pair that both returned
+  # their input unchanged would also "agree")
+  expect_gte(sum(normalize_string(chars) != toupper(chars), na.rm = TRUE), 100)
 })
 
-test_that("TWIN: sql_npi_name() == normalize_string(), executed on the corpus", {
+test_that("BEYOND THE DOMAIN: disagreement is abstention, never a different populated key", {
+  # Latin Extended-B is NOT in the declared domain. Measured 2026-09-19 over
+  # all 208 characters: 82 disagreements, every one abstention-shaped (the
+  # SQL side's letters-only key strips to nothing -> NULL) and ZERO cases of
+  # two different populated keys. That shape is the safety property - an
+  # out-of-domain character can cost a candidate, never place a person in a
+  # WRONG block - and this pins it exhaustively for the whole range.
+  cp <- 0x180:0x24F
+  chars <- vapply(cp, intToUtf8, "")
   with_duck(function(con) {
-    got <- sql_side(con, sql_npi_name, CORPUS)
-    want <- normalize_string(CORPUS)
-    expect_identical(got, unname(want))
+    got <- sql_side(con, function(col) mysterynpi:::.sql_translit_upper(col), chars)
+    want <- unname(normalize_string(chars))
+    disagree <- which(got != want)
+    expect_gt(length(disagree), 0)   # the range must actually exercise the shape
+    sql_key <- gsub("[^A-Z]", "", got[disagree])
+    expect_true(all(!nzchar(sql_key)),
+                info = "an out-of-domain char minted a POPULATED divergent SQL key")
   })
 })
 
-test_that("TWIN: sql_first_initial() == extract_first_initial(), executed on the corpus", {
-  with_duck(function(con) {
-    got <- sql_side(con, sql_first_initial, CORPUS)   # SQL NULL arrives as NA
-    want <- extract_first_initial(CORPUS)
-    expect_identical(got, unname(want))
-    # the defect this contract exists for, named explicitly: an accented
-    # first letter keys the SAME block on both sides
-    e_acute <- "Émile"
-    expect_identical(extract_first_initial(e_acute), "E")
-    expect_identical(sql_side(con, sql_first_initial, e_acute), "E")
-  })
-})
+# ---------------------------------------------------------------------------
+# NFC: composed and decomposed forms are one input
+# ---------------------------------------------------------------------------
 
-test_that("TWIN: sql_name_compact() == compact_name_key(), executed (suffix-free domain)", {
-  # sql_name_compact()'s contract includes the trailing credential/generation
-  # strip; compact_name_key() alone does not. On suffix-free names the twins
-  # must agree exactly - including accents, special letters, parentheticals
-  # and the NULL-for-no-letters rule.
-  suffix_free <- CORPUS[!grepl("\\s(JR|SR|II|III|IV|MD|DO)\\.?$",
-                               toupper(trimws(CORPUS))) | is.na(CORPUS)]
-  with_duck(function(con) {
-    got <- sql_side(con, sql_name_compact, suffix_free)
-    want <- compact_name_key(suffix_free)
-    expect_identical(got, unname(want))
-  })
-})
-
-test_that("sql_name_compact(): the suffix-strip contract, reference DERIVED from primitives", {
-  strip_suffix <- function(x) sub(
-    "(\\s+(MD|M\\.D\\.|DO|D\\.O\\.|JR|SR|III|II|IV|PH\\.\\s?D\\.)\\.?)+$",
-    "", toupper(trimws(x)), perl = TRUE)
-  inputs <- c("SMITH JR", "Smith Jr.", "SMITH JR MD", "Müller Jr")
-  with_duck(function(con) {
-    got <- sql_side(con, sql_name_compact, inputs)
-    want <- compact_name_key(strip_suffix(inputs))
-    expect_identical(got, unname(want))
-  })
-})
-
-test_that("no-letter inputs are NULL/NA on BOTH sides: absence cannot join to absence", {
-  inputs <- c("---", "", "   ", NA_character_, "123", "Иван")
-  # the last is Cyrillic: neither side claims to transliterate it, and both
-  # must refuse to mint a key rather than disagreeing about the refusal shape
-  with_duck(function(con) {
-    expect_true(all(is.na(sql_side(con, sql_name_compact, inputs))))
-    expect_true(all(is.na(compact_name_key(inputs))))
-    expect_true(all(is.na(sql_side(con, sql_first_initial, inputs))))
-    expect_true(all(is.na(extract_first_initial(inputs))))
-  })
-})
-
-test_that("decomposed combining marks agree with their composed forms, both sides", {
+test_that("BRANCH nfc: decomposed combining marks agree with composed, both sides", {
   # Only true because BOTH sides NFC-normalize before the digraph table:
   # without nfc_normalize() in the SQL chain, decomposed u-umlaut fell
   # through to strip_accents() and emitted MULLER where R said MUELLER.
@@ -140,12 +116,152 @@ test_that("decomposed combining marks agree with their composed forms, both side
   })
 })
 
-test_that("blocking_key()'s surname side and the SQL compact key block identically", {
-  # The end-to-end statement of the invariant: R-side blocking via
-  # compact_name_key() (what blocking_key() uses) and database-side blocking
-  # via sql_name_compact() place these physicians in the SAME block.
-  names <- c("Muñoz", "Müller", "García", "O'Brien",
-             "Van Houten", "Smith (Jones)", "Ødegaard")
+# ---------------------------------------------------------------------------
+# German digraphs, generic accents, special Latin letters
+# ---------------------------------------------------------------------------
+
+test_that("BRANCH digraphs: umlauts and sharp-s romanise as digraphs, both sides", {
+  v <- c("Müller", "MÜLLER", "Schön", "Ömer", "Ümit", "Groß", "Läßig")
+  with_duck(function(con) {
+    expect_twin(con, sql_npi_name, normalize_string, v, "digraphs/npi_name")
+    expect_twin(con, sql_first_initial, extract_first_initial, v, "digraphs/initial")
+    expect_twin(con, sql_name_compact, compact_name_key, v, "digraphs/compact")
+  })
+})
+
+test_that("BRANCH accents: acute/grave/tilde/cedilla strip identically", {
+  v <- c("Émile", "Álvaro", "García", "Muñoz", "Ñico", "Çetin", "François", "Àgnes")
+  with_duck(function(con) {
+    expect_twin(con, sql_npi_name, normalize_string, v, "accents/npi_name")
+    expect_twin(con, sql_first_initial, extract_first_initial, v, "accents/initial")
+    expect_twin(con, sql_name_compact, compact_name_key, v, "accents/compact")
+    # the founding defect of this contract, named: Émile keys E on BOTH sides
+    expect_identical(extract_first_initial("Émile"), "E")
+    expect_identical(sql_side(con, sql_first_initial, "Émile"), "E")
+  })
+})
+
+test_that("BRANCH special letters: strip_accents() keeps them whole; the map must not", {
+  v <- c("Øyvind", "Ødegaard", "Łukasz", "Łak", "Đorđe", "Æsa", "Œuvre", "Þor")
+  with_duck(function(con) {
+    expect_twin(con, sql_npi_name, normalize_string, v, "specials/npi_name")
+    expect_twin(con, sql_first_initial, extract_first_initial, v, "specials/initial")
+    expect_twin(con, sql_name_compact, compact_name_key, v, "specials/compact")
+  })
+})
+
+# ---------------------------------------------------------------------------
+# Parentheticals: three R branches, three SQL branches
+# ---------------------------------------------------------------------------
+
+test_that("BRANCH paren/standalone: a separate-token alternate drops", {
+  v <- c("Cynthia (Cindi) A", "Smith (Jones)", "(Sandra) Theresa",
+         "(Bob) (Rob) Robert")                     # multiple groups
+  with_duck(function(con) {
+    expect_twin(con, sql_strip_parenthetical, strip_parenthetical, v,
+                "paren/standalone raw twin")
+    expect_twin(con, sql_name_compact, compact_name_key, v,
+                "paren/standalone compact")
+  })
+})
+
+test_that("BRANCH paren/word-internal: optional letters UNWRAP, never delete", {
+  # The two conventions mean opposite things, and the single
+  # delete-the-group regex this replaces collapsed them: C(arolyn) must
+  # become CAROLYN - "C" is not a name, it is a blocking key that joins to
+  # every bare initial.
+  v <- c("C(arolyn) Diane", "A(B)C", "Jo(seph)ine (Jo)")   # mixed forms
+  expect_identical(strip_parenthetical("C(arolyn) Diane"), "Carolyn Diane")
+  with_duck(function(con) {
+    expect_twin(con, sql_strip_parenthetical, strip_parenthetical, v,
+                "paren/word-internal raw twin")
+    expect_twin(con, sql_name_compact, compact_name_key, v,
+                "paren/word-internal compact")
+    expect_identical(sql_side(con, sql_name_compact, "C(arolyn) Diane"),
+                     unname(compact_name_key("C(arolyn) Diane")))
+    expect_identical(unname(compact_name_key("C(arolyn) Diane")), "CAROLYNDIANE")
+  })
+})
+
+test_that("BRANCH paren/unclosed: an unterminated group runs to end-of-string", {
+  v <- c("Smith (Jones", "Smith (", "C(arolyn Diane")
+  with_duck(function(con) {
+    expect_twin(con, sql_strip_parenthetical, strip_parenthetical, v,
+                "paren/unclosed raw twin")
+    expect_twin(con, sql_name_compact, compact_name_key, v,
+                "paren/unclosed compact")
+  })
+})
+
+test_that("BRANCH paren/residual: stray brackets become spaces, both sides", {
+  v <- c("Smith) Jones", "Smith ] Jones", "[Smith", "Smith ()")
+  with_duck(function(con) {
+    expect_twin(con, sql_strip_parenthetical, strip_parenthetical, v,
+                "paren/residual raw twin")
+  })
+})
+
+# ---------------------------------------------------------------------------
+# Punctuation compaction, missingness, suffixes, first initial
+# ---------------------------------------------------------------------------
+
+test_that("BRANCH punctuation: apostrophes/hyphens/spaces compact identically", {
+  v <- c("O'Brien", "Jones-Cox", "JONES COX", "Van Houten", "van de Ven",
+         "  Della  Badia ", "MC CARTHY-DERVIN")
+  with_duck(function(con) {
+    expect_twin(con, sql_name_compact, compact_name_key, v, "punct/compact")
+    expect_twin(con, sql_first_initial, extract_first_initial, v, "punct/initial")
+  })
+})
+
+test_that("BRANCH missing: no-letter inputs are NULL/NA on BOTH sides", {
+  v <- c("---", "", "   ", NA_character_, "123", "Иван")
+  # the last is Cyrillic: out of scope for BOTH sides, and both must refuse
+  # to mint a key rather than disagreeing about the refusal shape
+  with_duck(function(con) {
+    expect_true(all(is.na(sql_side(con, sql_name_compact, v))))
+    expect_true(all(is.na(compact_name_key(v))))
+    expect_true(all(is.na(sql_side(con, sql_first_initial, v))))
+    expect_true(all(is.na(extract_first_initial(v))))
+  })
+})
+
+test_that("BRANCH suffixes: compact twins hold UNCONDITIONALLY in both modes", {
+  # sql_name_compact() and compact_name_key() carry the SAME strip_suffixes
+  # argument reading the SAME shared pattern; there is no "suffix-free
+  # domain" carve-out left to remember.
+  v <- c("SMITH JR", "Smith Jr.", "SMITH JR MD", "Müller Jr", "JONES PH.D.",
+         "DO", "JR", "DOOLEY", "MADDOX", "Muñoz")   # must-not-strip lookalikes
+  with_duck(function(con) {
+    expect_twin(con, function(col) sql_name_compact(col, strip_suffixes = FALSE),
+                function(x) compact_name_key(x, strip_suffixes = FALSE),
+                v, "suffix/mode-off")
+    expect_twin(con, function(col) sql_name_compact(col, strip_suffixes = TRUE),
+                function(x) compact_name_key(x, strip_suffixes = TRUE),
+                v, "suffix/mode-on")
+    # and the modes genuinely differ where a suffix exists
+    expect_identical(unname(compact_name_key("SMITH JR", strip_suffixes = TRUE)),
+                     "SMITH")
+    expect_identical(unname(compact_name_key("SMITH JR")), "SMITHJR")
+  })
+})
+
+test_that("BRANCH first-initial: extraction parity across every fixture class", {
+  v <- c("Mary", "mary ann", "J", "j. robert", "(Sandra) Theresa", "'Anne",
+         "C(arolyn) Diane", "Émile", "Ömer", "Øyvind", "Groß",
+         "---", "", "  ", NA_character_)
+  with_duck(function(con) {
+    expect_twin(con, sql_first_initial, extract_first_initial, v, "initial/all")
+  })
+})
+
+# ---------------------------------------------------------------------------
+# End to end: blocking places the same person in the same block
+# ---------------------------------------------------------------------------
+
+test_that("END-TO-END: blocking_key(compact) and sql_name_compact() block identically", {
+  names <- c("Muñoz", "Müller", "García", "O'Brien", "Van Houten",
+             "Smith (Jones)", "C(arolyn)", "Ødegaard", "SMITH JR")
   with_duck(function(con) {
     expect_identical(sql_side(con, sql_name_compact, names),
                      unname(blocking_key(names, mode = "compact")))

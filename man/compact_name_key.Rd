@@ -4,12 +4,22 @@
 \alias{compact_name_key}
 \title{Letters-only compact key for equality joins}
 \usage{
-compact_name_key(x, strip_alternates = TRUE)
+compact_name_key(x, strip_alternates = TRUE, strip_suffixes = FALSE)
 }
 \arguments{
 \item{x}{character vector of names or name fragments.}
 
 \item{strip_alternates}{see [name_key()].}
+
+\item{strip_suffixes}{logical(1): also strip TRAILING credential and
+generation tokens (`MD`, `M.D.`, `DO`, `D.O.`, `JR`, `SR`, `II`, `III`,
+`IV`, `PH.D.`, dotted or bare, iterated) before compacting. Default
+`FALSE` - the historical behaviour, and what [blocking_key()] uses. The
+flag exists so the R primitive and its SQL twin [sql_name_compact()]
+have IDENTICAL contracts in both modes: "twins" means the same function
+on the other execution engine, never "the same plus preprocessing a
+caller must remember". One pattern serves both engines
+(`.TRAILING_CREDENTIAL_RE`), and the parity tests execute both sides.}
 }
 \value{
 character vector of A-Z-only keys, `NA` where no letters survive.
@@ -36,6 +46,7 @@ absence cannot join to absence.
 \examples{
 compact_name_key(c("Jones-Cox", "O'Brien", "van de Ven"))
 # "JONESCOX" "OBRIEN" "VANDEVEN"
+compact_name_key("Smith Jr. MD", strip_suffixes = TRUE)  # "SMITH"
 }
 \seealso{
 Other join-keys:

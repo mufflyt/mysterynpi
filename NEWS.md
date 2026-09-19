@@ -111,24 +111,56 @@
   upstream to fix it for every consumer of this package. 19 new assertions
   in `test-parse-person.R`; full suite (1,540 assertions) green.
 
-* PACKAGE-LEVEL SQL/R PARITY CONTRACT: for every SQL helper advertised as
-  the database twin of an R identity primitive, executing the SQL on a
-  supported input produces the same normalized value as the R primitive -
-  proven by execution on a Unicode corpus (acutes, umlauts, tilde,
-  cedilla, sharp-s, O-slash/L-stroke/D-stroke, AE/OE ligatures, thorn,
-  DECOMPOSED combining marks, punctuation-led and parenthesised names)
-  against a live DuckDB in `test-sql-r-parity-contract.R`. The whole
-  `sql_name_*` family now stands on the one transliterating base
-  `sql_npi_name()` uses (NFC via `nfc_normalize()`, the digraph/special
-  REPLACE chain before `UPPER`, then `strip_accents()` - all DuckDB
-  built-ins, no user-registered UDF). This RETRACTS the earlier "ASCII
-  parity boundary" posture under which `Émile` keyed `E` in R and `M` in
-  SQL: a documented disagreement is still a disagreement, and blocking is
-  exactly where both sides must agree byte-for-byte. Also fixed on the
-  way: `sql_name_compact()` now yields `NULL` (never `''`) when no letter
-  survives, matching `compact_name_key()`'s NA - absence cannot join to
-  absence - and strips parenthesised alternates the way `name_key()` does
-  (`"SMITH (JONES)"` -> `"SMITH"`, previously `"SMITHJONES"`).
+* PACKAGE-LEVEL SQL/R PARITY CONTRACT: if an R function and a SQL helper
+  are called twins, they have the same preprocessing, the same supported
+  input domain, and the same output for every supported input - "parity
+  except for..." means they are not twins. Enforced by execution against
+  a live DuckDB in `test-sql-r-parity-contract.R`, organised one section
+  per semantic rule (NFC, digraphs, accents, special letters, THREE
+  parenthetical branches, punctuation, missingness, suffixes, first
+  initial, end-to-end blocking), with every expectation derived by
+  calling the real R primitive. The declared transliteration domain
+  (ASCII + U+00C0..U+017F) is checked EXHAUSTIVELY - a per-character
+  differential of `normalize_string()` vs the executed SQL runs on every
+  build, so the translit map is mechanically governed: a missing
+  character fails the build and must be mapped or the domain narrowed.
+  Beyond the domain (measured over all of Latin Extended-B) disagreement
+  is pinned to be ABSTENTION-shaped - the SQL key strips to `NULL`,
+  never a different populated key - so an unsupported character can cost
+  a candidate but can never place a person in a WRONG block.
+
+* The whole `sql_name_*` family now stands on the one transliterating
+  base `sql_npi_name()` uses (NFC via `nfc_normalize()`, the
+  digraph/special REPLACE chain before `UPPER`, then `strip_accents()` -
+  all DuckDB built-ins, no user-registered UDF). This RETRACTS the
+  earlier "ASCII parity boundary" posture under which `Émile` keyed `E`
+  in R and `M` in SQL: a documented disagreement is still a
+  disagreement, and blocking is exactly where both sides must agree
+  byte-for-byte. `sql_npi_name()` also gains NFC handling (a DECOMPOSED
+  umlaut previously emitted `MULLER` where R said `MUELLER`) and the
+  Latin special letters ICU maps but `strip_accents()` keeps whole.
+
+* New: `sql_strip_parenthetical()`, the exact SQL twin of
+  `strip_parenthetical()` - transformation for transformation, because
+  the R rule is NOT "delete everything in brackets": a standalone
+  `"(Cindi)"` is an alternate name and drops, but word-internal
+  `"C(arolyn)"` is optional letters and UNWRAPS to `"Carolyn"` (a plain
+  delete-the-group regex collapsed those opposite meanings and produced
+  `"C DIANE"`), and an unclosed `"(Jones"` runs to end-of-string. Every
+  branch carries an executed parity fixture. `sql_name_clean()` and
+  `sql_name_compact()` build on it.
+
+* SEMANTIC CHANGE, declared: `sql_name_compact()` is now the
+  UNCONDITIONAL twin of `compact_name_key()` - it no longer silently
+  performs the trailing credential/generation strip its R counterpart
+  does not (that mismatch is why the old parity test had to restrict
+  itself to a "suffix-free domain"). Both sides now carry the same
+  `strip_suffixes` argument (default `FALSE`), reading ONE shared
+  pattern, parity-tested in both modes. `compact_name_key()` gains the
+  argument; `sql_name_compact()` had no downstream callers yet, so no
+  caller changes. `sql_name_compact()` also now yields `NULL` (never
+  `''`) when no letter survives, matching `compact_name_key()`'s `NA`:
+  absence cannot join to absence.
 
 * New SQL builders in the join-key family, both proven by execution
   against a real DuckDB: `sql_first_initial()` (database twin of

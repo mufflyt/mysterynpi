@@ -4,29 +4,43 @@
 \alias{sql_name_compact}
 \title{SQL: letters-only compact join key (DuckDB/RE2)}
 \usage{
-sql_name_compact(col)
+sql_name_compact(col, strip_suffixes = FALSE)
 }
 \arguments{
 \item{col}{character(1): a SQL column expression.}
+
+\item{strip_suffixes}{logical(1), default `FALSE`: mirror of
+[compact_name_key()]'s `strip_suffixes` - when `TRUE`, trailing
+credential/generation tokens strip first, via the SAME shared pattern
+(`.TRAILING_CREDENTIAL_RE`) the R side applies.}
 }
 \value{
 character(1) SQL expression.
 }
 \description{
-[sql_name_clean()] with every non-letter removed instead of spaced:
-the database-side twin of [compact_name_key()] (after the same trailing
-suffix strip [sql_name_clean()] documents). `"JONES-COX"`,
-`"JONES COX"` and `"JONESCOX"` all reduce to `"JONESCOX"`; `"Muñoz"`
-and `"Munoz"` both reduce to `"MUNOZ"`; `"Müller"` and `"Mueller"` both
-reduce to `"MUELLER"`. An input with no letters is `NULL`, never `''` -
-[compact_name_key()] returns `NA` there for the same reason: absence
-must not join to absence.
+The database-side twin of [compact_name_key()], UNCONDITIONALLY: same
+preprocessing, same supported domain, same output, in BOTH modes -
+`strip_suffixes` mirrors the R primitive's own argument, so "twin" never
+means "the same plus preprocessing a caller must remember". (Until
+2026-09-19 this builder silently included the trailing credential strip
+the R primitive does not perform, and the parity test had to restrict
+itself to a suffix-free domain - evidence of two contracts wearing one
+name; retired by owner review.)
+}
+\details{
+`"JONES-COX"`, `"JONES COX"` and `"JONESCOX"` all reduce to
+`"JONESCOX"`; `"Muñoz"` and `"Munoz"` to `"MUNOZ"`; `"Müller"` and
+`"Mueller"` to `"MUELLER"`; `"C(arolyn)"` unwraps to `"CAROLYN"`. An
+input with no letters is `NULL`, never `''` - [compact_name_key()]
+returns `NA` there for the same reason: absence must not join to
+absence.
 }
 \seealso{
 Other sql-join-keys:
 \code{\link[=sql_first_initial]{sql_first_initial()}},
 \code{\link[=sql_middle_initial_guard]{sql_middle_initial_guard()}},
 \code{\link[=sql_name_clean]{sql_name_clean()}},
-\code{\link[=sql_quote_literal]{sql_quote_literal()}}
+\code{\link[=sql_quote_literal]{sql_quote_literal()}},
+\code{\link[=sql_strip_parenthetical]{sql_strip_parenthetical()}}
 }
 \concept{sql-join-keys}

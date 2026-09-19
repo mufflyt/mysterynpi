@@ -1,3 +1,47 @@
+# mysterynpi 0.5.0
+
+* Equality-join surname keys (`compact_name_key()`, `surname_key_variants()`):
+  letters-only keys emitting BOTH surname conventions (particles glued and
+  bare final token), for the join that cannot come into R -- millions of
+  registry rows on the database side, where the candidate set is built by
+  hash-join equality before any pairwise rule can run. Measured origin
+  (isochrones ABMS-to-NPI matcher, 2026-09-18): punctuated/particled
+  surnames matched at 80.1% against 97.5% for plain names, a glued-only
+  repair would have traded 42 matched Vietnamese-name physicians for the
+  recovered Dutch/Hispanic ones, and dual variants recovered 475 of 765
+  missing physicians while losing zero. A trailing single letter never
+  becomes a surname key (positional rule; deliberately NOT a generation
+  claim -- `normalize_suffix()` still refuses to read `V` as a suffix).
+
+* UDF-free SQL builders proven against the R side (`sql_name_clean()`,
+  `sql_name_compact()`, `sql_middle_initial_guard()`): DuckDB/RE2
+  expressions for suffix-stripped, letters-only join keys and a
+  middle-initial contradiction guard, executable-parity-tested against a
+  live DuckDB connection in this package's own suite. They exist because
+  R/SQL normaliser drift has two documented specimens: a suffix regex whose
+  doubled backslashes made it match NOTHING for twenty months while the
+  comment beside it claimed otherwise, and a SQL side that spaced
+  punctuation while the R side kept it, so `JONES-COX` could never equal
+  `JONES COX`. RE2 has no lookahead, so the suffix strip is
+  trailing-anchored -- which is also why a bare surname `DO`, a bare `JR`,
+  or `DOOLEY` can never be eaten. Complements `sql_npi_name()`, which
+  handles accents but requires a `strip_accents` UDF.
+
+* Taxonomy identity screen (`taxonomy_consistent()`,
+  `taxonomy_tiebreak_rank()`, `taxonomy_family_pattern()`,
+  `TAXONOMY_FAMILY_PATTERNS`): three-valued profession-level consistency of
+  an NPI record against a board specialty -- an IDENTITY axis beside
+  license/gender/graduation-year agreement, never a subspecialty classifier
+  (taxonomy runs 57-82% sensitivity / 58-65% PPV for subspecialty).
+  Inspects the FULL pipe-concatenated code string, because a record may
+  retain a residency code ahead of its 207V and a first-segment shortcut
+  misreads that clinician as a non-physician (a real review-tool defect
+  from the 2026-09-19 promotion audit). `NA` can never read as clean, and
+  the tie-break rank is documented for use AFTER every stronger ordering
+  criterion: in its origin deployment it changed 360 of 22,002 selections,
+  every one tied on recency and confidence, zero rank regressions and zero
+  recency/confidence overrides.
+
 # mysterynpi 0.4.0
 
 * `sql_npi_name()` now folds German digraphs (`ü`/`ö`/`ä`/`ß` -> `ue`/`oe`/

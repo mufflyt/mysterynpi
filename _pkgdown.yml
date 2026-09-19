@@ -13,6 +13,8 @@ reference:
   - first_initial
   - strip_parenthetical
   - split_given
+  - compact_name_key
+  - surname_key_variants
 - title: The normalisation surface
   desc: Drop-in replacements for the pipelines this was extracted from.
   contents:
@@ -20,6 +22,9 @@ reference:
   - normalize_name_columns
   - normalize_physician_names
   - sql_npi_name
+  - sql_name_clean
+  - sql_name_compact
+  - sql_middle_initial_guard
   - needs_normalization
   - extract_first_initial
   - strip_name_noise
@@ -67,6 +72,10 @@ reference:
   - graduation_year_agreement
   - graduation_year_band
   - GRADUATION_YEAR_BANDS
+  - taxonomy_consistent
+  - taxonomy_tiebreak_rank
+  - taxonomy_family_pattern
+  - TAXONOMY_FAMILY_PATTERNS
 - title: Similarity scoring (candidate ranking, never verdicts)
   desc: The fenced exception; extracted from isochrones, quirks pinned.
   contents:

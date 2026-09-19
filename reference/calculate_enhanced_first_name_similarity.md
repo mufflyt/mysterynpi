@@ -1,13 +1,15 @@
-# Nickname-aware first-name similarity SCORE (never a verdict)
+# Deprecated: use \[given_name_similarity()\]
 
-A number for RANKING candidates, extracted verbatim from isochrones: 1.0
-exact after normalisation; 0.98 one-hop nickname equivalent under the
-consolidated corpus (the same relation the verdict rule corroborates
-on); 0.5 neutral for missing; otherwise Jaro-Winkler similarity (the
-larger of raw and umlaut-digraph-simplified). The old extraction's
-0.96/0.94 sub-tiers were artifacts of the retired two-table shape and
-are consolidated into 0.98. Scores rank; only agreement rules decide,
-and the no-fuzzy guard proves they cannot reach this function.
+Superseded 2026-09-19 when similarity became a first-class governed
+primitive (owner ruling: the defect was hand-rolled fuzz, not fuzz). The
+replacement differs in exactly one semantic: MISSING input returns
+\`NA_real\_\`, never this function's \`0.5\` neutral scalar - a neutral
+constant for absence is the absence-into-evidence conversion the package
+forbids everywhere else. This wrapper preserves the old single-pair
+contract (including the 0.5) so a deprecation period cannot silently
+change scores; migrate to \[given_name_similarity()\] and handle \`NA\`.
+The \`options(mysterynpi.enable_similarity_scoring)\` opt-in fence is
+retired with the same ruling.
 
 ## Usage
 
@@ -23,17 +25,9 @@ calculate_enhanced_first_name_similarity(name1, name2, nickname_dict = NULL)
 
 - nickname_dict:
 
-  from \[create_nickname_dictionary()\]; NULL falls back to plain
-  Jaro-Winkler.
+  ignored (the consolidated corpus is always used); accepted for
+  signature compatibility.
 
 ## Value
 
-numeric in \`\[0, 1\]\`.
-
-## Details
-
-OFF BY DEFAULT: calling this without
-\`options(mysterynpi.enable_similarity_scoring = TRUE)\` stops with
-instructions. The opt-in line belongs in the pipeline script it governs,
-where a reviewer reads it – approximate scoring must be a decision,
-never a default.
+numeric in \`\[0, 1\]\`; \`0.5\` for missing input (old contract).

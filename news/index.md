@@ -1,5 +1,52 @@
 # Changelog
 
+## mysterynpi 0.6.0
+
+- PRINCIPLE CORRECTED (owner ruling, 2026-09-19): the package is the
+  canonical DETERMINISTIC identity-resolution layer, and numeric
+  similarity is deterministic. The no-fuzzy posture was aimed at the
+  right defect – an edit-distance tolerance silently flipping a verdict
+  – but drew the line in the wrong place: the 2026-09-19 isochrones
+  survey found ~24 hand-rolled similarity call sites, each with its own
+  normalisation, its own missing-value behaviour (usually
+  missing-scores-as-zero), and its own thresholds. The cure is one
+  governed home, not prohibition.
+
+- New first-class similarity primitives
+  ([`surname_similarity()`](https://mufflyt.github.io/mysterynpi/reference/surname_similarity.md),
+  [`middle_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/middle_name_similarity.md),
+  [`given_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/given_name_similarity.md)):
+  vectorized, length-disciplined (no silent recycling), computed on the
+  package’s own compact keys so punctuation and case never masquerade as
+  distance, with configurable Jaro-Winkler (`p` pinned as
+  `JW_PREFIX_WEIGHT = 0.1` – note the retired call sites used
+  stringdist’s default p = 0, a documented score change) and normalised
+  Levenshtein. THE MISSING CONTRACT IS THE FEATURE: missing + present =
+  `NA_real_`, missing + missing = `NA_real_`, only two observed values
+  produce a number.
+  [`assert_similarity_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_similarity_contract.md)
+  lets downstream suites pin all of it.
+  [`given_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/given_name_similarity.md)
+  is nickname-aware via the one corpus (`NICKNAME_SIMILARITY = 0.98` on
+  a one-hop edge), with the umlaut-digraph second chance retained.
+
+- [`calculate_enhanced_first_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/calculate_enhanced_first_name_similarity.md)
+  is DEPRECATED (its 0.5 neutral scalar for missing input is exactly the
+  absence-into-evidence conversion the contract forbids; the wrapper
+  preserves the old contract verbatim so deprecation cannot silently
+  change scores). `create_nickname_aware_similarity()` is removed (the
+  new signature obsoletes the closure factory). The dark-by-default
+  `options(mysterynpi.enable_similarity_scoring)` fence is retired –
+  similarity is a first-class primitive now, and the protection that
+  mattered was never the option: it is the call-graph reachability
+  guard, which is RETARGETED, not retired. `test-no-fuzzy.R` still
+  proves no `*_agreement()` verdict can reach a similarity engine
+  transitively.
+
+- stringdist moves Suggests -\> Imports (\>= 0.9.10): the one similarity
+  engine is a declared, pinned dependency, and the guard proves the
+  verdict machinery still cannot reach it.
+
 ## mysterynpi 0.5.0
 
 - Equality-join surname keys
@@ -303,7 +350,7 @@
   [`are_nickname_equivalents()`](https://mufflyt.github.io/mysterynpi/reference/are_nickname_equivalents.md),
   [`get_nicknames_for_name()`](https://mufflyt.github.io/mysterynpi/reference/get_nicknames_for_name.md),
   [`calculate_enhanced_first_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/calculate_enhanced_first_name_similarity.md),
-  [`create_nickname_aware_similarity()`](https://mufflyt.github.io/mysterynpi/reference/create_nickname_aware_similarity.md),
+  `create_nickname_aware_similarity()`,
   [`get_nickname_dictionary()`](https://mufflyt.github.io/mysterynpi/reference/get_nickname_dictionary.md))
   was first proven byte-identical over 4,000 real ABOG pairs, then
   CONSOLIDATED onto `NICKNAME_EDGES` – the same pinned corpus the

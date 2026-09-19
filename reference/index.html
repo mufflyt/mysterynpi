@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -502,7 +502,7 @@
         </dt>
         <dd>NUCC family patterns for board specialties (identity screen only)</dd>
       </dl></div><div class="section level2">
-      <h2 id="similarity-scoring-candidate-ranking-never-verdicts-">Similarity scoring (candidate ranking, never verdicts)<a class="anchor" aria-label="anchor" href="#similarity-scoring-candidate-ranking-never-verdicts-"></a></h2>
+      <h2 id="similarity-primitives-governed-numeric-scores-verdicts-stay-categorical-">Similarity primitives (governed numeric scores; verdicts stay categorical)<a class="anchor" aria-label="anchor" href="#similarity-primitives-governed-numeric-scores-verdicts-stay-categorical-"></a></h2>
 
       <div class="section-desc"><p>The fenced exception; extracted from isochrones, quirks pinned.</p></div>
 
@@ -551,14 +551,49 @@
           <code><a href="calculate_enhanced_first_name_similarity.html">calculate_enhanced_first_name_similarity()</a></code>
 
         </dt>
-        <dd>Nickname-aware first-name similarity SCORE (never a verdict)</dd>
+        <dd>Deprecated: use [given_name_similarity()]</dd>
 
         <dt>
 
-          <code><a href="create_nickname_aware_similarity.html">create_nickname_aware_similarity()</a></code>
+          <code><a href="surname_similarity.html">surname_similarity()</a></code>
 
         </dt>
-        <dd>Factory: similarity closure with a bound dictionary</dd>
+        <dd>Numeric surname similarity, missing-aware and vectorized</dd>
+
+        <dt>
+
+          <code><a href="middle_name_similarity.html">middle_name_similarity()</a></code>
+
+        </dt>
+        <dd>Numeric middle-name similarity, missing-aware and vectorized</dd>
+
+        <dt>
+
+          <code><a href="given_name_similarity.html">given_name_similarity()</a></code>
+
+        </dt>
+        <dd>Numeric given-name similarity: nickname-aware, missing-aware, vectorized</dd>
+
+        <dt>
+
+          <code><a href="assert_similarity_contract.html">assert_similarity_contract()</a></code>
+
+        </dt>
+        <dd>Assert the similarity contract on a similarity function</dd>
+
+        <dt>
+
+          <code><a href="JW_PREFIX_WEIGHT.html">JW_PREFIX_WEIGHT</a></code>
+
+        </dt>
+        <dd>Pinned Jaro-Winkler prefix weight</dd>
+
+        <dt>
+
+          <code><a href="NICKNAME_SIMILARITY.html">NICKNAME_SIMILARITY</a></code>
+
+        </dt>
+        <dd>Pinned nickname-equivalence similarity</dd>
       </dl></div><div class="section level2">
       <h2 id="clerical-review">Clerical review<a class="anchor" aria-label="anchor" href="#clerical-review"></a></h2>
 

@@ -158,18 +158,28 @@ evidence the threshold was right.
 
 Two specific exclusions worth naming:
 
-- **Similarity scoring is fenced, not forbidden (2026-09).** The package
-  now carries isochrones’ nickname-aware Jaro-Winkler scoring — RANKING
-  machinery for candidate generation, the stage fuzz was always
-  legitimate at. The fence is machine-enforced: no agreement verdict can
-  reach the scoring module through any call chain (a call-graph guard
-  asserts it; a mutation proves the guard fires), the Jaro-Winkler path
-  is OFF by default
-  (`options(mysterynpi.enable_similarity_scoring = TRUE)` is the
-  reviewable opt-in), and there is ONE nickname system: the scoring
-  dictionary derives from `NICKNAME_EDGES`, so verdicts and scores read
-  the same truth and the fence – not a second table – is what keeps
-  scores from deciding.
+- **Similarity is first-class and governed (2026-09-19, owner ruling).**
+  Jaro-Winkler and Levenshtein are deterministic functions; the defect
+  was never fuzz itself but hand-rolled, inconsistent, unaudited fuzz
+  spread across downstream pipelines.
+  [`surname_similarity()`](https://mufflyt.github.io/mysterynpi/reference/surname_similarity.md),
+  [`middle_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/middle_name_similarity.md)
+  and
+  [`given_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/given_name_similarity.md)
+  are the one governed home: one normalisation (the package’s own keys),
+  pinned method parameters (`JW_PREFIX_WEIGHT`), and a missing contract
+  callers can pin with
+  [`assert_similarity_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_similarity_contract.md)
+  – missing + present is `NA`, never zero and never a neutral constant,
+  because “we do not know” must never score like “utterly different”.
+  What remains machine-enforced by the call-graph guard: the categorical
+  `*_agreement()` verdicts cannot reach any similarity engine through
+  any call chain – a score informs the governed decision layer, it never
+  silently flips a verdict. There is still ONE nickname system:
+  [`given_name_similarity()`](https://mufflyt.github.io/mysterynpi/reference/given_name_similarity.md)
+  and
+  [`nickname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/nickname_agreement.md)
+  read the same `NICKNAME_EDGES` truth.
 - **No edit-distance tolerance on the middle name.** One was added and
   removed the same day. Measured: it changed 64 of 30,740 candidate
   pairs and was worth 22 records, while admitting pairs that are

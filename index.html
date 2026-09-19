@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -241,7 +241,7 @@
 <p>Two specific exclusions worth naming:</p>
 <ul>
 <li>
-<strong>Similarity scoring is fenced, not forbidden (2026-09).</strong> The package now carries isochrones’ nickname-aware Jaro-Winkler scoring — RANKING machinery for candidate generation, the stage fuzz was always legitimate at. The fence is machine-enforced: no agreement verdict can reach the scoring module through any call chain (a call-graph guard asserts it; a mutation proves the guard fires), the Jaro-Winkler path is OFF by default (<code>options(mysterynpi.enable_similarity_scoring = TRUE)</code> is the reviewable opt-in), and there is ONE nickname system: the scoring dictionary derives from <code>NICKNAME_EDGES</code>, so verdicts and scores read the same truth and the fence – not a second table – is what keeps scores from deciding.</li>
+<strong>Similarity is first-class and governed (2026-09-19, owner ruling).</strong> Jaro-Winkler and Levenshtein are deterministic functions; the defect was never fuzz itself but hand-rolled, inconsistent, unaudited fuzz spread across downstream pipelines. <code><a href="reference/surname_similarity.html">surname_similarity()</a></code>, <code><a href="reference/middle_name_similarity.html">middle_name_similarity()</a></code> and <code><a href="reference/given_name_similarity.html">given_name_similarity()</a></code> are the one governed home: one normalisation (the package’s own keys), pinned method parameters (<code>JW_PREFIX_WEIGHT</code>), and a missing contract callers can pin with <code><a href="reference/assert_similarity_contract.html">assert_similarity_contract()</a></code> – missing + present is <code>NA</code>, never zero and never a neutral constant, because “we do not know” must never score like “utterly different”. What remains machine-enforced by the call-graph guard: the categorical <code>*_agreement()</code> verdicts cannot reach any similarity engine through any call chain – a score informs the governed decision layer, it never silently flips a verdict. There is still ONE nickname system: <code><a href="reference/given_name_similarity.html">given_name_similarity()</a></code> and <code><a href="reference/nickname_agreement.html">nickname_agreement()</a></code> read the same <code>NICKNAME_EDGES</code> truth.</li>
 <li>
 <strong>No edit-distance tolerance on the middle name.</strong> One was added and removed the same day. Measured: it changed 64 of 30,740 candidate pairs and was worth 22 records, while admitting pairs that are genuinely different given names (<code>JULIA</code>/<code>JULIE</code>, <code>LEE</code>/<code>LEA</code>, <code>ANN</code>/<code>ANNE</code>). It is not symmetric with fuzzy <em>surname</em> blocking, which generates a candidate that is then ranked below exact evidence; this suppressed a veto with no tier recording that it happened.</li>
 <li>

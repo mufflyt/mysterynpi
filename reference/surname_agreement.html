@@ -64,7 +64,8 @@ one measured crosswalk, and marriage moves a surname wholesale.</p>
 <span>  middle_a <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  middle_b <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alternates_a <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  alternates_b <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  alternates_b <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  detail <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,11 +97,33 @@ difference must not become a veto. [name_key()] itself keeps the
 apostrophe – it is a join key with its own parity contract – so the
 erasure is local to this rule.</p></dd>
 
+
+<dt id="arg-detail">detail<a class="anchor" aria-label="anchor" href="#arg-detail"></a></dt>
+<dd><p>logical(1). `FALSE` (the default) returns the coarse
+three-valued character vector unchanged - every existing caller keeps
+its contract. `TRUE` returns a `data.frame(verdict, reason)` in the
+same shape as [given_name_agreement()]: the coarse verdict stays
+three-valued, and `reason` names the RULE that corroborated, `NA`
+otherwise. The reason vocabulary is the measured one
+[name_surname_match_type()] already reports, not a parallel invention:
+`"exact"`, `"separator_equivalent"` (`BARLOW-REED` vs `BARLOW REED`),
+`"concatenated_equivalent"` (`ABU-GHAZALEH` vs `ABUGHAZALEH`),
+`"component_subset"` (`NELSON` in `NELSON-BECKER` - the hyphen-subset
+evidence class, weaker than identity and now distinguishable so a
+caller can weight it), plus this rule's own two rescues:
+`"alternate_recorded"` and `"maiden_as_middle"`. A caller that wants
+to demote subset or rescue evidence filters on `reason`; collapsing
+the verdict itself would re-create the Boolean flattening this family
+exists to avoid.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>character: `"corroborates"`, `"conflicts"`, or `"uninformative"`
-  (either surname absent or reduced to nothing by normalisation).</p>
+    <p>With `detail = FALSE`: character - `"corroborates"`,
+  `"conflicts"`, or `"uninformative"` (either surname absent or reduced
+  to nothing by normalisation). With `detail = TRUE`: a
+  `data.frame(verdict, reason)`, `reason` non-`NA` exactly where the
+  verdict is `"corroborates"`.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

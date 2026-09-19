@@ -166,6 +166,22 @@
   `NA` becomes SQL `NULL` - replacing per-call-site `sprintf`/`gsub`
   patches).
 
+- [`surname_agreement()`](https://mufflyt.github.io/mysterynpi/reference/surname_agreement.md)
+  gains `detail = TRUE`, returning `data.frame(verdict, reason)` in the
+  same shape as
+  [`given_name_agreement()`](https://mufflyt.github.io/mysterynpi/reference/given_name_agreement.md).
+  The coarse three-valued default is untouched (contract-asserted
+  byte-identical), and the reason vocabulary is the measured one
+  [`name_surname_match_type()`](https://mufflyt.github.io/mysterynpi/reference/name_surname_match_type.md)
+  already reports (`exact`, `separator_equivalent`,
+  `concatenated_equivalent`, `component_subset`) plus the rule’s two
+  rescues (`alternate_recorded`, `maiden_as_middle`), so hyphen-subset
+  and rescue evidence become distinguishable from exact identity without
+  flattening any verdict.
+  [`assert_surname_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_surname_agreement_contract.md)
+  now also proves the detail projection can never disagree with coarse
+  mode and rejects undeclared reason values.
+
 - New:
   [`blocking_key()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key.md) -
   one governed construction for the keys candidate generation joins on,

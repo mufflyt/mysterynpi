@@ -15,7 +15,8 @@ surname_agreement(
   middle_a = NULL,
   middle_b = NULL,
   alternates_a = NULL,
-  alternates_b = NULL
+  alternates_b = NULL,
+  detail = FALSE
 )
 ```
 
@@ -47,10 +48,32 @@ surname_agreement(
   keeps the apostrophe – it is a join key with its own parity contract –
   so the erasure is local to this rule.
 
+- detail:
+
+  logical(1). \`FALSE\` (the default) returns the coarse three-valued
+  character vector unchanged - every existing caller keeps its contract.
+  \`TRUE\` returns a \`data.frame(verdict, reason)\` in the same shape
+  as \[given_name_agreement()\]: the coarse verdict stays three-valued,
+  and \`reason\` names the RULE that corroborated, \`NA\` otherwise. The
+  reason vocabulary is the measured one \[name_surname_match_type()\]
+  already reports, not a parallel invention: \`"exact"\`,
+  \`"separator_equivalent"\` (\`BARLOW-REED\` vs \`BARLOW REED\`),
+  \`"concatenated_equivalent"\` (\`ABU-GHAZALEH\` vs \`ABUGHAZALEH\`),
+  \`"component_subset"\` (\`NELSON\` in \`NELSON-BECKER\` - the
+  hyphen-subset evidence class, weaker than identity and now
+  distinguishable so a caller can weight it), plus this rule's own two
+  rescues: \`"alternate_recorded"\` and \`"maiden_as_middle"\`. A caller
+  that wants to demote subset or rescue evidence filters on \`reason\`;
+  collapsing the verdict itself would re-create the Boolean flattening
+  this family exists to avoid.
+
 ## Value
 
-character: \`"corroborates"\`, \`"conflicts"\`, or \`"uninformative"\`
-(either surname absent or reduced to nothing by normalisation).
+With \`detail = FALSE\`: character - \`"corroborates"\`,
+\`"conflicts"\`, or \`"uninformative"\` (either surname absent or
+reduced to nothing by normalisation). With \`detail = TRUE\`: a
+\`data.frame(verdict, reason)\`, \`reason\` non-\`NA\` exactly where the
+verdict is \`"corroborates"\`.
 
 ## Details
 

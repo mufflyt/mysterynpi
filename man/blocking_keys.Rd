@@ -10,19 +10,18 @@ blocking_keys(last, first = NULL, specs)
 \item{last}{Character vector of surnames.}
 
 \item{first}{Character vector of given names. Required if any specification
-uses \code{surname_initial}.}
+uses `surname_initial`.}
 
-\item{specs}{One \code{blocking_spec()} or a non-empty list of them.
-Labels must be unique so persisted ledgers can identify which rule emitted
-each key.}
+\item{specs}{One [blocking_spec()] or a non-empty list of them. Labels must
+be unique so persisted ledgers can identify which rule emitted each key.}
 }
 \value{
-Long-form data frame. It adds \code{record_id}, \code{spec_id}, and
-\code{label} to the columns returned by \code{blocking_key_info()}.
+Long-form data frame. It adds `record_id`, `spec_id`, and
+  `label` to the columns returned by [blocking_key_info()].
 }
 \description{
 Produces long-form candidate-generation plumbing: one row per input record
-per blocking specification. This is intentionally not an identity verdict
+per blocking specification. This is intentionally NOT an identity verdict
 and does not count repeated blocks as repeated evidence. Multiple blocks
 only widen or partition the candidate set that downstream agreement rules
 will evaluate.
@@ -32,6 +31,7 @@ Output order is specification-major: specifications keep their supplied
 order, and records keep their input order within each specification.
 }
 \seealso{
+Other blocking:
 \code{\link[=blocking_key]{blocking_key()}},
 \code{\link[=blocking_key_info]{blocking_key_info()}},
 \code{\link[=blocking_spec]{blocking_spec()}}

@@ -7,23 +7,24 @@
 blocking_spec(mode, n = NULL, label = NULL)
 }
 \arguments{
-\item{mode}{One explicit blocking mode accepted by \code{blocking_key()}.}
+\item{mode}{One blocking mode accepted by [blocking_key()].}
 
-\item{n}{Prefix width for \code{prefix_n}; forbidden for other modes.}
+\item{n}{Prefix width for `prefix_n`; forbidden for other modes.}
 
 \item{label}{Optional human-readable identifier. Defaults to the mode, or
-\code{prefix_<n>} for \code{prefix_n}.}
+`prefix_<n>` for `prefix_n`.}
 }
 \value{
-An object of class \code{mysterynpi_blocking_spec}.
+An object of class `mysterynpi_blocking_spec`.
 }
 \description{
-A specification records how a block is constructed, separately from the
+A specification records HOW a block is constructed, separately from the
 records it will be applied to. This makes multi-key candidate generation
 auditable: a caller can persist the exact blocking plan rather than only
 the resulting strings.
 }
 \seealso{
+Other blocking:
 \code{\link[=blocking_key]{blocking_key()}},
 \code{\link[=blocking_key_info]{blocking_key_info()}},
 \code{\link[=blocking_keys]{blocking_keys()}}

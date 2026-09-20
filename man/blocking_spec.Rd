@@ -4,14 +4,10 @@
 \alias{blocking_spec}
 \title{Define one governed blocking specification}
 \usage{
-blocking_spec(
-  mode = c("surname_initial", "prefix_n", "compact"),
-  n = NULL,
-  label = NULL
-)
+blocking_spec(mode, n = NULL, label = NULL)
 }
 \arguments{
-\item{mode}{One blocking mode accepted by \code{blocking_key()}.}
+\item{mode}{One explicit blocking mode accepted by \code{blocking_key()}.}
 
 \item{n}{Prefix width for \code{prefix_n}; forbidden for other modes.}
 

@@ -178,11 +178,11 @@ blocking_key <- function(last, first = NULL,
 #' @return An object of class `mysterynpi_blocking_spec`.
 #' @family blocking
 #' @export
-blocking_spec <- function(
-    mode = c("surname_initial", "prefix_n", "compact"),
-    n = NULL,
-    label = NULL) {
-  mode <- match.arg(mode)
+blocking_spec <- function(mode, n = NULL, label = NULL) {
+  if (missing(mode)) {
+    stop("blocking_spec: `mode` must be explicit.", call. = FALSE)
+  }
+  mode <- match.arg(mode, c("surname_initial", "prefix_n", "compact"))
   n <- .blocking_validate_n(mode, n)
 
   if (is.null(label)) {

@@ -422,11 +422,9 @@ test_that("multi-key plans share one broadcast record universe", {
     got$key,
     c("SMITH|M", "SMITH|J", "SMITH", "SMITH")
   )
-  expect_identical(
-    table(got$label),
-    structure(c(2L, 2L), dim = 2L,
-              dimnames = list(c("compact", "surname_initial")))
-  )
+  counts <- table(got$label)
+  expect_identical(names(counts), c("compact", "surname_initial"))
+  expect_identical(unname(as.integer(counts)), c(2L, 2L))
 })
 
 

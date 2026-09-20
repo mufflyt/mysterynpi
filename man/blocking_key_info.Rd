@@ -12,37 +12,37 @@ blocking_key_info(
 )
 }
 \arguments{
-\item{last}{Character vector of surnames. Required by every mode.}
+\item{last}{character vector of surnames. Required by every mode.}
 
-\item{first}{Character vector of given names. Required by
-\code{surname_initial}; ignored by the other modes.}
+\item{first}{character vector of given names. Required by
+`surname_initial`; ignored by the other modes.}
 
-\item{mode}{\code{"surname_initial"}, \code{"prefix_n"}, or
-\code{"compact"}.}
+\item{mode}{`"surname_initial"`, `"prefix_n"`, or `"compact"`.}
 
-\item{n}{Prefix length: required for \code{prefix_n}; forbidden for
-other modes.}
+\item{n}{prefix length: required for `prefix_n` (single finite whole
+number >= 1); an ERROR with any other mode.}
 }
 \value{
-A data frame with columns \code{key}, \code{mode},
-\code{components_used}, \code{informative}, \code{reason},
-\code{surname_key}, \code{first_initial}, and \code{prefix_n}.
+A data frame with columns `key`, `mode`, `components_used`,
+  `informative`, `reason`, `surname_key`, `first_initial`, and
+  `prefix_n`.
 }
 \description{
-The \code{key} column is byte-identical to \code{blocking_key()} on the
-same inputs. The remaining columns explain how that key was built and why
-a row is or is not informative. Metadata never upgrades a blocking key
-into identity evidence: blocking chooses candidates to compare; agreement
-rules decide what those candidates mean.
+The `key` column is byte-identical to [blocking_key()] on the same
+inputs. The remaining columns explain how that key was built and why a row
+is or is not informative. Metadata never upgrades a blocking key into
+identity evidence: blocking chooses candidates to compare; agreement rules
+decide what those candidates mean.
 }
 \details{
-\code{components_used} names the governed recipe, not the observed
-evidence. For example, \code{surname+first_initial} remains the recipe
-when the first initial is missing and the key is therefore \code{NA}.
+`components_used` names the governed recipe, not the observed evidence.
+For example, `surname+first_initial` remains the recipe when the first
+initial is missing and the key is therefore `NA`.
 }
 \seealso{
+Other blocking:
 \code{\link[=blocking_key]{blocking_key()}},
-\code{\link[=blocking_spec]{blocking_spec()}},
-\code{\link[=blocking_keys]{blocking_keys()}}
+\code{\link[=blocking_keys]{blocking_keys()}},
+\code{\link[=blocking_spec]{blocking_spec()}}
 }
 \concept{blocking}

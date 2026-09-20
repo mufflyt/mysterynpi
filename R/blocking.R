@@ -56,6 +56,30 @@
   as.integer(n)
 }
 
+.blocking_broadcast_pair <- function(last, first) {
+  ll <- length(last)
+  lf <- length(first)
+
+  if (ll != lf) {
+    if (ll == 0L || lf == 0L) {
+      stop("blocking_key: one input is empty (", min(ll, lf),
+           ") and the other is not (", max(ll, lf),
+           "). Refusing to recycle identity vectors.", call. = FALSE)
+    }
+    if (ll == 1L) {
+      last <- rep(last, lf)
+    } else if (lf == 1L) {
+      first <- rep(first, ll)
+    } else {
+      stop("blocking_key: `last` and `first` must be the same length, ",
+           "or one must be length 1 for broadcasting; got ", ll, " and ",
+           lf, ". Refusing to recycle identity vectors.", call. = FALSE)
+    }
+  }
+
+  list(last = last, first = first)
+}
+
 #' Canonical blocking key, by named mode
 #'
 #' One governed construction for the keys candidate generation joins on.
@@ -115,13 +139,13 @@ blocking_key <- function(last, first = NULL,
                          n = NULL) {
   mode <- match.arg(mode)
   n <- .blocking_validate_n(mode, n)
-  surname_key <- compact_name_key(last)
 
   if (mode == "compact") {
-    return(surname_key)
+    return(compact_name_key(last))
   }
 
   if (mode == "prefix_n") {
+    surname_key <- compact_name_key(last)
     return(substr(surname_key, 1L, n))
   }
 
@@ -130,20 +154,9 @@ blocking_key <- function(last, first = NULL,
     stop("blocking_key(mode = \"surname_initial\") requires `first`.",
          call. = FALSE)
   }
-  ll <- length(last); lf <- length(first)
-  if (ll != lf) {
-    if (ll == 0L || lf == 0L) {
-      stop("blocking_key: one input is empty (", min(ll, lf),
-           ") and the other is not (", max(ll, lf),
-           "). Refusing to recycle identity vectors.", call. = FALSE)
-    }
-    if (ll == 1L) surname_key <- rep(surname_key, lf)
-    else if (lf == 1L) first <- rep(first, ll)
-    else stop("blocking_key: `last` and `first` must be the same length, ",
-              "or one must be length 1 for broadcasting; got ", ll, " and ",
-              lf, ". Refusing to recycle identity vectors.", call. = FALSE)
-  }
-  init <- extract_first_initial(first)
+  pair <- .blocking_broadcast_pair(last, first)
+  surname_key <- compact_name_key(pair$last)
+  init <- extract_first_initial(pair$first)
   out <- ifelse(!is.na(surname_key) & !is.na(init),
                 paste0(surname_key, "|", init),
                 NA_character_)
@@ -221,19 +234,9 @@ blocking_key_info <- function(
   n <- .blocking_validate_n(mode, n)
 
   if (mode == "surname_initial") {
-    ll <- length(last)
-    lf <- length(first)
-    last_for_meta <- last
-    first_for_meta <- first
-    if (ll == 1L && length(key) > 1L) {
-      last_for_meta <- rep(last, length(key))
-    }
-    if (lf == 1L && length(key) > 1L) {
-      first_for_meta <- rep(first, length(key))
-    }
-
-    surname_key <- compact_name_key(last_for_meta)
-    first_initial <- extract_first_initial(first_for_meta)
+    pair <- .blocking_broadcast_pair(last, first)
+    surname_key <- compact_name_key(pair$last)
+    first_initial <- extract_first_initial(pair$first)
     missing_surname <- is.na(surname_key)
     missing_initial <- is.na(first_initial)
 
@@ -314,11 +317,28 @@ blocking_keys <- function(last, first = NULL, specs) {
          ".", call. = FALSE)
   }
 
+  uses_first <- any(vapply(
+    specs,
+    function(x) identical(x$mode, "surname_initial"),
+    logical(1)
+  ))
+  last_for_plan <- last
+  first_for_plan <- first
+  if (uses_first) {
+    if (is.null(first)) {
+      stop("blocking_keys: a surname_initial spec requires `first`.",
+           call. = FALSE)
+    }
+    pair <- .blocking_broadcast_pair(last, first)
+    last_for_plan <- pair$last
+    first_for_plan <- pair$first
+  }
+
   pieces <- lapply(seq_along(specs), function(i) {
     spec <- specs[[i]]
     info <- blocking_key_info(
-      last = last,
-      first = first,
+      last = last_for_plan,
+      first = first_for_plan,
       mode = spec$mode,
       n = spec$n
     )

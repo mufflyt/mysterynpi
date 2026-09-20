@@ -1,6 +1,6 @@
 Package: mysterynpi
 Title: Name Keys and Agreement Rules for Linking Person Rosters to NPI
-Version: 0.6.0
+Version: 0.7.0.9000
 Authors@R: person("Tyler", "Muffly", email = "tyler.muffly@dhha.org",
                   role = c("aut", "cre"))
 Description: One definition of the name-handling a provider linkage needs:
@@ -8,9 +8,10 @@ Description: One definition of the name-handling a provider linkage needs:
     agreement rules that decide whether two records name the same person.
     Every rule here encodes a defect that has already shipped in a real
     pipeline, and each ships with the test that catches its return. The
-    package deliberately stops short of candidate generation and blended
-    scoring: which candidates to compare and what a study claims from the
-    evidence is pipeline science, not shared machinery.
+    package provides governed blocking-key construction but deliberately
+    stops short of dataset-specific candidate-generation policy and blended
+    scoring: which blocking plans to deploy and what a study claims from the
+    resulting evidence are pipeline science, not shared machinery.
 License: MIT + file LICENSE
 URL: https://mufflyt.github.io/mysterynpi/, https://github.com/mufflyt/mysterynpi
 BugReports: https://github.com/mufflyt/mysterynpi/issues

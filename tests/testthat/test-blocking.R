@@ -204,6 +204,8 @@ test_that("multi-token first names key identically to legacy (no delta)", {
 
 
 test_that("blocking_spec defines a governed, labelled recipe", {
+  expect_error(blocking_spec(), "mode.*explicit")
+
   s1 <- blocking_spec("surname_initial")
   expect_s3_class(s1, "mysterynpi_blocking_spec")
   expect_identical(s1$mode, "surname_initial")

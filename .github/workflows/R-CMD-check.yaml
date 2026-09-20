@@ -61,26 +61,24 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Preinstall knitr from source on macOS
+        if: runner.os == 'macOS'
+        shell: Rscript {0}
+        run: |
+          # The current CRAN macOS knitr 1.52 binary is downloaded as a .tgz
+          # that pak cannot extract on the hosted runner. Install only knitr
+          # (and its light dependencies) from source first; pak will reuse it
+          # while still installing heavy dependencies such as duckdb/stringi
+          # from binaries.
+          options(pkgType = "source")
+          install.packages("knitr", type = "source")
+
       - uses: r-lib/actions/setup-r-dependencies@v2
-        if: runner.os != 'macOS'
         with:
           # The r-lib GitHub Pages pak binary repo can lag new R/platform
           # combinations (observed on Windows R 4.6 on 2026-09-20). Install
           # pak from the configured CRAN/Posit repository instead so a
           # missing bootstrap binary cannot masquerade as a package failure.
-          pak-version: repo
-          extra-packages: any::rcmdcheck
-          needs: check
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        if: runner.os == 'macOS'
-        env:
-          # The current CRAN macOS knitr 1.52 binary is downloaded as a .tgz
-          # that pak cannot extract on the hosted runner. Source packages are
-          # portable here and keep the macOS leg testing package behavior
-          # instead of a broken binary artifact.
-          R_PLATFORM_PKGTYPE: source
-        with:
           pak-version: repo
           extra-packages: any::rcmdcheck
           needs: check

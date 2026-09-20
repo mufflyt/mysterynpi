@@ -404,3 +404,41 @@ test_that("multi-key blocking is candidate plumbing, not identity evidence", {
   expect_false(any(c("verdict", "score", "confidence") %in% names(got)))
   expect_true(all(got$informative))
 })
+
+
+test_that("multi-key plans share one broadcast record universe", {
+  got <- blocking_keys(
+    "Smith",
+    c("Mary", "John"),
+    specs = list(
+      blocking_spec("surname_initial"),
+      blocking_spec("compact")
+    )
+  )
+
+  expect_identical(nrow(got), 4L)
+  expect_identical(got$record_id, c(1L, 2L, 1L, 2L))
+  expect_identical(
+    got$key,
+    c("SMITH|M", "SMITH|J", "SMITH", "SMITH")
+  )
+  expect_identical(
+    table(got$label),
+    structure(c(2L, 2L), dim = 2L,
+              dimnames = list(c("compact", "surname_initial")))
+  )
+})
+
+
+test_that("multi-key plans require first when any spec needs it", {
+  expect_error(
+    blocking_keys(
+      c("Smith", "Jones"),
+      specs = list(
+        blocking_spec("compact"),
+        blocking_spec("surname_initial")
+      )
+    ),
+    "requires `first`"
+  )
+})

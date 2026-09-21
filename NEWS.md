@@ -1,3 +1,14 @@
+# mysterynpi 0.7.0.9000
+
+* Blocking is now a first-class API family rather than a character-key
+  utility alone. `blocking_spec()` records one governed blocking recipe,
+  `blocking_key_info()` returns the exact `blocking_key()` plus auditable
+  metadata (`mode`, `components_used`, `informative`, missingness reason,
+  and normalized components), and `blocking_keys()` applies several labelled
+  specs in long form with stable record/spec identifiers. Existing
+  `blocking_key()` behavior is unchanged. Multiple blocks are explicitly
+  candidate-generation plumbing, never repeated identity evidence or a score.
+
 # mysterynpi 0.6.0
 
 * Documented (not changed) a third instance of the `"Do"` collision

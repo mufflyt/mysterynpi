@@ -201,3 +201,244 @@ test_that("multi-token first names key identically to legacy (no delta)", {
   expect_identical(blocking_key("Smith", "Mary Ann", "surname_initial"),
                    legacy_key_B("Mary Ann", "Smith"))
 })
+
+
+test_that("blocking_spec defines a governed, labelled recipe", {
+  expect_error(blocking_spec(), "mode.*explicit")
+
+  s1 <- blocking_spec("surname_initial")
+  expect_s3_class(s1, "mysterynpi_blocking_spec")
+  expect_identical(s1$mode, "surname_initial")
+  expect_null(s1$n)
+  expect_identical(s1$label, "surname_initial")
+
+  s2 <- blocking_spec("prefix_n", n = 3)
+  expect_identical(s2$mode, "prefix_n")
+  expect_identical(s2$n, 3L)
+  expect_identical(s2$label, "prefix_3")
+
+  s3 <- blocking_spec("compact", label = "whole_surname")
+  expect_identical(s3$label, "whole_surname")
+
+  expect_error(blocking_spec("prefix_n"), "explicit n")
+  expect_error(blocking_spec("compact", n = 3), "only meaningful")
+  expect_error(blocking_spec("compact", label = ""), "non-empty")
+  expect_error(blocking_spec("compact", label = NA_character_), "non-empty")
+})
+
+
+test_that("blocking_key_info is blocking_key plus auditable metadata", {
+  got <- blocking_key_info("Smith", "Mary", "surname_initial")
+
+  expect_identical(got$key, blocking_key(
+    "Smith", "Mary", "surname_initial"
+  ))
+  expect_identical(
+    names(got),
+    c(
+      "key", "mode", "components_used", "informative", "reason",
+      "surname_key", "first_initial", "prefix_n"
+    )
+  )
+  expect_identical(got$mode, "surname_initial")
+  expect_identical(got$components_used, "surname+first_initial")
+  expect_true(got$informative)
+  expect_identical(got$reason, "complete")
+  expect_identical(got$surname_key, "SMITH")
+  expect_identical(got$first_initial, "M")
+  expect_identical(got$prefix_n, NA_integer_)
+})
+
+
+test_that("blocking_key_info explains every insufficient component", {
+  got <- blocking_key_info(
+    c("Smith", NA, NA),
+    c(NA, "Mary", NA),
+    "surname_initial"
+  )
+
+  expect_identical(got$key, rep(NA_character_, 3))
+  expect_false(any(got$informative))
+  expect_identical(
+    got$reason,
+    c(
+      "missing_first_initial",
+      "missing_surname",
+      "missing_surname_and_first_initial"
+    )
+  )
+})
+
+
+test_that("blocking_key_info records prefix width without inventing initials", {
+  got <- blocking_key_info(
+    c("Smith", "---"),
+    mode = "prefix_n",
+    n = 3
+  )
+
+  expect_identical(got$key, c("SMI", NA_character_))
+  expect_identical(got$components_used, rep("surname", 2))
+  expect_identical(got$first_initial, rep(NA_character_, 2))
+  expect_identical(got$prefix_n, rep(3L, 2))
+  expect_identical(got$reason, c("complete", "missing_surname"))
+  expect_identical(got$informative, c(TRUE, FALSE))
+})
+
+
+test_that("blocking_key_info preserves surname_initial broadcasting", {
+  got <- blocking_key_info(
+    "Smith",
+    c("Mary", "John"),
+    "surname_initial"
+  )
+
+  expect_identical(got$key, c("SMITH|M", "SMITH|J"))
+  expect_identical(got$surname_key, rep("SMITH", 2))
+  expect_identical(got$first_initial, c("M", "J"))
+  expect_true(all(got$informative))
+})
+
+
+test_that("blocking_keys emits several governed blocks in long form", {
+  plan <- list(
+    blocking_spec("surname_initial"),
+    blocking_spec("prefix_n", n = 2),
+    blocking_spec("compact")
+  )
+
+  got <- blocking_keys(
+    c("Smith", "O'Brien"),
+    c("Mary", "John"),
+    specs = plan
+  )
+
+  expect_identical(nrow(got), 6L)
+  expect_identical(got$record_id, rep(1:2, 3))
+  expect_identical(got$spec_id, c(1L, 1L, 2L, 2L, 3L, 3L))
+  expect_identical(
+    got$label,
+    c(
+      "surname_initial", "surname_initial",
+      "prefix_2", "prefix_2",
+      "compact", "compact"
+    )
+  )
+  expect_identical(
+    got$key,
+    c("SMITH|M", "OBRIEN|J", "SM", "OB", "SMITH", "OBRIEN")
+  )
+})
+
+
+test_that("each multi-key row is exactly the corresponding governed key", {
+  last <- c("Muñoz", "Van Houten", NA)
+  first <- c("José", "Laura", "Mary")
+  plan <- list(
+    blocking_spec("surname_initial", label = "si"),
+    blocking_spec("prefix_n", n = 4, label = "p4"),
+    blocking_spec("compact", label = "whole")
+  )
+
+  got <- blocking_keys(last, first, plan)
+
+  expect_identical(
+    got$key[got$label == "si"],
+    blocking_key(last, first, "surname_initial")
+  )
+  expect_identical(
+    got$key[got$label == "p4"],
+    blocking_key(last, mode = "prefix_n", n = 4)
+  )
+  expect_identical(
+    got$key[got$label == "whole"],
+    blocking_key(last, mode = "compact")
+  )
+  expect_identical(got$informative, !is.na(got$key))
+})
+
+
+test_that("blocking_keys requires governed specs with unique labels", {
+  expect_error(
+    blocking_keys("Smith", "Mary"),
+    "supply one blocking_spec"
+  )
+  expect_error(
+    blocking_keys("Smith", "Mary", specs = list("compact")),
+    "must come from blocking_spec"
+  )
+  expect_error(
+    blocking_keys(
+      "Smith",
+      "Mary",
+      specs = list(
+        blocking_spec("compact", label = "same"),
+        blocking_spec("prefix_n", n = 3, label = "same")
+      )
+    ),
+    "labels must be unique"
+  )
+})
+
+
+test_that("a single blocking_spec is accepted directly", {
+  got <- blocking_keys(
+    c("Smith", "Jones"),
+    specs = blocking_spec("compact")
+  )
+  expect_identical(got$record_id, 1:2)
+  expect_identical(got$spec_id, c(1L, 1L))
+  expect_identical(got$label, rep("compact", 2))
+  expect_identical(got$key, c("SMITH", "JONES"))
+})
+
+
+test_that("multi-key blocking is candidate plumbing, not identity evidence", {
+  got <- blocking_keys(
+    "Smith",
+    "Mary",
+    specs = list(
+      blocking_spec("surname_initial"),
+      blocking_spec("compact")
+    )
+  )
+
+  expect_false(any(c("verdict", "score", "confidence") %in% names(got)))
+  expect_true(all(got$informative))
+})
+
+
+test_that("multi-key plans share one broadcast record universe", {
+  got <- blocking_keys(
+    "Smith",
+    c("Mary", "John"),
+    specs = list(
+      blocking_spec("surname_initial"),
+      blocking_spec("compact")
+    )
+  )
+
+  expect_identical(nrow(got), 4L)
+  expect_identical(got$record_id, c(1L, 2L, 1L, 2L))
+  expect_identical(
+    got$key,
+    c("SMITH|M", "SMITH|J", "SMITH", "SMITH")
+  )
+  counts <- table(got$label)
+  expect_identical(names(counts), c("compact", "surname_initial"))
+  expect_identical(unname(as.integer(counts)), c(2L, 2L))
+})
+
+
+test_that("multi-key plans require first when any spec needs it", {
+  expect_error(
+    blocking_keys(
+      c("Smith", "Jones"),
+      specs = list(
+        blocking_spec("compact"),
+        blocking_spec("surname_initial")
+      )
+    ),
+    "requires `first`"
+  )
+})

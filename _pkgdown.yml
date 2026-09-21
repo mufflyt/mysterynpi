@@ -15,6 +15,9 @@ reference:
   - split_given
   - compact_name_key
   - blocking_key
+  - blocking_spec
+  - blocking_key_info
+  - blocking_keys
   - surname_key_variants
 - title: The normalisation surface
   desc: Drop-in replacements for the pipelines this was extracted from.

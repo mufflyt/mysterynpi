@@ -70,4 +70,10 @@ candidate-set delta, characterized in test-blocking.R.
 Length discipline: `last` and `first` must be equal length or scalar;
 anything else refuses to recycle.
 }
+\seealso{
+Other blocking:
+\code{\link[=blocking_key_info]{blocking_key_info()}},
+\code{\link[=blocking_keys]{blocking_keys()}},
+\code{\link[=blocking_spec]{blocking_spec()}}
+}
 \concept{blocking}

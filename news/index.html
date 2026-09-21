@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,10 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.0.9000" id="mysterynpi-0709000">mysterynpi 0.7.0.9000<a class="anchor" aria-label="anchor" href="#mysterynpi-0709000"></a></h2>
+<ul><li>Blocking is now a first-class API family rather than a character-key utility alone. <code><a href="../reference/blocking_spec.html">blocking_spec()</a></code> records one governed blocking recipe, <code><a href="../reference/blocking_key_info.html">blocking_key_info()</a></code> returns the exact <code><a href="../reference/blocking_key.html">blocking_key()</a></code> plus auditable metadata (<code>mode</code>, <code>components_used</code>, <code>informative</code>, missingness reason, and normalized components), and <code><a href="../reference/blocking_keys.html">blocking_keys()</a></code> applies several labelled specs in long form with stable record/spec identifiers. Existing <code><a href="../reference/blocking_key.html">blocking_key()</a></code> behavior is unchanged. Multiple blocks are explicitly candidate-generation plumbing, never repeated identity evidence or a score.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.0" id="mysterynpi-060">mysterynpi 0.6.0<a class="anchor" aria-label="anchor" href="#mysterynpi-060"></a></h2>
 <ul><li><p>Documented (not changed) a third instance of the <code>"Do"</code> collision class: <code>SURNAME_PARTICLES</code> lists <code>"DO"</code> as a genuine Portuguese/ Lusophone particle (as in <code>"do Carmo"</code>), which collides with <code>"Do"</code> as a standalone Vietnamese surname. <code>parse_person("Do Nguyen Van", format = "surname_first")</code> reads leading <code>"Do"</code> as a particle and walks one token further, corrupting the real surname into a false compound (<code>"Do Nguyen"</code>) while losing the real given name. Removing <code>"DO"</code> from the list would equally break the genuine Portuguese case. No evidence either population is rarer in this package’s target data, so – same precedent as the all-caps DO/Ma limitations already documented – this is a documented known limitation, not an unproven directional fix. See <code>SURNAME_PARTICLES</code>’s docs.</p></li>

@@ -244,6 +244,12 @@ Keys where absence is never read as a value.
   : Letters-only compact key for equality joins
 - [`blocking_key()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key.md)
   : Canonical blocking key, by named mode
+- [`blocking_spec()`](https://mufflyt.github.io/mysterynpi/reference/blocking_spec.md)
+  : Define one governed blocking specification
+- [`blocking_key_info()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key_info.md)
+  : Canonical blocking key with auditable metadata
+- [`blocking_keys()`](https://mufflyt.github.io/mysterynpi/reference/blocking_keys.md)
+  : Generate several governed blocking keys per record
 - [`surname_key_variants()`](https://mufflyt.github.io/mysterynpi/reference/surname_key_variants.md)
   : Both equality-join key variants of a surname
 

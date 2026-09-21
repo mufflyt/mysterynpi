@@ -86,3 +86,10 @@ characterized in test-blocking.R.
 
 Length discipline: \`last\` and \`first\` must be equal length or
 scalar; anything else refuses to recycle.
+
+## See also
+
+Other blocking:
+[`blocking_key_info()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key_info.md),
+[`blocking_keys()`](https://mufflyt.github.io/mysterynpi/reference/blocking_keys.md),
+[`blocking_spec()`](https://mufflyt.github.io/mysterynpi/reference/blocking_spec.md)

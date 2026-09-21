@@ -1,5 +1,24 @@
 # Changelog
 
+## mysterynpi 0.7.0.9000
+
+- Blocking is now a first-class API family rather than a character-key
+  utility alone.
+  [`blocking_spec()`](https://mufflyt.github.io/mysterynpi/reference/blocking_spec.md)
+  records one governed blocking recipe,
+  [`blocking_key_info()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key_info.md)
+  returns the exact
+  [`blocking_key()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key.md)
+  plus auditable metadata (`mode`, `components_used`, `informative`,
+  missingness reason, and normalized components), and
+  [`blocking_keys()`](https://mufflyt.github.io/mysterynpi/reference/blocking_keys.md)
+  applies several labelled specs in long form with stable record/spec
+  identifiers. Existing
+  [`blocking_key()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key.md)
+  behavior is unchanged. Multiple blocks are explicitly
+  candidate-generation plumbing, never repeated identity evidence or a
+  score.
+
 ## mysterynpi 0.6.0
 
 - Documented (not changed) a third instance of the `"Do"` collision

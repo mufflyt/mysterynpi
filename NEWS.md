@@ -1,4 +1,4 @@
-# mysterynpi 0.7.0.9000
+# mysterynpi 0.7.0
 
 * Blocking is now a first-class API family rather than a character-key
   utility alone. `blocking_spec()` records one governed blocking recipe,

@@ -268,11 +268,15 @@ test_that("candidate generation composes with existing categorical resolution", 
     strategies = blocking_spec("surname_initial")
   )
 
-  evidence <- got$pairs
-  evidence$evidence_class <- ifelse(
-    evidence$candidate_npi %in% c("100", "200"),
-    1L,
-    2L
+  evidence <- data.frame(
+    id = got$pairs$source_id,
+    candidate = got$pairs$candidate_npi,
+    evidence_class = ifelse(
+      got$pairs$candidate_npi %in% c("100", "200"),
+      1L,
+      2L
+    ),
+    stringsAsFactors = FALSE
   )
 
   resolved <- resolve_ordered_classes(evidence)

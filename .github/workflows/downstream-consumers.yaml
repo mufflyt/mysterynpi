@@ -1,0 +1,88 @@
+# Downstream consumer contract: proves a behaviour-breaking change is caught
+# HERE, before release, instead of surfacing days later in a consumer's own
+# nightly (the failure mode that shipped a 0.3.1-vs-0.6.0 pin drift into
+# mufflyt/isochrones undetected -- see that repo's H1 hardening writeup).
+#
+# mysterynpi ships assert_*_contract() functions (R/contracts.R) precisely so
+# a caller can pin the behaviour it relies on and prove the pin can fail; this
+# repo's own suite already runs them against itself (test-rule-contracts.R).
+# What was missing: nothing ran them against a REAL CONSUMER's own contract
+# file before a candidate change merges. This job closes that gap by
+# installing the CANDIDATE build (the branch under test, not the last
+# release) and running the consumer's file as-is -- a copy kept in this repo
+# would drift silently; the real file, fetched fresh every run, cannot.
+#
+# Scope: mufflyt/midwifery only. It carries a single self-contained
+# tests/test_mysterynpi_contracts.R with no external data/DB dependency --
+# exactly the shape this job needs, and public, so no cross-repo secret is
+# required. mufflyt/isochrones also consumes this package but is private
+# (would need a cross-repo PAT secret provisioned first) and has no
+# equivalent single-file contract yet -- its mysterynpi-reliant assertions
+# are spread across ~10 tests entangled with pipeline fixtures. Add an
+# isochrones leg here once that repo grows its own test_mysterynpi_contracts.R
+# twin and a read-only PAT secret is provisioned for this repo.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+name: downstream-consumers.yaml
+
+permissions: read-all
+
+concurrency:
+  group: downstream-consumers-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  midwifery-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out this candidate mysterynpi
+        uses: actions/checkout@v7
+        with:
+          path: mysterynpi
+
+      # Public repo, so the default GITHUB_TOKEN (read-only, this-repo-scoped)
+      # is enough to fetch it cross-repo; sparse-checkout keeps this to the
+      # one file the job needs instead of the whole pipeline repo.
+      - name: Check out midwifery's contract file only
+        uses: actions/checkout@v7
+        with:
+          repository: mufflyt/midwifery
+          path: midwifery
+          sparse-checkout: |
+            tests/test_mysterynpi_contracts.R
+          sparse-checkout-cone-mode: false
+
+      # A checkout failure (renamed file, repo moved, sparse-checkout typo)
+      # must not read as "nothing failed" -- fail loud, same principle the
+      # contract file itself asserts about its own machinery below.
+      - name: Contract file must actually be present
+        run: |
+          if [ ! -s midwifery/tests/test_mysterynpi_contracts.R ]; then
+            echo "::error::midwifery/tests/test_mysterynpi_contracts.R is missing or empty -- a checkout failure here must not read as a silent pass"
+            exit 1
+          fi
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      # Installs the CANDIDATE source checked out above -- the branch under
+      # test -- not whatever tag isochrones/midwifery currently pin. That is
+      # the whole point: prove the change about to ship doesn't break the
+      # consumer, before it ships.
+      - name: Install this candidate mysterynpi
+        working-directory: mysterynpi
+        run: |
+          install.packages("remotes")
+          remotes::install_local(".", dependencies = TRUE, force = TRUE, upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Run midwifery's own contract test against this candidate
+        run: Rscript midwifery/tests/test_mysterynpi_contracts.R

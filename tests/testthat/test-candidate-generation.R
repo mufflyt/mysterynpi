@@ -9,7 +9,7 @@ candidate_fixture <- function() {
     source = data.frame(
       source_id = c("s1", "s2", "s3", "s4"),
       first = c("Mary", "John", "Mary", NA),
-      last = c("Smith", "Jones", "Smith", "Brown"),
+      last = c("Smith", "Jones", "Smith", NA),
       stringsAsFactors = FALSE
     ),
     registry = data.frame(

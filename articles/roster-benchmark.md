@@ -171,6 +171,15 @@ reviewer, not from stored truth; here the stored truth stands in to show
 the workflow. The class-4 row is the payoff to notice: quarantine turned
 six would-be deletions into six reviewed true matches.
 
+Three regimes
+[`clerical_precision()`](https://mufflyt.github.io/mysterynpi/reference/clerical_precision.md)
+guarantees rather than leaves undefined: a class with zero reviewed
+verdicts – reviews still outstanding – reports precision `NA`, never a
+silent `0`; a class where every review came back a nonmatch reports
+exactly `0` with a real (non-degenerate) confidence interval; and
+all-match reports exactly `1`, likewise with a real interval. None of
+the three is a crash or a NaN mistaken for a number.
+
 ## The harder corpus, and the honest number
 
 `WINKLER_CENSUS` measures a failure mode the roster benchmark

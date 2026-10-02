@@ -217,6 +217,14 @@ human reviewer, not from stored truth; here the stored truth stands in
 to show the workflow. The class-4 row is the payoff to notice:
 quarantine turned six would-be deletions into six reviewed true
 matches.</p>
+<p>Three regimes <code><a href="../reference/clerical_precision.html">clerical_precision()</a></code> guarantees rather
+than leaves undefined: a class with zero reviewed verdicts – reviews
+still outstanding – reports precision <code>NA</code>, never a silent
+<code>0</code>; a class where every review came back a nonmatch reports
+exactly <code>0</code> with a real (non-degenerate) confidence interval;
+and all-match reports exactly <code>1</code>, likewise with a real
+interval. None of the three is a crash or a NaN mistaken for a
+number.</p>
 </div>
 <div class="section level2">
 <h2 id="the-harder-corpus-and-the-honest-number">The harder corpus, and the honest number<a class="anchor" aria-label="anchor" href="#the-harder-corpus-and-the-honest-number"></a>

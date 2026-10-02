@@ -82,6 +82,20 @@ test_that("an initial is compatibility evidence, not a nickname", {
   expect_identical(nickname_agreement("JAMES", "R"), "conflicts")
 })
 
+test_that("KNOWN LIMITATION: a hyphenated given name does not corroborate its first component", {
+  # human-name's (Rust) own equal-names.txt test corpus treats
+  # "Poul-Henning Kemp" and "Poul Kemp" as the same person: a hyphenated
+  # compound given name is compatible with its first component, the given-
+  # name mirror of surname_agreement()'s "MCCARTHY-DERVIN" ~ "MCCARTHY"
+  # hyphenation handling (see test-surname.R). nickname_agreement() has no
+  # equivalent rule: there is no table edge from "POUL-HENNING" to "POUL",
+  # and it is not treated as a nickname-table lookup target, so it falls
+  # through to a hard equality check and conflicts. Pinned as current
+  # behavior, not endorsed as correct -- revisit if roster data turns up
+  # real hyphenated-given-name pairs this silently vetoes.
+  expect_identical(nickname_agreement("POUL-HENNING", "POUL"), "conflicts")
+})
+
 test_that("absence is uninformative, never a conflict", {
   expect_identical(nickname_agreement("", "MARY"), "uninformative")
   expect_identical(nickname_agreement(NA_character_, "MARY"), "uninformative")

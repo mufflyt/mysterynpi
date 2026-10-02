@@ -124,10 +124,45 @@
 </tr>
 </tbody>
 </table>
+<pre class="mermaid"><code>flowchart LR
+    subgraph before1 ["Before: nzchar(NA) is TRUE"]
+        A1["Absent middle, absent middle"] --&gt; B1["Read as a SHARED value&lt;br/&gt;-&amp;gt; 'agreement'"]
+    end
+    subgraph after1 ["After: has_name_information()"]
+        A2["Absent middle, absent middle"] --&gt; B2["'uninformative'&lt;br/&gt;decides nothing"]
+    end</code></pre>
+<pre class="mermaid"><code>flowchart LR
+    subgraph before2 ["Before: accents preserved"]
+        A3["'&amp;Aacute;lvarez' (roster)"] --&gt;|"toupper(trimws())"| B3["accented key"]
+        C3["'ALVAREZ' (registry)"] --&gt; D3["unaccented key"]
+        B3 -.-&gt;|"never equal"| D3
+    end
+    subgraph after2 ["After: name_key() transliterates"]
+        A4["'&amp;Aacute;lvarez' (roster)"] --&gt;|"name_key()"| B4["'ALVAREZ'"]
+        C4["'ALVAREZ' (registry)"] --&gt; D4["'ALVAREZ'"]
+        B4 --&gt;|"blocking route reaches it"| D4
+    end</code></pre>
+<pre class="mermaid"><code>flowchart LR
+    subgraph before3 ["Before: compare at position 1"]
+        A5["roster middle = maiden surname&lt;br/&gt;registry middle = different slot"] --&gt; B5["positions disagree&lt;br/&gt;-&amp;gt; 'conflicts' -&amp;gt; candidate deleted"]
+    end
+    subgraph after3 ["After: compare as a token SET"]
+        A6["roster middle tokens&lt;br/&gt;registry middle tokens"] --&gt; B6["shared token, any position&lt;br/&gt;-&amp;gt; 'corroborates'"]
+    end</code></pre>
 </div>
 <div class="section level2">
 <h2 id="what-it-covers">What it covers<a class="anchor" aria-label="anchor" href="#what-it-covers"></a>
 </h2>
+<p>The four stages below are also the four sections of <code><a href="articles/resolving-a-roster.html">vignette("resolving-a-roster")</a></code>:</p>
+<pre class="mermaid"><code>flowchart LR
+    A["Raw roster &amp;amp; registry names"] --&gt; B["1. Keys &amp;amp; tokens&lt;br/&gt;name_key(), *_tokens()&lt;br/&gt;absence is never a value"]
+    B --&gt; C["2. Agreement, per axis&lt;br/&gt;middle/given/surname/gender/suffix/license&lt;br/&gt;corroborates / conflicts / uninformative"]
+    C --&gt; D["3. Ordered classes&lt;br/&gt;resolve_ordered_classes()"]
+    D --&gt;|"one candidate at the&lt;br/&gt;strongest class"| E["Resolved"]
+    D --&gt;|"tie at the&lt;br/&gt;strongest class"| F["Quarantined"]
+    E --&gt; G["4. One-to-one&lt;br/&gt;award_contested(), count_rivals()"]
+    G --&gt;|"not claimed&lt;br/&gt;by anyone else"| H["Final identity"]
+    G --&gt;|"claimed by another person"| I["Contested &amp;rarr; policy&lt;br/&gt;(strict_dominance / quarantine_all / greedy)"]</code></pre>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -248,6 +283,10 @@
 <li>
 <strong>The nickname table is vendored; the decision to use it is not.</strong> An earlier version of this README refused a nickname dictionary outright. The refusal was aimed at the <em>decision</em> — whether <code>BETH</code> may stand for <code>ELIZABETH</code> in a given study, and which evidence class that pairing earns — and that decision still stays with the caller. The <em>table</em> is different: every pipeline curating its own copy is how two pipelines quietly disagree about who matched whom, so one copy now ships (<code>NICKNAME_EDGES</code>, vendored at a pinned commit), with a one-hop rule (<code><a href="reference/nickname_agreement.html">nickname_agreement()</a></code>) that never closes the relation transitively — <code>AL</code> may stand for <code>ALBERT</code> or <code>ALEXANDER</code> without ever welding <code>ALBERT</code> to <code>ALEXANDER</code>.</li>
 </ul>
+<pre class="mermaid"><code>flowchart LR
+    AL["AL"] --&gt;|"one hop"| ALBERT["ALBERT"]
+    AL --&gt;|"one hop"| ALEXANDER["ALEXANDER"]
+    ALBERT -.-&gt;|"NEVER inferred"| ALEXANDER</code></pre>
 </div>
 <div class="section level2">
 <h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a>
@@ -259,6 +298,14 @@
 </h2>
 <p>Adopted. As of 2026-09-05 (<code>midwifery</code> PR #162), the AMCB→NPPES pipeline’s name machinery is a shim over this package — every <code>amcb_*</code> call site delegates here, pinned <code>&gt;= 0.2.0</code>, with the package contracts asserted in that repository’s own CI. The migration was proven, not assumed: all function surfaces identical over the cohort’s 23,543 distinct name values, <code>parse_person</code> identical over 77,379 author and roster strings, and the full pipeline <strong>byte-identical end to end</strong> — same crosswalk, same audit, same diagnostics, sha256 for sha256; the only differing bytes in any output were the manifest’s three wall-clock lines.</p>
 <p><code>isochrones</code> — the repository these rules were first extracted from — is the remaining copy, and the next migration.</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph midwifery ["midwifery (PR #162, adopted)"]
+        shim["amcb_* call sites"] --&gt;|"delegate, pinned &amp;gt;= 0.2.0"| pkg1
+    end
+    pkg1["mysterynpi&lt;br/&gt;one definition"]
+    subgraph isochrones_repo ["isochrones (next migration)"]
+        dup["its own copy of this logic"] -.-&gt;|"not yet delegated"| pkg1
+    end</code></pre>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

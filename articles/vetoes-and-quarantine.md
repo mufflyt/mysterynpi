@@ -24,6 +24,15 @@ The policy this vignette recommends: **a conflict vetoes in the weaker
 evidence classes, and quarantines at the strongest one.** Fully
 deterministic, and every action it takes is recorded.
 
+``` mermaid
+flowchart TD
+    A["Candidate row, verdict = conflicts<br/>(e.g. gender_agreement())"] --> B{"At this row's<br/>strongest evidence class?"}
+    B -->|"No &mdash; a weaker class"| C["VETO<br/>row removed, recorded in vetoed"]
+    B -->|"Yes &mdash; the top class"| D["QUARANTINE<br/>person held for review,<br/>never auto-resolved, never silently deleted"]
+    C --> E["Remaining candidates proceed to<br/>resolve_ordered_classes()"]
+    D --> F["clerical_sample() &rarr; blinded review<br/>&rarr; clerical_precision()"]
+```
+
 ## A cohort of two people
 
 `r1`’s only strong candidate carries a conflicting gender code. `r2` is
@@ -66,6 +75,14 @@ code for `N100` was the error (a true match with a wrong byte), the hard
 veto did not just lose a match: it silently published a **different
 identity** for a real person, with nothing in the output recording that
 a stronger candidate was deleted on one field.
+
+``` mermaid
+flowchart TD
+    A["r1: class-1 candidate N100 (true match,<br/>one wrong byte: gender code)<br/>class-2 candidate N101 (different person)"] --> B["Hard veto drops EVERY<br/>'conflicts' row, no record kept"]
+    B --> C["N100 deleted silently"]
+    C --> D["resolve_ordered_classes()<br/>sees only N101 left"]
+    D --> E["Publishes N101<br/>as r1's identity &mdash; WRONG,<br/>and nothing flags it"]
+```
 
 ## Veto below, quarantine at the top
 

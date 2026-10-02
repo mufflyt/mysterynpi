@@ -61,7 +61,56 @@ point of packaging:
 | naive normalisation preserves accents rather than stripping them | accented names could not reach their unaccented registry spelling by **any** blocking route; unmatched ran 30% against 10.4% | [`name_key()`](https://mufflyt.github.io/mysterynpi/reference/name_key.md) |
 | middle names compared at position 1 | a maiden surname in a different slot scored as a disagreement and deleted the candidate; 82 rows lost their only match and were published as “no candidate” | [`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md) |
 
+``` mermaid
+flowchart LR
+    subgraph before1 ["Before: nzchar(NA) is TRUE"]
+        A1["Absent middle, absent middle"] --> B1["Read as a SHARED value<br/>-&gt; 'agreement'"]
+    end
+    subgraph after1 ["After: has_name_information()"]
+        A2["Absent middle, absent middle"] --> B2["'uninformative'<br/>decides nothing"]
+    end
+```
+
+``` mermaid
+flowchart LR
+    subgraph before2 ["Before: accents preserved"]
+        A3["'&Aacute;lvarez' (roster)"] -->|"toupper(trimws())"| B3["accented key"]
+        C3["'ALVAREZ' (registry)"] --> D3["unaccented key"]
+        B3 -.->|"never equal"| D3
+    end
+    subgraph after2 ["After: name_key() transliterates"]
+        A4["'&Aacute;lvarez' (roster)"] -->|"name_key()"| B4["'ALVAREZ'"]
+        C4["'ALVAREZ' (registry)"] --> D4["'ALVAREZ'"]
+        B4 -->|"blocking route reaches it"| D4
+    end
+```
+
+``` mermaid
+flowchart LR
+    subgraph before3 ["Before: compare at position 1"]
+        A5["roster middle = maiden surname<br/>registry middle = different slot"] --> B5["positions disagree<br/>-&gt; 'conflicts' -&gt; candidate deleted"]
+    end
+    subgraph after3 ["After: compare as a token SET"]
+        A6["roster middle tokens<br/>registry middle tokens"] --> B6["shared token, any position<br/>-&gt; 'corroborates'"]
+    end
+```
+
 ## What it covers
+
+The four stages below are also the four sections of
+[`vignette("resolving-a-roster")`](https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.md):
+
+``` mermaid
+flowchart LR
+    A["Raw roster &amp; registry names"] --> B["1. Keys &amp; tokens<br/>name_key(), *_tokens()<br/>absence is never a value"]
+    B --> C["2. Agreement, per axis<br/>middle/given/surname/gender/suffix/license<br/>corroborates / conflicts / uninformative"]
+    C --> D["3. Ordered classes<br/>resolve_ordered_classes()"]
+    D -->|"one candidate at the<br/>strongest class"| E["Resolved"]
+    D -->|"tie at the<br/>strongest class"| F["Quarantined"]
+    E --> G["4. One-to-one<br/>award_contested(), count_rivals()"]
+    G -->|"not claimed<br/>by anyone else"| H["Final identity"]
+    G -->|"claimed by another person"| I["Contested &rarr; policy<br/>(strict_dominance / quarantine_all / greedy)"]
+```
 
 | stage | functions |
 |----|----|
@@ -199,6 +248,13 @@ Two specific exclusions worth naming:
   that never closes the relation transitively — `AL` may stand for
   `ALBERT` or `ALEXANDER` without ever welding `ALBERT` to `ALEXANDER`.
 
+``` mermaid
+flowchart LR
+    AL["AL"] -->|"one hop"| ALBERT["ALBERT"]
+    AL -->|"one hop"| ALEXANDER["ALEXANDER"]
+    ALBERT -.->|"NEVER inferred"| ALEXANDER
+```
+
 ## Versioning
 
 Semantic. Any change that flips an assertion in
@@ -222,3 +278,14 @@ lines.
 
 `isochrones` — the repository these rules were first extracted from — is
 the remaining copy, and the next migration.
+
+``` mermaid
+flowchart LR
+    subgraph midwifery ["midwifery (PR #162, adopted)"]
+        shim["amcb_* call sites"] -->|"delegate, pinned &gt;= 0.2.0"| pkg1
+    end
+    pkg1["mysterynpi<br/>one definition"]
+    subgraph isochrones_repo ["isochrones (next migration)"]
+        dup["its own copy of this logic"] -.->|"not yet delegated"| pkg1
+    end
+```

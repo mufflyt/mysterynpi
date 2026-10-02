@@ -8,6 +8,20 @@ carries several over a career.
 This vignette walks the four stages `mysterynpi` supports, and is
 explicit about the fifth it deliberately does not.
 
+``` mermaid
+flowchart TD
+    S1["1. Keys &amp; tokens<br/>name_key(), *_tokens()<br/>absence is never a value"] --> S2
+    S2["2. Agreement, per axis<br/>middle_agreement(), surname_agreement(), ...<br/>'corroborates' / 'conflicts' / 'uninformative'"] --> S3
+    S3["3. Ordered classes<br/>resolve_ordered_classes()<br/>resolves only when ONE candidate<br/>holds the strongest class"] --> S4a
+    S3 --> S4b
+    S4a["Resolved<br/>(one winner per class)"] --> S5
+    S4b["Quarantined<br/>(tie at the strongest class)"]
+    S5["4. One-to-one<br/>award_contested(), count_rivals()<br/>enforced ACROSS people"] --> S6a
+    S5 --> S6b
+    S6a["Final identity"]
+    S6b["Contested &rarr; policy<br/>(strict_dominance / quarantine_all / greedy)"]
+```
+
 ## 1. Keys, where absence is not a value
 
 ``` r
@@ -48,6 +62,13 @@ name_key("C(arolyn) Diane")    # but word-internal brackets are LETTERS
 The second and third differ for a reason: dropping the group in
 `C(arolyn)` leaves a given name of `"C"`, which is not a name — it is a
 blocking key that joins to everyone whose given name is a bare initial.
+
+``` mermaid
+flowchart TD
+    A["Parenthesised text in a name field"] --> B{"Is the group a WHOLE word,<br/>set off by a space?<br/>e.g. 'Cynthia (Cindi)'"}
+    B -->|"Yes"| C["Strip it &mdash; it's a nickname aside<br/>name_key() -&gt; 'CYNTHIA'"]
+    B -->|"No, it's WORD-INTERNAL<br/>e.g. 'C(arolyn) Diane'"| D["Keep the letters &mdash; stripping<br/>leaves given name 'C',<br/>a bare-initial blocking key, not a name"]
+```
 
 ## 2. Agreement, on token sets
 
@@ -169,6 +190,14 @@ snapshot and without it in another supplies both a conflicting and a
 non-conflicting row, and a naive count treats a person as evidence
 *against* the match that belongs to them. That cost two false demotions
 before it was understood.
+
+``` mermaid
+flowchart TD
+    N1["Candidate N1, snapshot A<br/>(has middle initial)"] --> P["Same PERSON, N1"]
+    N2["Candidate N1, snapshot B<br/>(no middle initial)"] --> P
+    P --> Naive["naive n_distinct(candidate[conflict])<br/>-&gt; counts N1 as 2 rivals<br/>(itself, twice)"]
+    P --> Correct["count_rivals()<br/>-&gt; excludes the id's OWN winner<br/>-&gt; 1 rival if truly contested, 0 if none"]
+```
 
 ## 5. What this package does not do
 

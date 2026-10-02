@@ -74,10 +74,21 @@ and names are not identifiers: two people share one, and one person
 carries several over a career.</p>
 <p>This vignette walks the four stages <code>mysterynpi</code> supports,
 and is explicit about the fifth it deliberately does not.</p>
+<pre class="mermaid"><code>flowchart TD
+    S1["1. Keys &amp;amp; tokens&lt;br/&gt;name_key(), *_tokens()&lt;br/&gt;absence is never a value"] --&gt; S2
+    S2["2. Agreement, per axis&lt;br/&gt;middle_agreement(), surname_agreement(), ...&lt;br/&gt;'corroborates' / 'conflicts' / 'uninformative'"] --&gt; S3
+    S3["3. Ordered classes&lt;br/&gt;resolve_ordered_classes()&lt;br/&gt;resolves only when ONE candidate&lt;br/&gt;holds the strongest class"] --&gt; S4a
+    S3 --&gt; S4b
+    S4a["Resolved&lt;br/&gt;(one winner per class)"] --&gt; S5
+    S4b["Quarantined&lt;br/&gt;(tie at the strongest class)"]
+    S5["4. One-to-one&lt;br/&gt;award_contested(), count_rivals()&lt;br/&gt;enforced ACROSS people"] --&gt; S6a
+    S5 --&gt; S6b
+    S6a["Final identity"]
+    S6b["Contested &amp;rarr; policy&lt;br/&gt;(strict_dominance / quarantine_all / greedy)"]</code></pre>
 <div class="section level2">
 <h2 id="keys-where-absence-is-not-a-value">1. Keys, where absence is not a value<a class="anchor" aria-label="anchor" href="#keys-where-absence-is-not-a-value"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/name_key.html">name_key</a></span><span class="op">(</span><span class="st">"Álvarez"</span><span class="op">)</span>            <span class="co"># transliterated, so it can reach "ALVAREZ"</span></span>
 <span><span class="co">#&gt; [1] "ALVAREZ"</span></span>
 <span><span class="fu"><a href="../reference/first_initial.html">first_initial</a></span><span class="op">(</span><span class="st">"Álvarez"</span><span class="op">)</span>       <span class="co"># "A", never the accented letter</span></span>
@@ -94,7 +105,7 @@ agreement and the evidence class meaning “exact name, no middle
 information” was empty.</p>
 <p>Rosters also fuse middle names into the given-name column, and
 publish preferred names inline:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/split_given.html">split_given</a></span><span class="op">(</span><span class="st">"Julie Ann"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $given</span></span>
 <span><span class="co">#&gt; [1] "JULIE"</span></span>
@@ -109,11 +120,15 @@ publish preferred names inline:</p>
 <code>C(arolyn)</code> leaves a given name of <code>"C"</code>, which is
 not a name — it is a blocking key that joins to everyone whose given
 name is a bare initial.</p>
+<pre class="mermaid"><code>flowchart TD
+    A["Parenthesised text in a name field"] --&gt; B{"Is the group a WHOLE word,&lt;br/&gt;set off by a space?&lt;br/&gt;e.g. 'Cynthia (Cindi)'"}
+    B --&gt;|"Yes"| C["Strip it &amp;mdash; it's a nickname aside&lt;br/&gt;name_key() -&amp;gt; 'CYNTHIA'"]
+    B --&gt;|"No, it's WORD-INTERNAL&lt;br/&gt;e.g. 'C(arolyn) Diane'"| D["Keep the letters &amp;mdash; stripping&lt;br/&gt;leaves given name 'C',&lt;br/&gt;a bare-initial blocking key, not a name"]</code></pre>
 </div>
 <div class="section level2">
 <h2 id="agreement-on-token-sets">2. Agreement, on token sets<a class="anchor" aria-label="anchor" href="#agreement-on-token-sets"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ag</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span> <span class="fu"><a href="../reference/middle_agreement.html">middle_agreement</a></span><span class="op">(</span><span class="fu"><a href="../reference/middle_tokens.html">middle_tokens</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, <span class="fu"><a href="../reference/middle_tokens.html">middle_tokens</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">ag</span><span class="op">(</span><span class="st">"A REINHARD"</span>, <span class="st">"REINHARD"</span><span class="op">)</span>     <span class="co"># a shared token, wherever each side keeps it</span></span>
 <span><span class="co">#&gt; [1] "corroborates"</span></span>
@@ -145,7 +160,7 @@ which are different given names.</p>
 <p>You assign the classes; the package resolves them. A record resolves
 <strong>only</strong> when exactly one candidate occupies its strongest
 available class.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  id             <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p1"</span>, <span class="st">"p2"</span>, <span class="st">"p2"</span>, <span class="st">"p3"</span><span class="op">)</span>,</span>
 <span>  candidate      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n1"</span>, <span class="st">"n2"</span>, <span class="st">"n3"</span>, <span class="st">"n4"</span>, <span class="st">"n5"</span><span class="op">)</span>,</span>
@@ -178,7 +193,7 @@ orderings.</p>
 depend on another person’s claim, so the constraint runs <em>after</em>
 individual resolution. A <strong>contested</strong> candidate is one two
 people each resolved to independently.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">contested</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  id        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p2"</span>, <span class="st">"p3"</span>, <span class="st">"p4"</span><span class="op">)</span>,</span>
 <span>  candidate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n1"</span>, <span class="st">"n1"</span>, <span class="st">"n2"</span>, <span class="st">"n2"</span><span class="op">)</span>,</span>
@@ -225,7 +240,7 @@ exists only because reproducing a cohort frozen before this distinction
 was drawn requires it.</p>
 <p>When you count what a veto removed, count <em>people</em>, not
 rows:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/count_rivals.html">count_rivals</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p1"</span><span class="op">)</span>, vetoed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n1"</span>, <span class="st">"n2"</span><span class="op">)</span>,</span>
 <span>             stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
@@ -238,6 +253,11 @@ one snapshot and without it in another supplies both a conflicting and a
 non-conflicting row, and a naive count treats a person as evidence
 <em>against</em> the match that belongs to them. That cost two false
 demotions before it was understood.</p>
+<pre class="mermaid"><code>flowchart TD
+    N1["Candidate N1, snapshot A&lt;br/&gt;(has middle initial)"] --&gt; P["Same PERSON, N1"]
+    N2["Candidate N1, snapshot B&lt;br/&gt;(no middle initial)"] --&gt; P
+    P --&gt; Naive["naive n_distinct(candidate[conflict])&lt;br/&gt;-&amp;gt; counts N1 as 2 rivals&lt;br/&gt;(itself, twice)"]
+    P --&gt; Correct["count_rivals()&lt;br/&gt;-&amp;gt; excludes the id's OWN winner&lt;br/&gt;-&amp;gt; 1 rival if truly contested, 0 if none"]</code></pre>
 </div>
 <div class="section level2">
 <h2 id="what-this-package-does-not-do">5. What this package does not do<a class="anchor" aria-label="anchor" href="#what-this-package-does-not-do"></a>
@@ -257,7 +277,7 @@ fact about strings.</p>
 <h2 id="pinning-the-behaviour-you-rely-on">Pinning the behaviour you rely on<a class="anchor" aria-label="anchor" href="#pinning-the-behaviour-you-rely-on"></a>
 </h2>
 <p>Run this in <em>your</em> test suite:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assert_middle_agreement_contract.html">assert_middle_agreement_contract</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Any change to this package that flips one of its assertions is a
 <strong>major</strong> version bump. This matters more than it looks:

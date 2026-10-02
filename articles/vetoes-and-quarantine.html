@@ -93,12 +93,18 @@ in a middle slot; this vignette is about the ones it cannot.)</li>
 <p>The policy this vignette recommends: <strong>a conflict vetoes in the
 weaker evidence classes, and quarantines at the strongest one.</strong>
 Fully deterministic, and every action it takes is recorded.</p>
+<pre class="mermaid"><code>flowchart TD
+    A["Candidate row, verdict = conflicts&lt;br/&gt;(e.g. gender_agreement())"] --&gt; B{"At this row's&lt;br/&gt;strongest evidence class?"}
+    B --&gt;|"No &amp;mdash; a weaker class"| C["VETO&lt;br/&gt;row removed, recorded in vetoed"]
+    B --&gt;|"Yes &amp;mdash; the top class"| D["QUARANTINE&lt;br/&gt;person held for review,&lt;br/&gt;never auto-resolved, never silently deleted"]
+    C --&gt; E["Remaining candidates proceed to&lt;br/&gt;resolve_ordered_classes()"]
+    D --&gt; F["clerical_sample() &amp;rarr; blinded review&lt;br/&gt;&amp;rarr; clerical_precision()"]</code></pre>
 <div class="section level2">
 <h2 id="a-cohort-of-two-people">A cohort of two people<a class="anchor" aria-label="anchor" href="#a-cohort-of-two-people"></a>
 </h2>
 <p><code>r1</code>’s only strong candidate carries a conflicting gender
 code. <code>r2</code> is the clean case.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cands</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  id              <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r1"</span>,   <span class="st">"r1"</span>,   <span class="st">"r2"</span>,   <span class="st">"r2"</span><span class="op">)</span>,</span>
 <span>  candidate       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"N100"</span>, <span class="st">"N101"</span>, <span class="st">"N200"</span>, <span class="st">"N201"</span><span class="op">)</span>,</span>
@@ -119,7 +125,7 @@ code. <code>r2</code> is the clean case.</p>
 </h2>
 <p>A hard veto drops every <code>"conflicts"</code> row before
 resolution:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hard</span> <span class="op">&lt;-</span> <span class="va">cands</span><span class="op">[</span><span class="va">cands</span><span class="op">$</span><span class="va">gender</span> <span class="op">!=</span> <span class="st">"conflicts"</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="../reference/resolve_ordered_classes.html">resolve_ordered_classes</a></span><span class="op">(</span><span class="va">hard</span>, tiebreak <span class="op">=</span> <span class="st">"candidate"</span><span class="op">)</span><span class="op">$</span><span class="va">resolved</span><span class="op">[</span></span>
 <span>  , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"candidate"</span>, <span class="st">"evidence_class"</span><span class="op">)</span><span class="op">]</span></span>
@@ -132,11 +138,16 @@ true match with a wrong byte), the hard veto did not just lose a match:
 it silently published a <strong>different identity</strong> for a real
 person, with nothing in the output recording that a stronger candidate
 was deleted on one field.</p>
+<pre class="mermaid"><code>flowchart TD
+    A["r1: class-1 candidate N100 (true match,&lt;br/&gt;one wrong byte: gender code)&lt;br/&gt;class-2 candidate N101 (different person)"] --&gt; B["Hard veto drops EVERY&lt;br/&gt;'conflicts' row, no record kept"]
+    B --&gt; C["N100 deleted silently"]
+    C --&gt; D["resolve_ordered_classes()&lt;br/&gt;sees only N101 left"]
+    D --&gt; E["Publishes N101&lt;br/&gt;as r1's identity &amp;mdash; WRONG,&lt;br/&gt;and nothing flags it"]</code></pre>
 </div>
 <div class="section level2">
 <h2 id="veto-below-quarantine-at-the-top">Veto below, quarantine at the top<a class="anchor" aria-label="anchor" href="#veto-below-quarantine-at-the-top"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">conflict</span>  <span class="op">&lt;-</span> <span class="va">cands</span><span class="op">$</span><span class="va">gender</span> <span class="op">==</span> <span class="st">"conflicts"</span></span>
 <span><span class="va">top_class</span> <span class="op">&lt;-</span> <span class="va">cands</span><span class="op">$</span><span class="va">evidence_class</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">cands</span><span class="op">$</span><span class="va">evidence_class</span><span class="op">)</span></span>
 <span></span>

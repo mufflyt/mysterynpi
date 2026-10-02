@@ -68,6 +68,43 @@ test_that("clerical_precision reports per class, with unreviewed counted", {
   expect_true(all(p$ci_low <= p$precision & p$precision <= p$ci_high))
 })
 
+# The next three pin the degenerate regimes a precision metric can land in,
+# the way clevr's test-measures_pairs.R exhaustively covers make_pairs_no_pred
+# / make_pairs_distinct / make_pairs_identical for its own pairwise metrics:
+# no data, all-negative, and all-positive must each produce a distinct,
+# correct value -- never a silently-wrong 0, a NaN mistaken for 0, or a crash.
+test_that("a class with zero reviewed verdicts reports NA precision, not an error", {
+  s <- clerical_sample(pc, n_per_class = 5, seed = 20260905)
+  v <- data.frame(review_id = s$key$review_id, is_match = TRUE)
+  v$is_match[s$key$evidence_class == 1L] <- NA   # class 1 left entirely unreviewed
+  p <- clerical_precision(s$key, v)
+  row1 <- p[p$evidence_class == 1L, ]
+  expect_identical(row1$n_reviewed, 0L)
+  expect_identical(row1$n_match, 0L)
+  expect_identical(row1$precision, NA_real_)
+  expect_true(is.na(row1$ci_low) && is.na(row1$ci_high))
+})
+
+test_that("a class where every review is a nonmatch reports precision exactly 0, with a real interval", {
+  s <- clerical_sample(pc, n_per_class = 5, seed = 20260905)
+  v <- data.frame(review_id = s$key$review_id, is_match = TRUE)
+  v$is_match[s$key$evidence_class == 2L] <- FALSE
+  p <- clerical_precision(s$key, v)
+  row2 <- p[p$evidence_class == 2L, ]
+  expect_identical(row2$precision, 0)
+  expect_identical(row2$ci_low, 0)
+  expect_true(row2$ci_high > 0 && row2$ci_high < 1)
+})
+
+test_that("a class where every review is a match reports precision exactly 1, with a real interval", {
+  s <- clerical_sample(pc, n_per_class = 5, seed = 20260905)
+  v <- data.frame(review_id = s$key$review_id, is_match = TRUE)
+  p <- clerical_precision(s$key, v)
+  expect_true(all(p$precision == 1))
+  expect_true(all(p$ci_high == 1))
+  expect_true(all(p$ci_low > 0 & p$ci_low < 1))
+})
+
 test_that("clerical_precision refuses what it cannot audit", {
   s <- clerical_sample(pc, n_per_class = 2, seed = 1)
   expect_error(clerical_precision(s$key, data.frame(review_id = "REV9999",

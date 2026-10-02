@@ -193,6 +193,22 @@ test_that("the MA credential is still stripped -- the collision list narrows NAM
   expect_false(grepl("MA", parse_person("John Smith MA")$last, fixed = TRUE))
 })
 
+test_that("the Ma carve-out composes with a real trailing generational suffix", {
+  # python-nameparser's own test suite has the mirror-image case
+  # (test_potential_suffix_that_is_also_last_name_with_suffix: "Jack Ma Jr"
+  # keeps last = "Ma", suffix = "Jr") -- the carve-out above is only tested
+  # against "Ma" alone or "Ma" reclaimed from humaniformat's internal suffix
+  # heuristic, never against "Ma" PLUS a genuine generational suffix in the
+  # same string.
+  p <- parse_person("Jack Ma Jr")
+  expect_identical(p$last, "MA")
+  expect_identical(p$suffix, "JR")
+
+  p2 <- parse_person("Ma, Jack Jr", format = "surname_first")
+  expect_identical(p2$last, "MA")
+  expect_identical(p2$suffix, "JR")
+})
+
 test_that("a trailing 'Ma' is reclaimed from humaniformat's own suffix detection", {
   # THE DEFECT: humaniformat::parse_names() has its OWN internal notion of
   # degree-suffix tokens, entirely independent of NAME_NOISE/

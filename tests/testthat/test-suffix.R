@@ -8,6 +8,16 @@ test_that("normalize_suffix maps recorded spellings and refuses the rest", {
                    rep(NA_character_, 4))
 })
 
+test_that("a lone trailing initial is never misread as a truncated degree suffix", {
+  # python-nameparser's test_phd_conflict pins the same guard this package
+  # already applies to "V" ("V is an initial far more often than a
+  # fifth-of-name"), generalized: "Adolph D" must not extract "D" as a
+  # suffix, the way a careless pattern could mistake it for a cut-off "D.O."
+  # or "D.D.S.".
+  expect_identical(extract_suffix("Adolph D")$suffix, NA_character_)
+  expect_identical(extract_suffix("Adolph D")$name, "Adolph D")
+})
+
 test_that("extract_suffix splits the suffix out and keeps both parts", {
   got <- extract_suffix(c("John Smith Jr.", "SMITH, JOHN, JR",
                           "Samuel V Anaya", "Jane Doe", NA))

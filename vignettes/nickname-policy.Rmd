@@ -24,6 +24,18 @@ cleanly by layer, and the split *is* the policy:
   **review-only**, gated to source classes that plausibly record go-by
   names, never sufficient for auto-acceptance.
 
+```mermaid
+flowchart TD
+    A["Nickname evidence"] --> B["Verdict layer<br/>nickname_agreement()"]
+    A --> C["Candidate layer<br/>npi_search(name_expansion = 'curated_one_hop')"]
+    B --> D["RETAINED globally<br/>190 adjudicated pairs:<br/>33 rescued, 0 false accepts"]
+    C --> E{"SOURCE_CLASSES gate"}
+    E -->|"formal legal-name roster"| F["Cannot invoke expansion at all"]
+    E -->|"unknown source"| G["Fails closed"]
+    E -->|"source plausibly records<br/>go-by names"| H["Expansion allowed,<br/>every candidate stamped review_only<br/>1 rescue per 77 false candidates"]
+    H --> I["assert_nickname_policy()<br/>refuses to auto-accept"]
+```
+
 The policy ships as data so any consumer can cite it:
 
 ```{r}
@@ -82,6 +94,22 @@ A <- decisions(no_table)
 B <- decisions(nickname_agreement)
 table(A, truth = ROSTER_BENCHMARK$truth)
 table(B, truth = ROSTER_BENCHMARK$truth)
+```
+
+```mermaid
+flowchart LR
+    R["ROSTER_BENCHMARK<br/>190 pairs, recomputed on every build"] --> CA
+    R --> CB
+    subgraph CA ["Condition A: no_table()"]
+        direction TB
+        A1["exact equality or<br/>initial-compatibility only"]
+    end
+    subgraph CB ["Condition B: nickname_agreement()"]
+        direction TB
+        B1["as shipped, with NICKNAME_EDGES"]
+    end
+    CA --> OA["33 nickname-recorded true<br/>matches -&gt; 'reject'"]
+    CB --> OB["same 33 -&gt; 'accept'<br/>0 false accepts, review queue unchanged"]
 ```
 
 Thirty-three adjudicated true matches — every nickname-recorded pair —

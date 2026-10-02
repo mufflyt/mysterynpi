@@ -31,6 +31,19 @@ table(ROSTER_BENCHMARK$family, ROSTER_BENCHMARK$truth)
 
 ## A reference policy from the package's own rules
 
+```mermaid
+flowchart TD
+    A["ROSTER_BENCHMARK<br/>190 pairs, truth by construction"] --> B["extract_suffix() + parse_person()<br/>BEFORE the noise strip eats the suffix"]
+    B --> C["Compare every axis:<br/>surname / given / middle / suffix / gender / license"]
+    C --> D{"Any axis conflicts?<br/>(middle excused if it's a maiden surname)"}
+    D -->|"Yes"| E["reject"]
+    D -->|"No, but name axes<br/>don't both corroborate"| F["review"]
+    D -->|"No, but gender conflicts"| F
+    D -->|"name_ok and no conflicts"| G["accept"]
+    E & F & G --> H["Compare decision vs stored truth<br/>table(decision, truth)"]
+    F --> I["clerical_sample() -&gt; blinded review<br/>-&gt; clerical_precision()"]
+```
+
 Pairs are pre-formed (blocking is the pipeline's job, not this package's),
 so the policy is pure agreement: parse the roster's free text, compare every
 axis, veto on hard conflicts, quarantine gender conflicts at the top, accept
@@ -78,6 +91,13 @@ Every accept is a true match, every reject a true nonmatch, and the review
 queue is exactly the stale-gender family: true matches whose recorded
 gender codes conflict, routed to a person instead of deleted -- the policy
 `vignette("vetoes-and-quarantine")` argues for, doing its job.
+
+Conflicts rarely stack: of the 72 pairs with any conflicting axis, 69 conflict
+on exactly one, and the only two-axis combination (`given+suffix`, 3 pairs)
+is itself a single defect family, not two independent failures landing on the
+same pair.
+
+![Which evidence axes conflict together, across all 190 ROSTER_BENCHMARK pairs](../man/figures/README-conflict-upset.png)
 
 Two honest caveats. First, this is the package evaluated on a corpus built
 from the package's own defect taxonomy -- the families are the failure

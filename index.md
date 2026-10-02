@@ -1,5 +1,8 @@
 # mysterynpi
 
+Full function reference:
+[mufflyt.github.io/mysterynpi](https://mufflyt.github.io/mysterynpi/)
+
 One definition of the name handling a provider linkage needs:
 transliterating join keys, given/middle/surname tokenisation, and the
 rules that decide whether two records name the same person.
@@ -11,7 +14,7 @@ are the product.
 
 ``` r
 
-# install.packages("remotes"); remotes::install_local("~/mysterynpi")
+# install.packages("remotes"); remotes::install_github("mufflyt/mysterynpi")
 library(mysterynpi)
 
 middle_agreement(middle_tokens("A REINHARD"), middle_tokens("REINHARD"))
@@ -143,7 +146,8 @@ facts about strings. Gender is the partial exception:
 ships the *verdict* — do two recorded codes agree, disagree, or decide
 nothing — because comparing recorded codes is a fact about fields.
 Whether a `"conflicts"` verdict vetoes outright or routes to quarantine
-is still a claim about the study, and stays with you.
+is still a claim about the study, and stays with you. See
+[`vignette("vetoes-and-quarantine")`](https://mufflyt.github.io/mysterynpi/articles/vetoes-and-quarantine.md).
 
 **A method-priority lookup keyed on strategy names.** One existed
 upstream; it contained none of the calling pipeline’s method names, so

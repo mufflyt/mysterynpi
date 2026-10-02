@@ -60,10 +60,11 @@
 </h1></div>
 <!-- badges: start -->
 
+<p>Full function reference: <a href="https://mufflyt.github.io/mysterynpi/">mufflyt.github.io/mysterynpi</a></p>
 <p>One definition of the name handling a provider linkage needs: transliterating join keys, given/middle/surname tokenisation, and the rules that decide whether two records name the same person.</p>
 <p><strong>Every rule here encodes a defect that already shipped in a real pipeline, and each ships with the test that catches its return.</strong> That is the whole design. The functions are small; the comments and the tests are the product.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes"); remotes::install_local("~/mysterynpi")</span></span>
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes"); remotes::install_github("mufflyt/mysterynpi")</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mufflyt.github.io/mysterynpi/">mysterynpi</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/middle_agreement.html">middle_agreement</a></span><span class="op">(</span><span class="fu"><a href="reference/middle_tokens.html">middle_tokens</a></span><span class="op">(</span><span class="st">"A REINHARD"</span><span class="op">)</span>, <span class="fu"><a href="reference/middle_tokens.html">middle_tokens</a></span><span class="op">(</span><span class="st">"REINHARD"</span><span class="op">)</span><span class="op">)</span></span>
@@ -235,7 +236,7 @@
 <h2 id="what-is-deliberately-not-here">What is deliberately NOT here<a class="anchor" aria-label="anchor" href="#what-is-deliberately-not-here"></a>
 </h2>
 <p><strong>Blocking.</strong> Which candidates to generate — exact name, surname plus initial, fuzzy surname, surname component — and which class each earns, is where a study declares what it will claim from a name. That belongs in your pipeline, in code a reviewer can read.</p>
-<p><strong>Scoring gates.</strong> Credential gates encode claims about identity, not facts about strings. Gender is the partial exception: <code><a href="reference/gender_agreement.html">gender_agreement()</a></code> ships the <em>verdict</em> — do two recorded codes agree, disagree, or decide nothing — because comparing recorded codes is a fact about fields. Whether a <code>"conflicts"</code> verdict vetoes outright or routes to quarantine is still a claim about the study, and stays with you.</p>
+<p><strong>Scoring gates.</strong> Credential gates encode claims about identity, not facts about strings. Gender is the partial exception: <code><a href="reference/gender_agreement.html">gender_agreement()</a></code> ships the <em>verdict</em> — do two recorded codes agree, disagree, or decide nothing — because comparing recorded codes is a fact about fields. Whether a <code>"conflicts"</code> verdict vetoes outright or routes to quarantine is still a claim about the study, and stays with you. See <code><a href="articles/vetoes-and-quarantine.html">vignette("vetoes-and-quarantine")</a></code>.</p>
 <p><strong>A method-priority lookup keyed on strategy names.</strong> One existed upstream; it contained none of the calling pipeline’s method names, so every row missed the lookup and was coalesced to a constant. A shared table that silently does nothing is worse than no table.</p>
 <p><strong>A blended match score.</strong> A numeric threshold expresses a continuous question about categorical evidence. The upstream version’s margin constant turned out to have zero-conflict behaviour that was <em>structural</em> — the candidates it compared never coexisted — rather than evidence the threshold was right.</p>
 <p>Two specific exclusions worth naming:</p>
@@ -297,6 +298,7 @@
 <ul class="list-unstyled">
 <li><a href="https://github.com/mufflyt/mysterynpi/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/mufflyt/mysterynpi/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://app.codecov.io/gh/mufflyt/mysterynpi" class="external-link"><img src="https://codecov.io/gh/mufflyt/mysterynpi/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a></li>
 </ul>
 </div>
 

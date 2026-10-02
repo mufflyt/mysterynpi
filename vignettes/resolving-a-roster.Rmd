@@ -91,6 +91,19 @@ There is **no edit-distance tolerance** here. One was added and removed the same
 day: it was worth 22 records and it admitted `JULIA`/`JULIE`, `LEE`/`LEA`,
 `ANN`/`ANNE`, which are different given names.
 
+**Known limitation:** a hyphenated given name does not corroborate its own
+first component. `nickname_agreement("POUL-HENNING", "POUL")` is
+`"conflicts"`, not `"corroborates"`, because there is no table edge from the
+compound form to its lead component and no initial-compatibility rule covers
+it either. This is not a deliberate policy the way the no-edit-distance
+stance is -- it is an unaddressed gap, pinned as current behavior rather than
+silently left to surprise a caller. Revisit if roster data turns up real
+hyphenated-given-name pairs this silently vetoes.
+
+```{r}
+nickname_agreement("POUL-HENNING", "POUL")
+```
+
 ## 3. Ordered classes, not a blended score
 
 You assign the classes; the package resolves them. A record resolves **only**
@@ -149,6 +162,12 @@ The 37 tie on every ranking key, 10 of them at the strongest class — two peopl
 whose full names *and* middle names both match one record. `greedy` hands those
 to whoever sorts first. It exists only because reproducing a cohort frozen
 before this distinction was drawn requires it.
+
+"Sorts first" means the claimant `id` that sorts lowest, not whichever row
+happened to arrive first: `award_contested()` re-sorts on entry, so its
+result -- for every policy, including `greedy` -- does not depend on the
+input's row order. The id comparison genuinely decides the tie; shuffling the
+input beforehand cannot.
 
 When you count what a veto removed, count *people*, not rows:
 

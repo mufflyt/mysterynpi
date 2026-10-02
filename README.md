@@ -3,7 +3,10 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/mufflyt/mysterynpi/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mufflyt/mysterynpi/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/mufflyt/mysterynpi/graph/badge.svg)](https://app.codecov.io/gh/mufflyt/mysterynpi)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 <!-- badges: end -->
+
+Full function reference: [mufflyt.github.io/mysterynpi](https://mufflyt.github.io/mysterynpi/)
 
 One definition of the name handling a provider linkage needs: transliterating
 join keys, given/middle/surname tokenisation, and the rules that decide whether
@@ -14,7 +17,7 @@ each ships with the test that catches its return.** That is the whole design.
 The functions are small; the comments and the tests are the product.
 
 ```r
-# install.packages("remotes"); remotes::install_local("~/mysterynpi")
+# install.packages("remotes"); remotes::install_github("mufflyt/mysterynpi")
 library(mysterynpi)
 
 middle_agreement(middle_tokens("A REINHARD"), middle_tokens("REINHARD"))
@@ -129,7 +132,7 @@ about strings. Gender is the partial exception: `gender_agreement()` ships the
 *verdict* — do two recorded codes agree, disagree, or decide nothing — because
 comparing recorded codes is a fact about fields. Whether a `"conflicts"`
 verdict vetoes outright or routes to quarantine is still a claim about the
-study, and stays with you.
+study, and stays with you. See `vignette("vetoes-and-quarantine")`.
 
 **A method-priority lookup keyed on strategy names.** One existed upstream; it
 contained none of the calling pipeline's method names, so every row missed the

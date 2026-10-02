@@ -64,6 +64,18 @@ test_that("absent parts are empty strings, never NA", {
   expect_false(has_name_information(p$last[1]))
 })
 
+test_that("dotted initials with no spaces still split into first/middle/last", {
+  # humaniformat's OWN test suite (test_parser.R) treats "G.R.Dobbs" as a
+  # fallback case -- no spaces, so it keeps the whole string as one token.
+  # parse_person() actually does better here (humaniformat splits on the
+  # periods), but nothing pinned that; a future change could regress it to
+  # the single-token fallback with nothing here to catch it.
+  p <- parse_person("G.R.Dobbs")
+  expect_identical(p$first,  "G")
+  expect_identical(p$middle, "R")
+  expect_identical(p$last,   "DOBBS")
+})
+
 test_that("it errors clearly when humaniformat is unavailable", {
   expect_true(is.function(parse_person))   # contract documented in ?parse_person
 })

@@ -44,3 +44,17 @@ test_that("confidence is reporting only and is indexed by class", {
 test_that("a missing column is named, not silently tolerated", {
   expect_error(collapse_candidates(mk(id = "A"), ), "missing")
 })
+
+# Regression test modeled on reclin2's test_select_greedy.R, which pins that
+# select_greedy() on a zero-row pairs table returns logical(0) rather than
+# erroring -- an empty candidate frame is a normal pipeline state (e.g. a
+# block with no survivors), not an edge case that should need special-casing
+# by every caller.
+test_that("resolve_ordered_classes on zero rows returns well-formed empty output, not an error", {
+  empty <- mk(id = character(0), candidate = character(0), evidence_class = integer(0))
+  r <- resolve_ordered_classes(empty)
+  expect_equal(nrow(r$per_candidate), 0L)
+  expect_equal(nrow(r$stats), 0L)
+  expect_equal(nrow(r$resolved), 0L)
+  expect_identical(r$quarantined, character(0))
+})

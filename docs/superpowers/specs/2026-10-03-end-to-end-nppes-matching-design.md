@@ -1,7 +1,7 @@
 # End-to-End NPPES Name Matching Design
 
-**Status:** Design approved in conversation on 2026-10-03; awaiting review of this
-written spec.
+**Status:** Design approved in conversation on 2026-10-03; terminology updated to
+“user-provided” as requested.
 
 ## Goal
 

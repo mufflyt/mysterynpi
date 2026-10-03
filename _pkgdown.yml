@@ -121,6 +121,7 @@ reference:
   desc: A roster to NPIs in one call, from a data frame or a read-only DuckDB table.
   contents:
   - match_npi
+  - MATCH_NPI_ATTRIBUTES
 - title: NPI
   contents:
   - npi_luhn_ok

@@ -252,3 +252,40 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
     stop("entity_filter must be a nonblank character value", call. = FALSE)
   }
 }
+
+# Attribute values for candidate NPIs only: the NPIs are registered as a
+# connection-scoped temporary table and joined, so no unrestricted reference
+# rows cross the connection boundary.
+.npi_duckdb_reference_values <- function(con, table, columns, npis, cols) {
+  quote_id <- function(x) as.character(DBI::dbQuoteIdentifier(con, x))
+  source_table <- quote_id(table)
+  missing <- setdiff(cols, DBI::dbListFields(con, table))
+  if (length(missing)) {
+    stop("nppes is missing attribute column(s): ", paste(missing, collapse = ", "),
+         call. = FALSE)
+  }
+  empty <- data.frame(.npi = character(), stringsAsFactors = FALSE)
+  for (col in cols) empty[[col]] <- character()
+  if (!length(npis)) return(empty)
+  numeric_fields <- .npi_duckdb_numeric_fields(con, source_table, columns, quote_id)
+  x <- quote_id(columns$npi)
+  npi_expr <- if (isTRUE(numeric_fields[["npi"]])) {
+    paste0("CASE WHEN ", x, " IS NULL THEN NULL WHEN ", x, " = trunc(", x,
+           ") AND abs(", x, ") < 1e18 THEN CAST(CAST(", x,
+           " AS BIGINT) AS VARCHAR) ELSE CAST(", x, " AS VARCHAR) END")
+  } else paste0("CAST(", x, " AS VARCHAR)")
+  raw <- paste0(basename(tempfile("mysterynpi_")), "_npis")
+  qualified <- quote_id(DBI::Id(schema = "temp", table = raw))
+  on.exit(try(DBI::dbExecute(con, paste("DROP TABLE IF EXISTS", qualified)), silent = TRUE),
+          add = TRUE)
+  DBI::dbWriteTable(con, raw, data.frame(npi = npis, stringsAsFactors = FALSE),
+                    temporary = TRUE)
+  selected <- vapply(cols, function(col) {
+    paste0("CAST(t.", quote_id(col), " AS VARCHAR) AS ", quote_id(col))
+  }, character(1))
+  values <- DBI::dbGetQuery(con, paste0(
+    "SELECT n.npi AS \".npi\", ", paste(selected, collapse = ", "),
+    " FROM ", source_table, " t JOIN ", qualified, " n ON ", npi_expr, " = n.npi"))
+  if (!nrow(values)) return(empty)
+  .match_npi_collapse_reference(values, cols)
+}

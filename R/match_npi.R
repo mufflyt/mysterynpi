@@ -33,6 +33,16 @@
 #' @param nppes_given,nppes_middle,nppes_surname,nppes_full_name Reference name mappings.
 #' @param entity_filter Entity type to include; defaults to individuals ("1").
 #' @param backend One of "auto", "data.frame", or "duckdb".
+#' @param attributes Optional named list of extra fields to weigh, keyed by a
+#'   name in [MATCH_NPI_ATTRIBUTES] (`gender`, `credential`, `taxonomy`,
+#'   `license`, `graduation_year`, `state`). Each value maps `roster` and
+#'   `nppes` to column names (`license` also maps `roster_state` and
+#'   `nppes_state`). A conflicting attribute vetoes the candidate into
+#'   `review` with reason `<attribute>_conflict`; corroborating attributes
+#'   break ties through `attribute_rank`; absence is uninformative.
+#' @param block Names from `attributes` to use as true blocking variables:
+#'   candidates that conflict on them are removed before evidence (counted in
+#'   `counts$blocked_by_attribute`) instead of being sent to review.
 #' @return A list with:
 #' \describe{
 #'   \item{matches}{Roster rows with one uniquely supported NPI (reason
@@ -72,12 +82,16 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
                       surname = NULL, full_name = NULL, npi, entity_type,
                       nppes_given = NULL, nppes_middle = NULL, nppes_surname = NULL,
                       nppes_full_name = NULL, entity_filter = "1",
-                      backend = c("auto", "data.frame", "duckdb")) {
+                      backend = c("auto", "data.frame", "duckdb"),
+                      attributes = NULL, block = character()) {
+  spec <- .match_npi_attribute_spec(attributes, block)
   columns <- list(id = id, given = given, middle = middle, surname = surname,
                   full_name = full_name, npi = npi, entity_type = entity_type,
                   nppes_given = nppes_given, nppes_middle = nppes_middle,
                   nppes_surname = nppes_surname, nppes_full_name = nppes_full_name)
   inputs <- .match_npi_inputs(roster, nppes, table, columns, entity_filter, backend)
+  .match_npi_attribute_check(spec, names(roster), if (inputs$backend == "duckdb")
+    DBI::dbListFields(nppes, table) else names(nppes))
   fields <- c("source_id", "npi", "reason")
   output_names <- utils::tail(make.unique(c(names(roster), fields)), length(fields))
   result_columns <- stats::setNames(output_names, fields)
@@ -87,6 +101,21 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
     generate_npi_candidates_memory(roster, nppes, columns, entity_filter)
   }
   candidates <- build_npi_candidate_evidence(generated$pairs)
+  attribute_cols <- .match_npi_attribute_columns(spec, "nppes")
+  reference_values <- if (!length(attribute_cols)) {
+    data.frame(.npi = character(), stringsAsFactors = FALSE)
+  } else if (inputs$backend == "duckdb") {
+    .npi_duckdb_reference_values(nppes, table, columns, unique(candidates$npi), attribute_cols)
+  } else {
+    values <- nppes[attribute_cols]
+    values$.npi <- .match_npi_text(nppes[[columns$npi]])
+    .match_npi_collapse_reference(values[values$.npi %in% candidates$npi, , drop = FALSE],
+                                  attribute_cols)
+  }
+  roster_values <- roster[.match_npi_attribute_columns(spec, "roster")]
+  roster_values$.source_id <- as.character(roster[[id]])
+  applied <- .match_npi_apply_attributes(candidates, spec, roster_values, reference_values)
+  candidates <- applied$candidates
   partitions <- partition_npi_matches(roster, candidates, id = id,
                                       result_columns = result_columns,
                                       missing_name = inputs$missing_name)
@@ -96,17 +125,18 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
     review = nrow(partitions$review), unmatched = nrow(partitions$unmatched),
     candidates = nrow(candidates), candidate_pairs = nrow(generated$pairs),
     missing_required_name = sum(inputs$missing_name),
+    blocked_by_attribute = applied$blocked,
     reference = as.list(reference_counts))
   c(partitions, list(counts = counts, run_manifest = .match_npi_manifest(
     inputs, table, entity_filter, result_columns, roster, reference_counts,
-    generated$pairs, candidates)))
+    generated$pairs, candidates, spec)))
 }
 
 # The manifest is deterministic for a given input: no timestamps, so two
 # backends run on the same data produce manifests that differ only in
 # `backend` and `table`.
 .match_npi_manifest <- function(inputs, table, entity_filter, result_columns, roster,
-                                reference_counts, pairs, candidates) {
+                                reference_counts, pairs, candidates, spec) {
   table_label <- if (inputs$backend != "duckdb") NULL
     else if (inherits(table, "Id")) paste(table@name, collapse = ".") else table
   list(
@@ -118,6 +148,8 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
     table = table_label,
     entity_filter = as.character(entity_filter),
     columns = inputs$columns,
+    attributes = spec$attributes,
+    block = spec$block,
     result_columns = result_columns,
     candidate_settings = list(
       routes = c("exact_given_surname", "surname_initial", "surname_variant_given",
@@ -125,7 +157,8 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
                  "fuzzy_surname_given"),
       fuzzy_rule = "exact intersection of single-character deletion signatures (names of 3+ characters), anchored on the exact opposite name",
       nickname_rule = "nickname_agreement() inside the exact-surname block; review only",
-      resolution_rule = "resolve_one_to_one() on eligible candidates ranked by evidence class then middle corroboration; ties and contested NPIs go to review"),
+      resolution_rule = "resolve_one_to_one() on eligible candidates ranked by evidence class, middle corroboration, then corroborating attributes; ties and contested NPIs go to review",
+      attribute_rule = "a conflicting attribute vetoes to review (or is blocked when named in block); corroborations count into attribute_rank; absence is uninformative"),
     roster_rows = nrow(roster),
     roster_missing_required_name = sum(inputs$missing_name),
     reference_rows = reference_counts[["input"]],

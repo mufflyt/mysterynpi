@@ -16,11 +16,10 @@ duckdb_available <- requireNamespace("DBI", quietly = TRUE) &&
 # declared dependency: the map chunks run only when it is present and the
 # vignette builds without it. The function is fetched by name for the same
 # reason -- a bare `mysterymaps::` reference would read as an undeclared import.
-maps_available <- all(vapply(c("mysterymaps", "maps", "ggplot2"),
-                           function(p) nzchar(system.file(package = p)), logical(1)))
-if (maps_available) {
-  state_map <- getExportedValue("mysterymaps", "mysterymaps_geographic_map")
-}
+state_map <- tryCatch(getExportedValue("mysterymaps", "mysterymaps_geographic_map"),
+                      error = function(e) NULL)
+maps_available <- !is.null(state_map) &&
+  all(vapply(c("maps", "ggplot2"), requireNamespace, logical(1), quietly = TRUE))
 ```
 
 `match_npi()` takes a roster of people you hold (a mystery-caller sample, a

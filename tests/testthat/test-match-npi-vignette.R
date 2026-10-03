@@ -65,8 +65,10 @@ test_that("the end-to-end vignette knits offline and its evaluated claims hold",
   # The funnel and disposition figures are embedded; the maps are embedded
   # when mysterymaps is installed and otherwise replaced by the documented note.
   figures <- regmatches(rendered, gregexpr("<img[^>]*alt=\"", rendered))[[1]]
-  maps_available <- all(vapply(c("mysterymaps", "maps", "ggplot2"),
-                               function(p) nzchar(system.file(package = p)), logical(1)))
+  state_map <- tryCatch(getExportedValue("mysterymaps", "mysterymaps_geographic_map"),
+                        error = function(e) NULL)
+  maps_available <- !is.null(state_map) &&
+    all(vapply(c("maps", "ggplot2"), requireNamespace, logical(1), quietly = TRUE))
   expect_identical(length(figures), if (maps_available) 4L else 2L)
   if (!maps_available) expect_match(rendered, "state maps", fixed = TRUE)
   expect_false(grepl("#> Warning", rendered, fixed = TRUE))

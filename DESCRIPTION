@@ -19,7 +19,7 @@ Encoding: UTF-8
 Depends: R (>= 4.1)
 Imports: stringi, stats
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown, humaniformat, jsonlite,
-    duckdb, DBI
+    duckdb (>= 1.5.0), DBI, RSQLite, withr
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true

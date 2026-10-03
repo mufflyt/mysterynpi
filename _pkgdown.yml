@@ -117,6 +117,10 @@ reference:
   - ROSTER_BENCHMARK
   - WINKLER_CENSUS
   - SURNAME_FREQUENCIES
+- title: End-to-end NPPES matching
+  desc: A roster to NPIs in one call, from a data frame or a read-only DuckDB table.
+  contents:
+  - match_npi
 - title: NPI
   contents:
   - npi_luhn_ok

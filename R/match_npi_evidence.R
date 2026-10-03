@@ -135,6 +135,11 @@ build_npi_candidate_evidence <- function(candidate_pairs) {
 #' class ranks first, middle corroboration second. Unique supported claims yield
 #' `unique_best_evidence`. Ties and shared NPI claims yield resolver reason codes
 #' `ambiguous_tied_evidence` and `ambiguous_contested_candidate`. Any source with
+#' a tied strongest eligible pool still claims every NPI in that pool; those
+#' claims also veto another source's unique selection of the same NPI. Eligible
+#' alternatives below the strongest pool and review-only candidates do not claim
+#' an NPI for this contention guard. Tied sources retain the tied reason.
+#' Any source with
 #' candidates but no eligible candidate is review with its strongest candidate's
 #' reason (lexicographic reason order for equal weak classes). Sources without
 #' candidates are unmatched with `no_candidate`. Review rows have no assigned
@@ -189,6 +194,23 @@ partition_npi_matches <- function(roster, candidates, id = "source_id",
   eligible <- candidates[candidates$disposition == "eligible", , drop = FALSE]
   gate <- resolve_one_to_one(eligible, id = "source_id", candidate = "npi",
                              rank_by = c(evidence_class = "desc", middle_rank = "desc"))
+  # The resolver counts only unique selections as claims. Tied best pools must
+  # also contest a supported NPI; compute that guard over bounded evidence only.
+  strongest <- unlist(lapply(split(seq_len(nrow(eligible)), eligible$source_id),
+    function(rows) {
+      rows <- rows[eligible$evidence_class[rows] == max(eligible$evidence_class[rows])]
+      rows[eligible$middle_rank[rows] == max(eligible$middle_rank[rows])]
+    }), use.names = FALSE)
+  claims <- eligible[strongest, , drop = FALSE]
+  contested <- names(Filter(function(sources) length(unique(sources)) > 1L,
+                            split(claims$source_id, claims$npi)))
+  guarded <- gate$resolved$npi %in% contested
+  if (any(guarded)) {
+    vetoed <- gate$resolved[guarded, , drop = FALSE]
+    vetoed$resolution_status <- "ambiguous_contested_candidate"
+    gate$quarantined <- rbind(gate$quarantined, vetoed)
+    gate$resolved <- gate$resolved[!guarded, , drop = FALSE]
+  }
   out <- roster
   out[[result_columns[["source_id"]]]] <- ids
   out[[result_columns[["npi"]]]] <- rep(NA_character_, length(ids))

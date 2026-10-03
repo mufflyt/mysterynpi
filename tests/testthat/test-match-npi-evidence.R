@@ -140,10 +140,12 @@ test_that("blocked weak evidence is not promoted by an exact route label", {
 
 test_that("review-only and eligible records claiming one NPI do not create false contention", {
   candidates <- build_npi_candidate_evidence(rbind(evidence_pair("exact"),
-    evidence_pair("nick", roster_first = "Bob", nppes_first = "Robert")))
-  parts <- partition_npi_matches(data.frame(source_id = c("nick", "exact")), candidates)
+    evidence_pair("nick", roster_first = "Bob", nppes_first = "Robert"),
+    evidence_pair("fuzzy", nppes_last = "Smyth", block_route = "fuzzy")))
+  parts <- partition_npi_matches(data.frame(source_id = c("nick", "exact", "fuzzy")),
+                                 candidates)
   expect_identical(parts$matches$source_id, "exact")
-  expect_identical(parts$review$source_id, "nick")
+  expect_identical(parts$review$source_id, c("nick", "fuzzy"))
 })
 
 test_that("missing reference names and incompatible given names remain review", {
@@ -181,4 +183,31 @@ test_that("duplicate route evidence is independent of backend row order", {
   forward <- build_npi_candidate_evidence(pairs)
   backward <- build_npi_candidate_evidence(pairs[2:1, ])
   expect_identical(forward, backward)
+})
+
+test_that("a tied strongest eligible claim contests a second source's unique claim", {
+  pairs <- rbind(evidence_pair("a", npi = "1234567893"),
+                 evidence_pair("a", npi = "1999999984"),
+                 evidence_pair("b", npi = "1234567893"))
+  roster <- data.frame(source_id = c("a", "b"))
+  forward <- partition_npi_matches(roster, build_npi_candidate_evidence(pairs))
+  backward <- partition_npi_matches(roster,
+    build_npi_candidate_evidence(pairs[3:1, ]))
+  expect_identical(forward, backward)
+  expect_equal(nrow(forward$matches), 0L)
+  expect_identical(forward$review$source_id, c("a", "b"))
+  expect_identical(forward$review$reason,
+    c("ambiguous_tied_evidence", "ambiguous_contested_candidate"))
+  expect_identical(forward$review$npi, rep(NA_character_, 2L))
+})
+
+test_that("eligible alternatives below a source's strongest pool do not contest another match", {
+  pairs <- rbind(evidence_pair("a", npi = "1234567893"),
+    evidence_pair("a", npi = "1999999984", nppes_first = "J"),
+    evidence_pair("b", npi = "1999999984"))
+  parts <- partition_npi_matches(data.frame(source_id = c("a", "b")),
+                                 build_npi_candidate_evidence(pairs))
+  expect_identical(parts$matches$source_id, c("a", "b"))
+  expect_identical(parts$matches$npi, c("1234567893", "1999999984"))
+  expect_equal(nrow(parts$review), 0L)
 })

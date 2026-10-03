@@ -81,7 +81,9 @@ behaviour, and output schema. The reference universe is filtered to
 <span>  nppes_surname <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nppes_full_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  entity_filter <span class="op">=</span> <span class="st">"1"</span>,</span>
-<span>  backend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"data.frame"</span>, <span class="st">"duckdb"</span><span class="op">)</span></span>
+<span>  backend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"data.frame"</span>, <span class="st">"duckdb"</span><span class="op">)</span>,</span>
+<span>  attributes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  block <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -124,6 +126,22 @@ connection; must be `NULL` for a data frame.</p></dd>
 
 <dt id="arg-backend">backend<a class="anchor" aria-label="anchor" href="#arg-backend"></a></dt>
 <dd><p>One of "auto", "data.frame", or "duckdb".</p></dd>
+
+
+<dt id="arg-attributes">attributes<a class="anchor" aria-label="anchor" href="#arg-attributes"></a></dt>
+<dd><p>Optional named list of extra fields to weigh, keyed by a
+name in [MATCH_NPI_ATTRIBUTES] (`gender`, `credential`, `taxonomy`,
+`license`, `graduation_year`, `state`). Each value maps `roster` and
+`nppes` to column names (`license` also maps `roster_state` and
+`nppes_state`). A conflicting attribute vetoes the candidate into
+`review` with reason `&lt;attribute&gt;_conflict`; corroborating attributes
+break ties through `attribute_rank`; absence is uninformative.</p></dd>
+
+
+<dt id="arg-block">block<a class="anchor" aria-label="anchor" href="#arg-block"></a></dt>
+<dd><p>Names from `attributes` to use as true blocking variables:
+candidates that conflict on them are removed before evidence (counted in
+`counts$blocked_by_attribute`) instead of being sent to review.</p></dd>
 
 </dl></div>
     <div class="section level2">

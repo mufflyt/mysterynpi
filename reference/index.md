@@ -240,6 +240,8 @@ table.
 
 - [`match_npi()`](https://mufflyt.github.io/mysterynpi/reference/match_npi.md)
   : Match a source roster against user-provided NPPES data
+- [`MATCH_NPI_ATTRIBUTES`](https://mufflyt.github.io/mysterynpi/reference/MATCH_NPI_ATTRIBUTES.md)
+  : Attributes match_npi() can block or corroborate on
 
 ## NPI
 

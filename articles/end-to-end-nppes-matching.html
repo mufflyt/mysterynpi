@@ -148,6 +148,7 @@ before matching and we want these rows to survive that gate.</p>
 <span>  last   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Doe"</span>, <span class="st">"Brown"</span>, <span class="st">"Nelson Becker"</span>, <span class="st">"Smith"</span>, <span class="st">"Smith"</span>, <span class="st">"Jones"</span>, <span class="st">"White"</span>,</span>
 <span>             <span class="st">"White"</span>, <span class="st">"Lee"</span>, <span class="st">"Zzyzx"</span>, <span class="st">"Garcia"</span>, <span class="st">"Lopez"</span><span class="op">)</span>,</span>
 <span>  state  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CO"</span>, <span class="st">"CO"</span>, <span class="st">"CO"</span>, <span class="st">"RI"</span>, <span class="st">"RI"</span>, <span class="st">"RI"</span>, <span class="st">"TX"</span>, <span class="st">"TX"</span>, <span class="st">"TX"</span>, <span class="st">"NM"</span>, <span class="st">"NM"</span>, <span class="st">"NM"</span><span class="op">)</span>,</span>
+<span>  credential <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MD"</span>, <span class="cn">NA</span>, <span class="st">"MD"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"MD"</span>, <span class="st">"MD"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"MD"</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
 <span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">nppes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -161,6 +162,10 @@ before matching and we want these rows to survive that gate.</p>
 <span>  `Provider Last Name (Legal Name)` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Doe"</span>, <span class="st">"Brown"</span>, <span class="st">"Nelson-Becker"</span>, <span class="st">"Smith"</span>,</span>
 <span>                                        <span class="st">"Smith"</span>, <span class="st">"Jones"</span>, <span class="st">"Jones"</span>, <span class="st">"White"</span>, <span class="st">"García"</span>,</span>
 <span>                                        <span class="st">"Lopez"</span>, <span class="st">"Doe"</span>, <span class="st">"Doe"</span><span class="op">)</span>,</span>
+<span>  `Provider Credential Text` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"M.D."</span>, <span class="cn">NA</span>, <span class="st">"MD"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"D.O."</span>, <span class="st">"M.D."</span>, <span class="st">"MD"</span>, <span class="cn">NA</span>,</span>
+<span>                                 <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  `Provider Business Practice Location Address State Name` <span class="op">=</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CO"</span>, <span class="st">"CO"</span>, <span class="st">"CO"</span>, <span class="st">"RI"</span>, <span class="st">"RI"</span>, <span class="st">"CO"</span>, <span class="st">"RI"</span>, <span class="st">"TX"</span>, <span class="st">"NM"</span>, <span class="st">"NM"</span>, <span class="st">"CO"</span>, <span class="st">"CO"</span><span class="op">)</span>,</span>
 <span>  check.names <span class="op">=</span> <span class="cn">FALSE</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>The last two reference rows are deliberate noise: an NPI that fails
 the Luhn check, and a Type 2 organisation that happens to be called
@@ -178,7 +183,7 @@ the Luhn check, and a Type 2 organisation that happens to be called
 <span>  nppes_surname <span class="op">=</span> <span class="st">"Provider Last Name (Legal Name)"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">counts</span><span class="op">)</span></span>
-<span><span class="co">#&gt; List of 8</span></span>
+<span><span class="co">#&gt; List of 9</span></span>
 <span><span class="co">#&gt;  $ roster_rows          : int 12</span></span>
 <span><span class="co">#&gt;  $ matches              : int 5</span></span>
 <span><span class="co">#&gt;  $ review               : int 5</span></span>
@@ -186,6 +191,7 @@ the Luhn check, and a Type 2 organisation that happens to be called
 <span><span class="co">#&gt;  $ candidates           : int 11</span></span>
 <span><span class="co">#&gt;  $ candidate_pairs      : int 35</span></span>
 <span><span class="co">#&gt;  $ missing_required_name: int 1</span></span>
+<span><span class="co">#&gt;  $ blocked_by_attribute : int(0) </span></span>
 <span><span class="co">#&gt;  $ reference            :List of 5</span></span>
 <span><span class="co">#&gt;   ..$ input                : int 12</span></span>
 <span><span class="co">#&gt;   ..$ entity_type          : int 11</span></span>
@@ -368,12 +374,102 @@ record:</p>
 <span><span class="co">#&gt; [1] 10</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="breaking-ties-with-what-else-you-know">Breaking ties with what else you know<a class="anchor" aria-label="anchor" href="#breaking-ties-with-what-else-you-know"></a>
+</h2>
+<p>Names tie. Against the national file, “R. Brown” meets every Robert,
+Rachel, and Richard Brown at the same strength, and the gate rightly
+refuses to pick one. What breaks a tie is a second field the two sources
+recorded independently. <code>attributes</code> maps up to six of them –
+<code>state</code>, <code>gender</code>, <code>credential</code>,
+<code>taxonomy</code>, <code>license</code>,
+<code>graduation_year</code> – and each is judged by the package’s own
+rule for that field (<code><a href="../reference/gender_agreement.html">gender_agreement()</a></code>,
+<code><a href="../reference/normalize_credential.html">normalize_credential()</a></code>, <code><a href="../reference/taxonomy_consistent.html">taxonomy_consistent()</a></code>,
+<code><a href="../reference/license_agreement.html">license_agreement()</a></code>,
+<code><a href="../reference/graduation_year_agreement.html">graduation_year_agreement()</a></code>), never by a bespoke
+comparison. The verdicts are the same three words as everywhere else: a
+conflict vetoes the candidate into <code>review</code> with reason
+<code>&lt;attribute&gt;_conflict</code>, a corroboration counts toward
+<code>attribute_rank</code> (the tie-break after evidence class and
+middle name), and absence on either side is uninformative.</p>
+<p>Mary Jones (r06) tied between two reference rows. The roster says she
+is in Rhode Island and an MD; one reference Mary Jones is in Colorado
+and a DO:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result_attr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/match_npi.html">match_npi</a></span><span class="op">(</span></span>
+<span>  <span class="va">roster</span>, <span class="va">nppes</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"record"</span>, given <span class="op">=</span> <span class="st">"first"</span>, middle <span class="op">=</span> <span class="st">"middle"</span>, surname <span class="op">=</span> <span class="st">"last"</span>,</span>
+<span>  npi <span class="op">=</span> <span class="st">"NPI"</span>, entity_type <span class="op">=</span> <span class="st">"Entity Type Code"</span>,</span>
+<span>  nppes_given <span class="op">=</span> <span class="st">"Provider First Name"</span>, nppes_middle <span class="op">=</span> <span class="st">"Provider Middle Name"</span>,</span>
+<span>  nppes_surname <span class="op">=</span> <span class="st">"Provider Last Name (Legal Name)"</span>,</span>
+<span>  attributes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>roster <span class="op">=</span> <span class="st">"state"</span>,</span>
+<span>              nppes <span class="op">=</span> <span class="st">"Provider Business Practice Location Address State Name"</span><span class="op">)</span>,</span>
+<span>    credential <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>roster <span class="op">=</span> <span class="st">"credential"</span>, nppes <span class="op">=</span> <span class="st">"Provider Credential Text"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show</span><span class="op">(</span><span class="va">result_attr</span><span class="op">$</span><span class="va">matches</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    record first          last state        npi               reason</span></span>
+<span><span class="co">#&gt; 1     r01  Jane           Doe    CO 1234567893 unique_best_evidence</span></span>
+<span><span class="co">#&gt; 2     r02    R.         Brown    CO 1046000000 unique_best_evidence</span></span>
+<span><span class="co">#&gt; 3     r03  Anne Nelson Becker    CO 1053000000 unique_best_evidence</span></span>
+<span><span class="co">#&gt; 6     r06  Mary         Jones    RI 1020000000 unique_best_evidence</span></span>
+<span><span class="co">#&gt; 11    r11  Jose        Garcia    NM 1061000000 unique_best_evidence</span></span>
+<span><span class="co">#&gt; 12    r12 Maria         Lopez    NM 1079000000 unique_best_evidence</span></span>
+<span><span class="va">result_attr</span><span class="op">$</span><span class="va">candidates</span><span class="op">[</span><span class="va">result_attr</span><span class="op">$</span><span class="va">candidates</span><span class="op">$</span><span class="va">source_id</span> <span class="op">==</span> <span class="st">"r06"</span>,</span>
+<span>                       <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"npi"</span>, <span class="st">"evidence_class"</span>, <span class="st">"state_evidence"</span>, <span class="st">"credential_evidence"</span>,</span>
+<span>                         <span class="st">"attribute_rank"</span>, <span class="st">"disposition"</span>, <span class="st">"reason"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;          npi   evidence_class state_evidence credential_evidence attribute_rank</span></span>
+<span><span class="co">#&gt; 6 1012000000 conflicting_name      conflicts           conflicts              0</span></span>
+<span><span class="co">#&gt; 7 1020000000       exact_name   corroborates        corroborates              2</span></span>
+<span><span class="co">#&gt;   disposition              reason</span></span>
+<span><span class="co">#&gt; 6      review      state_conflict</span></span>
+<span><span class="co">#&gt; 7    eligible exact_name_evidence</span></span></code></pre></div>
+<p>Two things did not change, on purpose. The Carol White contest (r07
+and r08) still stands: both roster rows are in Texas, both corroborate,
+and a shared NPI at full strength is a review item regardless of how
+much else agrees. And the Colorado Mary Jones was not deleted; she is in
+<code>candidates</code> with the reason a reviewer needs.</p>
+<p>If you would rather treat a field as a true blocking variable – a
+conflict means “not a candidate at all” – name it in <code>block</code>.
+The rows are removed before evidence and counted:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result_block</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/match_npi.html">match_npi</a></span><span class="op">(</span></span>
+<span>  <span class="va">roster</span>, <span class="va">nppes</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"record"</span>, given <span class="op">=</span> <span class="st">"first"</span>, middle <span class="op">=</span> <span class="st">"middle"</span>, surname <span class="op">=</span> <span class="st">"last"</span>,</span>
+<span>  npi <span class="op">=</span> <span class="st">"NPI"</span>, entity_type <span class="op">=</span> <span class="st">"Entity Type Code"</span>,</span>
+<span>  nppes_given <span class="op">=</span> <span class="st">"Provider First Name"</span>, nppes_middle <span class="op">=</span> <span class="st">"Provider Middle Name"</span>,</span>
+<span>  nppes_surname <span class="op">=</span> <span class="st">"Provider Last Name (Legal Name)"</span>,</span>
+<span>  attributes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>roster <span class="op">=</span> <span class="st">"state"</span>,</span>
+<span>              nppes <span class="op">=</span> <span class="st">"Provider Business Practice Location Address State Name"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  block <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">result_block</span><span class="op">$</span><span class="va">counts</span><span class="op">$</span><span class="va">blocked_by_attribute</span></span>
+<span><span class="co">#&gt; state </span></span>
+<span><span class="co">#&gt;     1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">result_block</span><span class="op">$</span><span class="va">candidates</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 10</span></span></code></pre></div>
+<p>Against NPPES the usual maps are <code>Provider Sex Code</code> for
+<code>gender</code>, <code>Healthcare Provider Taxonomy Code_1</code>
+for <code>taxonomy</code> (the roster side holds a code or a prefix such
+as <code>207V</code>), and <code>Provider License Number_1</code> with
+<code>Provider License Number State Code_1</code> for
+<code>license</code> (which can only corroborate: a quarter of NPIs
+carry more than one license, so a different number is not a
+disagreement). NPPES has no graduation year; map
+<code>graduation_year</code> to a credentialing or enumeration year from
+another source, and keep it out of <code>block</code>: beyond ten years
+is a flag, not proof of a different person. Practice state moves with
+careers, so <code>state</code> is strongest as a tie-break and should be
+blocked on only when the roster’s state is current.</p>
+</div>
+<div class="section level2">
 <h2 id="where-the-rows-went">Where the rows went<a class="anchor" aria-label="anchor" href="#where-the-rows-went"></a>
 </h2>
 <p>The candidate funnel: from the reference table through the entity
 filter and the validity gates to the pairs the blocks retrieved, the
 identities the evidence layer scored, and the records that resolved.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">counts</span></span>
 <span><span class="va">funnel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`reference rows` <span class="op">=</span> <span class="va">counts</span><span class="op">$</span><span class="va">reference</span><span class="op">$</span><span class="va">input</span>,</span>
 <span>            `Type 1` <span class="op">=</span> <span class="va">counts</span><span class="op">$</span><span class="va">reference</span><span class="op">$</span><span class="va">entity_type</span>,</span>
@@ -385,17 +481,17 @@ identities the evidence layer scored, and the records that resolved.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">funnel</span><span class="op">)</span>, horiz <span class="op">=</span> <span class="cn">TRUE</span>, las <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"grey70"</span>, border <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>        xlab <span class="op">=</span> <span class="st">"rows"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="end-to-end-nppes-matching_files/figure-html/funnel-1.png" class="r-plt" alt="Bar chart of the candidate funnel from reference rows to matches." width="672"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">op</span><span class="op">)</span></span></code></pre></div>
 <p>Dispositions by reason, which is the view a review queue is planned
 from:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reasons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">matches</span><span class="op">$</span><span class="va">reason</span>, <span class="va">result</span><span class="op">$</span><span class="va">review</span><span class="op">$</span><span class="va">reason</span>, <span class="va">result</span><span class="op">$</span><span class="va">unmatched</span><span class="op">$</span><span class="va">reason</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">op</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">14</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">reasons</span><span class="op">)</span>, horiz <span class="op">=</span> <span class="cn">TRUE</span>, las <span class="op">=</span> <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"grey70"</span>, border <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>        xlab <span class="op">=</span> <span class="st">"roster rows"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="end-to-end-nppes-matching_files/figure-html/dispositions-1.png" class="r-plt" alt="Bar chart of roster rows by disposition reason." width="672"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">op</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -406,7 +502,7 @@ gives a state-level view of linkage outcomes. The maps describe <em>this
 roster’s</em> match rate per state and nothing else: they say nothing
 about provider availability or quality, and no NPPES address is geocoded
 (the roster carries a state, not a street address).</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">matches</span>, <span class="va">result</span><span class="op">$</span><span class="va">review</span>, <span class="va">result</span><span class="op">$</span><span class="va">unmatched</span><span class="op">)</span></span>
 <span><span class="va">outcome</span><span class="op">$</span><span class="va">matched</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">outcome</span><span class="op">$</span><span class="va">reason</span> <span class="op">==</span> <span class="st">"unique_best_evidence"</span><span class="op">)</span></span>
 <span><span class="va">outcome</span><span class="op">$</span><span class="va">needs_review</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">outcome</span><span class="op">$</span><span class="va">record</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">result</span><span class="op">$</span><span class="va">review</span><span class="op">$</span><span class="va">record</span><span class="op">)</span></span>
@@ -416,12 +512,12 @@ about provider availability or quality, and no NPPES address is geocoded
 <span><span class="co">#&gt; 2    NM 0.6666667    0.0000000</span></span>
 <span><span class="co">#&gt; 3    RI 0.0000000    1.0000000</span></span>
 <span><span class="co">#&gt; 4    TX 0.0000000    0.6666667</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">state_map</span><span class="op">(</span><span class="va">outcome</span>, state_col <span class="op">=</span> <span class="st">"state"</span>, outcome_col <span class="op">=</span> <span class="st">"matched"</span>,</span>
 <span>                fill_label <span class="op">=</span> <span class="st">"Matched"</span>, title <span class="op">=</span> <span class="st">"Share of roster rows with a unique NPI"</span>,</span>
 <span>                subtitle <span class="op">=</span> <span class="st">"Synthetic roster; four states; not a measure of provider supply"</span>,</span>
 <span>                low_states_warn <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu">state_map</span><span class="op">(</span><span class="va">outcome</span>, state_col <span class="op">=</span> <span class="st">"state"</span>, outcome_col <span class="op">=</span> <span class="st">"needs_review"</span>,</span>
 <span>                fill_label <span class="op">=</span> <span class="st">"Needs review"</span>, title <span class="op">=</span> <span class="st">"Share of roster rows routed to review"</span>,</span>
 <span>                subtitle <span class="op">=</span> <span class="st">"Synthetic roster; the review queue a team would work"</span>,</span>
@@ -439,7 +535,7 @@ rebuild.</em></p>
 several gigabytes; the DuckDB path keeps it on disk.</p>
 <p>A full extract already loaded into R, using the standard NPPES
 headers:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nppes_full</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu">read_csv</span><span class="op">(</span><span class="st">"npidata_pfile.csv"</span>, col_types <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu">cols</span><span class="op">(</span>.default <span class="op">=</span> <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/match_npi.html">match_npi</a></span><span class="op">(</span></span>
 <span>  <span class="va">my_roster</span>, <span class="va">nppes_full</span>,</span>
@@ -450,7 +546,7 @@ headers:</p>
 <p>An existing DuckDB database, opened read-only, with the table named
 explicitly (a <code><a href="https://dbi.r-dbi.org/reference/Id.html" class="external-link">DBI::Id()</a></code> works for a schema-qualified
 table):</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"nppes.duckdb"</span>, read_only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/match_npi.html">match_npi</a></span><span class="op">(</span></span>
 <span>  <span class="va">my_roster</span>, <span class="va">con</span>, table <span class="op">=</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/Id.html" class="external-link">Id</a></span><span class="op">(</span>schema <span class="op">=</span> <span class="st">"main"</span>, table <span class="op">=</span> <span class="st">"npidata"</span><span class="op">)</span>,</span>

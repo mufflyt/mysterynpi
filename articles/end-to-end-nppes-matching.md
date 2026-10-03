@@ -85,6 +85,7 @@ roster <- data.frame(
   last   = c("Doe", "Brown", "Nelson Becker", "Smith", "Smith", "Jones", "White",
              "White", "Lee", "Zzyzx", "Garcia", "Lopez"),
   state  = c("CO", "CO", "CO", "RI", "RI", "RI", "TX", "TX", "TX", "NM", "NM", "NM"),
+  credential = c("MD", NA, "MD", NA, NA, "MD", "MD", NA, NA, NA, "MD", NA),
   stringsAsFactors = FALSE)
 
 nppes <- data.frame(
@@ -98,6 +99,10 @@ nppes <- data.frame(
   `Provider Last Name (Legal Name)` = c("Doe", "Brown", "Nelson-Becker", "Smith",
                                         "Smith", "Jones", "Jones", "White", "García",
                                         "Lopez", "Doe", "Doe"),
+  `Provider Credential Text` = c("M.D.", NA, "MD", NA, NA, "D.O.", "M.D.", "MD", NA,
+                                 NA, NA, NA),
+  `Provider Business Practice Location Address State Name` =
+    c("CO", "CO", "CO", "RI", "RI", "CO", "RI", "TX", "NM", "NM", "CO", "CO"),
   check.names = FALSE, stringsAsFactors = FALSE)
 ```
 
@@ -117,7 +122,7 @@ result <- match_npi(
   nppes_surname = "Provider Last Name (Legal Name)")
 
 str(result$counts)
-#> List of 8
+#> List of 9
 #>  $ roster_rows          : int 12
 #>  $ matches              : int 5
 #>  $ review               : int 5
@@ -125,6 +130,7 @@ str(result$counts)
 #>  $ candidates           : int 11
 #>  $ candidate_pairs      : int 35
 #>  $ missing_required_name: int 1
+#>  $ blocked_by_attribute : int(0) 
 #>  $ reference            :List of 5
 #>   ..$ input                : int 12
 #>   ..$ entity_type          : int 11
@@ -311,6 +317,103 @@ result_db$run_manifest[c("backend", "table", "package_version", "nickname_policy
 #> $reference_rows_usable
 #> [1] 10
 ```
+
+## Breaking ties with what else you know
+
+Names tie. Against the national file, “R. Brown” meets every Robert,
+Rachel, and Richard Brown at the same strength, and the gate rightly
+refuses to pick one. What breaks a tie is a second field the two sources
+recorded independently. `attributes` maps up to six of them – `state`,
+`gender`, `credential`, `taxonomy`, `license`, `graduation_year` – and
+each is judged by the package’s own rule for that field
+([`gender_agreement()`](https://mufflyt.github.io/mysterynpi/reference/gender_agreement.md),
+[`normalize_credential()`](https://mufflyt.github.io/mysterynpi/reference/normalize_credential.md),
+[`taxonomy_consistent()`](https://mufflyt.github.io/mysterynpi/reference/taxonomy_consistent.md),
+[`license_agreement()`](https://mufflyt.github.io/mysterynpi/reference/license_agreement.md),
+[`graduation_year_agreement()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.md)),
+never by a bespoke comparison. The verdicts are the same three words as
+everywhere else: a conflict vetoes the candidate into `review` with
+reason `<attribute>_conflict`, a corroboration counts toward
+`attribute_rank` (the tie-break after evidence class and middle name),
+and absence on either side is uninformative.
+
+Mary Jones (r06) tied between two reference rows. The roster says she is
+in Rhode Island and an MD; one reference Mary Jones is in Colorado and a
+DO:
+
+``` r
+
+result_attr <- match_npi(
+  roster, nppes,
+  id = "record", given = "first", middle = "middle", surname = "last",
+  npi = "NPI", entity_type = "Entity Type Code",
+  nppes_given = "Provider First Name", nppes_middle = "Provider Middle Name",
+  nppes_surname = "Provider Last Name (Legal Name)",
+  attributes = list(
+    state = c(roster = "state",
+              nppes = "Provider Business Practice Location Address State Name"),
+    credential = c(roster = "credential", nppes = "Provider Credential Text")))
+
+show(result_attr$matches)
+#>    record first          last state        npi               reason
+#> 1     r01  Jane           Doe    CO 1234567893 unique_best_evidence
+#> 2     r02    R.         Brown    CO 1046000000 unique_best_evidence
+#> 3     r03  Anne Nelson Becker    CO 1053000000 unique_best_evidence
+#> 6     r06  Mary         Jones    RI 1020000000 unique_best_evidence
+#> 11    r11  Jose        Garcia    NM 1061000000 unique_best_evidence
+#> 12    r12 Maria         Lopez    NM 1079000000 unique_best_evidence
+result_attr$candidates[result_attr$candidates$source_id == "r06",
+                       c("npi", "evidence_class", "state_evidence", "credential_evidence",
+                         "attribute_rank", "disposition", "reason")]
+#>          npi   evidence_class state_evidence credential_evidence attribute_rank
+#> 6 1012000000 conflicting_name      conflicts           conflicts              0
+#> 7 1020000000       exact_name   corroborates        corroborates              2
+#>   disposition              reason
+#> 6      review      state_conflict
+#> 7    eligible exact_name_evidence
+```
+
+Two things did not change, on purpose. The Carol White contest (r07 and
+r08) still stands: both roster rows are in Texas, both corroborate, and
+a shared NPI at full strength is a review item regardless of how much
+else agrees. And the Colorado Mary Jones was not deleted; she is in
+`candidates` with the reason a reviewer needs.
+
+If you would rather treat a field as a true blocking variable – a
+conflict means “not a candidate at all” – name it in `block`. The rows
+are removed before evidence and counted:
+
+``` r
+
+result_block <- match_npi(
+  roster, nppes,
+  id = "record", given = "first", middle = "middle", surname = "last",
+  npi = "NPI", entity_type = "Entity Type Code",
+  nppes_given = "Provider First Name", nppes_middle = "Provider Middle Name",
+  nppes_surname = "Provider Last Name (Legal Name)",
+  attributes = list(
+    state = c(roster = "state",
+              nppes = "Provider Business Practice Location Address State Name")),
+  block = "state")
+
+result_block$counts$blocked_by_attribute
+#> state 
+#>     1
+nrow(result_block$candidates)
+#> [1] 10
+```
+
+Against NPPES the usual maps are `Provider Sex Code` for `gender`,
+`Healthcare Provider Taxonomy Code_1` for `taxonomy` (the roster side
+holds a code or a prefix such as `207V`), and
+`Provider License Number_1` with `Provider License Number State Code_1`
+for `license` (which can only corroborate: a quarter of NPIs carry more
+than one license, so a different number is not a disagreement). NPPES
+has no graduation year; map `graduation_year` to a credentialing or
+enumeration year from another source, and keep it out of `block`: beyond
+ten years is a flag, not proof of a different person. Practice state
+moves with careers, so `state` is strongest as a tie-break and should be
+blocked on only when the roster’s state is current.
 
 ## Where the rows went
 

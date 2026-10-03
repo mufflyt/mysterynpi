@@ -155,6 +155,10 @@ result$unmatched # no_candidate, missing_required_name
 Candidates come from bounded blocks (never an all-pairs join); nothing
 resolves on a tie, a nickname alone, or a fuzzy route alone; the
 in-memory and DuckDB backends share one policy and one output schema.
+Optional `attributes` (`state`, `gender`, `credential`, `taxonomy`,
+`license`, `graduation_year`) veto conflicts and break ties with the
+package’s own agreement rules, or act as true blocking variables when
+named in `block`.
 [`vignette("end-to-end-nppes-matching")`](https://mufflyt.github.io/mysterynpi/articles/end-to-end-nppes-matching.md)
 walks a synthetic roster through both paths, with diagrams and state
 maps.

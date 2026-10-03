@@ -94,16 +94,42 @@ test_that("DuckDB excludes invalid NPIs and missing names sequentially within en
 test_that("DuckDB name normalization matches accents parentheses particles and token order", {
   reference <- duck_reference(
     c("José", "Jörg", "C(arolyn)", "Cynthia (Cindi)", "Renée", "Sean", "Mary Anne",
-      "A.", "Jane", "Jane", "Łukasz", "François", "Zoe\u0308"),
+      "A.", "Jane", "Jane", "Łukasz", "François", "Zoe\u0308", "Ho\u0329ang",
+      "Nguye\u0303n"),
     c("García", "Müller", "de la Cruz", "O’Connor", "Dùpont", "O`Brien", "van van Erven",
-      "Li", "X", "---", "Żółć", "Dœ", "Åström"),
-    middle = c(rep(NA, 6), "Jane", rep(NA, 6)))
+      "Li", "X", "---", "Żółć", "Dœ", "Åström", "Ho\u0329ang", "Nguye\u0303n"),
+    middle = c(rep(NA, 6), "Jane", rep(NA, 8)))
   roster <- duck_roster(
     c("Jose", "Joerg", "Carolyn", "Cynthia", "Renee", "Sean", "Jane", "A", "Jane",
-      "Jane", "Lukasz", "Francois", "Zoe"),
+      "Jane", "Lukasz", "Francois", "Zoe", "Hoang", "Nguyen"),
     c("Garcia", "Mueller", "Cruz", "Oconnor", "Dupont", "Obrien", "van Erven",
-      "Li", "X", "---", "Zolc", "Doe", "Aastroem"))
-  duck_expect_parity(roster, reference)
+      "Li", "X", "---", "Zolc", "Doe", "Aastroem", "Hoang", "Nguyen"))
+  result <- duck_expect_parity(roster, reference)
+  # A combining mark with no precomposed form (U+0329) and one that composes
+  # under NFC (U+0303) both reach the exact block, in SQL and in R alike.
+  for (record in c("r14", "r15")) {
+    expect_true(any(result$pairs$source_id == record &
+                      result$pairs$block_route == "exact_given_surname"))
+  }
+})
+
+test_that("DuckDB renders numeric NPI and entity-type columns like the memory backend", {
+  reference <- data.frame(
+    provider = c(1234567893, 1245319599, 1234567893.5, 1234567890, 1004000000, NA),
+    type = c(1, 2, 1, 1, 1, 1), first = "Jane", middle = NA_character_, last = "Doe")
+  result <- duck_expect_parity(duck_roster(), reference)
+  # 1004000000 is Luhn-valid; as.character() would have written it 1.004e+09.
+  expect_setequal(result$pairs$npi, c("1234567893", "1004000000"))
+  expect_identical(result$reference_counts,
+                   c(input = 6L, entity_type = 5L, invalid_npi = 3L,
+                     missing_required_name = 0L, usable = 2L))
+  type2 <- duck_expect_parity(duck_roster(), reference, type = "2")
+  expect_identical(unique(type2$pairs$npi), "1245319599")
+  integers <- data.frame(provider = c(1234567893L, 1245319599L), type = c(1L, 2L),
+                         first = "Jane", middle = NA_character_, last = "Doe")
+  result <- duck_expect_parity(duck_roster(), integers)
+  expect_identical(unique(result$pairs$npi), "1234567893")
+  expect_identical(result$reference_counts[["usable"]], 1L)
 })
 
 test_that("DuckDB never truncates matching blocks and produces typed empty results", {

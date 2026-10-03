@@ -15,9 +15,17 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   quote_id <- function(x) as.character(DBI::dbQuoteIdentifier(con, x))
   literal <- function(x) as.character(DBI::dbQuoteLiteral(con, x))
   source_table <- quote_id(table)
+  numeric_fields <- .npi_duckdb_numeric_fields(con, source_table, columns, quote_id)
   field <- function(name) {
-    if (is.null(columns[[name]])) "NULL::VARCHAR"
-    else paste0("CAST(", quote_id(columns[[name]]), " AS VARCHAR)")
+    if (is.null(columns[[name]])) return("NULL::VARCHAR")
+    x <- quote_id(columns[[name]])
+    if (!isTRUE(numeric_fields[[name]])) return(paste0("CAST(", x, " AS VARCHAR)"))
+    # Mirror .match_npi_text(): whole numbers become plain digits (a DOUBLE
+    # would otherwise cast to "1234567893.0"); fractional values keep their
+    # decimal text, which never validates as an NPI or equals an entity code.
+    paste0("CASE WHEN ", x, " IS NULL THEN NULL WHEN ", x, " = trunc(", x,
+           ") AND abs(", x, ") < 1e18 THEN CAST(CAST(", x,
+           " AS BIGINT) AS VARCHAR) ELSE CAST(", x, " AS VARCHAR) END")
   }
   # Unique names and explicit temp-schema qualification prevent collisions with
   # persistent tables, including during cleanup after a failed CREATE.
@@ -71,6 +79,9 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   # This small Unicode dictionary is generated independently of reference data.
   # ICU supplies the same Latin-ASCII mapping as name_key; NFC happens in SQL.
   # BMP Latin, punctuation, and presentation forms cover supported name keys.
+  # Combining marks that survive NFC (no precomposed form, e.g. o + U+0329)
+  # are dropped before the per-character lookup: ICU's Latin-ASCII removes
+  # them in context, but a lone mark is not in the dictionary.
   chars <- intToUtf8(setdiff(seq_len(65535L), 55296L:57343L), multiple = TRUE)
   transliterated <- stringi::stri_trans_general(chars, "Latin-ASCII")
   german <- c("ü", "Ü", "ö", "Ö", "ä", "Ä", "ß")
@@ -81,7 +92,8 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   normalize <- macro("normalize", "value", paste0(
     "CASE WHEN value IS NULL THEN NULL ELSE upper(coalesce((SELECT ",
     "string_agg(coalesce(m.replacement, c.ch), '' ORDER BY c.pos) FROM ",
-    "unnest(string_split(nfc_normalize(value), '')) WITH ORDINALITY c(ch, pos) ",
+    "unnest(string_split(regexp_replace(nfc_normalize(value), '\\p{Mn}', '', 'g'), '')) ",
+    "WITH ORDINALITY c(ch, pos) ",
     "LEFT JOIN ", transliteration, " m ON m.ch = c.ch), '')) END"))
   reg <- function(x, pattern, replacement) {
     paste0("regexp_replace(", x, ", ", literal(pattern), ", ", literal(replacement), ", 'g')")
@@ -183,6 +195,21 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   pairs <- pairs[keep, , drop = FALSE]
   rownames(pairs) <- NULL
   list(pairs = pairs, reference_counts = counts)
+}
+
+# Which mapped reference columns are numeric in DuckDB, by declared type.
+.npi_duckdb_numeric_fields <- function(con, source_table, columns, quote_id) {
+  fields <- c("npi", "entity_type", "nppes_given", "nppes_middle", "nppes_surname")
+  fields <- fields[!vapply(columns[fields], is.null, logical(1))]
+  selected <- vapply(fields, function(name) {
+    paste0(quote_id(columns[[name]]), " AS ", quote_id(name))
+  }, character(1))
+  described <- DBI::dbGetQuery(con, paste0(
+    "DESCRIBE SELECT ", paste(selected, collapse = ", "), " FROM ", source_table))
+  numeric <- grepl(paste0("^(U?TINYINT|U?SMALLINT|U?INTEGER|U?BIGINT|U?HUGEINT|",
+                          "FLOAT|REAL|DOUBLE|DECIMAL|NUMERIC)"),
+                   toupper(described$column_type))
+  stats::setNames(as.list(numeric), described$column_name)
 }
 
 .npi_duckdb_validate <- function(con, table, roster, columns, entity_filter) {

@@ -79,6 +79,20 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
              else name_key(data[[middle]]), last = name_key(data[[surname]]))
 }
 
+# NPI and entity-type identifiers may arrive as numbers. Whole numbers render
+# as plain digits (as.character() would write 1004000000 as "1.004e+09" and a
+# valid NPI would silently fail validation); fractional values keep their
+# decimal text and can never pass NPI validation or equal an entity code. The
+# DuckDB backend mirrors this rendering in SQL.
+.match_npi_text <- function(x) {
+  out <- as.character(x)
+  if (is.numeric(x)) {
+    whole <- !is.na(x) & is.finite(x) & x == trunc(x) & abs(x) < 1e18
+    out[whole] <- sprintf("%.0f", x[whole])
+  }
+  out
+}
+
 .match_npi_name_mode <- function(given, middle, surname, full_name, label) {
   structured <- !is.null(given) && !is.null(surname)
   any_structured <- !is.null(given) || !is.null(middle) || !is.null(surname)
@@ -126,10 +140,10 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
       is.na(entity_filter) || !nzchar(trimws(entity_filter))) {
     stop("entity_filter must be a nonblank character value", call. = FALSE)
   }
-  keep <- as.character(nppes[[columns$entity_type]]) == entity_filter
+  keep <- .match_npi_text(nppes[[columns$entity_type]]) == entity_filter
   reference <- nppes[!is.na(keep) & keep, , drop = FALSE]
   if (!nrow(reference)) stop("no reference rows remain after entity filtering", call. = FALSE)
-  reference[[columns$npi]] <- as.character(reference[[columns$npi]])
+  reference[[columns$npi]] <- .match_npi_text(reference[[columns$npi]])
   source_names <- .match_npi_names(roster, columns$given, columns$middle,
                                   columns$surname, columns$full_name)
   reference_names <- .match_npi_names(reference, columns$nppes_given, columns$nppes_middle,

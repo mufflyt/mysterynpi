@@ -165,3 +165,18 @@ test_that("memory candidate normalization supports full-name mappings", {
   expect_identical(unique(result$pairs$npi), "1234567893")
   expect_identical(unique(result$pairs$roster_first), "JANE")
 })
+
+test_that("memory numeric NPI and entity columns never render in scientific notation", {
+  reference <- data.frame(provider = c(1004000000, 1234567893.5, 1234567893),
+                          type = c(1, 1, 2), first = "Jane", middle = NA_character_,
+                          last = "Doe")
+  result <- generate_npi_candidates_memory(memory_roster(), reference, memory_columns())
+  expect_identical(unique(result$pairs$npi), "1004000000")
+  expect_identical(result$reference_counts,
+                   c(input = 3L, entity_type = 2L, invalid_npi = 1L,
+                     missing_required_name = 0L, usable = 1L))
+  type2 <- generate_npi_candidates_memory(memory_roster(), reference, memory_columns(), "2")
+  expect_identical(unique(type2$pairs$npi), "1234567893")
+  expect_identical(.match_npi_text(c(1004000000, 1.5, NA, 12L)),
+                   c("1004000000", "1.5", NA, "12"))
+})

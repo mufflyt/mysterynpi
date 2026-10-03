@@ -60,7 +60,7 @@ generate_npi_candidates_memory <- function(roster, nppes, columns, entity_filter
   for (i in sources) {
     for (route in names(indexes)) {
       keys <- source_blocks[[route]][[i]]
-      hits <- unique(unlist(indexes[[route]][keys], use.names = FALSE))
+      hits <- .npi_memory_lookup(indexes[[route]], keys)
       if (!length(hits)) next
       if (route == "nickname_surname") {
         hits <- hits[nchar(source_lead[i]) >= 2L & nchar(ref_lead[hits]) >= 2L &
@@ -142,5 +142,17 @@ generate_npi_candidates_memory <- function(roster, nppes, columns, entity_filter
 
 .npi_memory_index <- function(keys) {
   rows <- rep(seq_along(keys), lengths(keys))
-  split(rows, unlist(keys, use.names = FALSE))
+  flat_keys <- unlist(keys, use.names = FALSE)
+  present <- has_name_information(flat_keys)
+  postings <- split(rows[present], flat_keys[present])
+  # Hash-backed retrieval avoids scanning every distinct reference block key.
+  list2env(postings, parent = emptyenv(), hash = TRUE, size = max(29L, length(postings)))
+}
+
+.npi_memory_lookup <- function(index, keys) {
+  keys <- keys[has_name_information(keys)]
+  if (!length(keys)) return(integer())
+  postings <- mget(keys, envir = index, inherits = FALSE, ifnotfound = list(integer()))
+  hits <- unique(unlist(postings, use.names = FALSE))
+  if (length(hits)) hits else integer()
 }

@@ -14,6 +14,23 @@ memory_reference <- function(first = "Jane", last = "Doe", middle = NA_character
   data.frame(provider = provider, type = type, first = first, middle = middle, last = last)
 }
 
+test_that("memory postings use hash backing and retrieve exact distinct reference rows", {
+  index <- .npi_memory_index(list(c("A", "B", "A"), character(), "A", "C"))
+  expect_true(is.environment(index))
+  if (is.environment(index)) expect_false(is.null(env.profile(index)))
+  expect_identical(.npi_memory_lookup(index, c("B", "A", "B", "missing")), c(1L, 3L))
+  expect_identical(.npi_memory_lookup(index, "C"), 4L)
+  expect_identical(.npi_memory_lookup(index, c("missing", "mean")), integer())
+  expect_identical(.npi_memory_lookup(index, character()), integer())
+  expect_identical(.npi_memory_lookup(index, c("", NA_character_, "A")), c(1L, 3L))
+  empty <- .npi_memory_index(list(character(), character()))
+  expect_true(is.environment(empty))
+  if (is.environment(empty)) expect_false(is.null(env.profile(empty)))
+  expect_identical(.npi_memory_lookup(empty, "A"), integer())
+  blank <- .npi_memory_index(list(c("", NA_character_), "A"))
+  expect_identical(.npi_memory_lookup(blank, c("", NA_character_, "A")), 2L)
+})
+
 test_that("memory candidates filter entities and account sequential reference exclusions", {
   reference <- memory_reference(
     first = c("Jane", "Jane", "Jane", "", "Jane", "Jane"),

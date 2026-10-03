@@ -5,7 +5,7 @@ written spec.
 
 ## Goal
 
-Make `mysterynpi` take a source roster and caller-provided NPPES Type 1 data all
+Make `mysterynpi` take a source roster and user-provided NPPES Type 1 data all
 the way through candidate generation, evidence assessment, conservative identity
 resolution, and reviewable outputs with a rationale for every candidate.
 
@@ -18,7 +18,7 @@ or already-loaded tables; the DuckDB path must avoid importing the full national
 reference table into R merely to generate candidates.
 
 NPPES Type 1 individuals are the default candidate universe. The source table is
-provided by the caller: the package does not download NPPES, choose a database
+provided by the user: the package does not download NPPES, choose a database
 path, or assume that a particular local database is current. Matching is
 limited to identity linkage; it does not establish licensure, specialty,
 practice status, or whether a provider is currently active.
@@ -29,9 +29,9 @@ Add a high-level `match_npi()` entry point in `mysterynpi`.
 
 - `roster` is a data frame. It contains a stable source-record ID and either
   structured name fields or a full-name field handled through existing
-  `mysterynpi` parsing tools. Callers may map nonstandard source columns.
+  `mysterynpi` parsing tools. Users may map nonstandard source columns.
 - `nppes` is either a data frame or a DuckDB DBI connection. When it is a
-  connection, a caller-supplied table identifier is required. Callers map the
+  connection, a user-supplied table identifier is required. Users map the
   NPPES NPI, entity type, and name columns when they do not use standard NPPES
   headers.
 - The entity-type filter defaults to Type 1. The input data frame and persistent
@@ -94,7 +94,7 @@ equivalent candidate identities and dispositions.
 
 The DuckDB path accepts an existing DBI connection and a table identifier. It
 uses only connection-scoped temporary/registered data where needed; it must not
-create, update, or replace persistent tables or write to the caller's database.
+create, update, or replace persistent tables or write to the user's database.
 Identifiers are quoted through DBI rather than interpolated as raw SQL. A
 missing table, missing required field, unsupported connection backend, or empty
 Type 1 reference set produces a clear error rather than an empty-looking result.
@@ -133,7 +133,7 @@ The feature is acceptable when:
 1. One public call can take roster rows through candidate generation, evidence,
    conservative resolution, and rationale-bearing result outputs.
 2. Type 1 filtering is the default in both backends; Type 2 organizations are
-   excluded unless the caller deliberately changes the entity filter.
+   excluded unless the user deliberately changes the entity filter.
 3. Candidate generation is bounded/indexed and there is no all-pairs join.
 4. Name conflicts, tied candidates, contested NPIs, nickname-only candidates,
    fuzzy-only candidates, missing names, invalid NPIs, duplicate evidence paths,
@@ -159,4 +159,4 @@ The feature is acceptable when:
 - Geocoding NPPES addresses or making maps part of the identity decision.
 - Claiming match probabilities, precision, or recall without an adjudicated
   validation set.
-- Writing persistent indexes, match tables, or outputs into caller databases.
+- Writing persistent indexes, match tables, or outputs into user databases.

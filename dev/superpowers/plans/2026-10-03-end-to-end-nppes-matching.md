@@ -209,7 +209,10 @@ For a DBI connection, require `table`; for data frames, reject an unexpected tab
 - [ ] **Step 4: Run integration and regression checks**
 
 Run: `Rscript -e "testthat::test_file('tests/testthat/test-match-npi-backend-parity.R')"`
-Expected: PASS with parity assertions. Then run `Rscript RUN_REGRESSION_TESTS.R` as the package checkpoint.
+Expected: PASS with parity assertions. Then run
+`Rscript -e 'pkgload::load_all(); testthat::test_dir("tests/testthat")'` as the package
+checkpoint (`RUN_REGRESSION_TESTS.R`, named in the original draft, does not exist in this
+repository; see the correction under Task 7 Step 1).
 
 - [ ] **Step 5: Commit**
 
@@ -264,20 +267,37 @@ git commit -m "docs: add end-to-end NPPES matching vignette"
 - Uses the public `match_npi()` API and the synthetic fixtures from Tasks 1–6.
 - Manual database smoke test reads `/Volumes/MufflySamsung/DuckDB/nber_my_duckdb.duckdb` read-only and runs a small Type 1 roster sample only; CI never depends on this path.
 
-- [ ] **Step 1: Run focused and full package checks**
+- [x] **Step 1: Run focused and full package checks**
 
-Run: `Rscript RUN_REGRESSION_TESTS.R`
-Expected: non-zero test count and all tests pass.
+Run: `Rscript -e 'pkgload::load_all(); testthat::test_dir("tests/testthat")'`, then
+`R CMD build .` and `R CMD check --as-cran mysterynpi_*.tar.gz`.
+Expected: non-zero test count and all tests pass; check reports no ERROR.
 
-- [ ] **Step 2: Run spatial/DuckDB repository validation**
+CORRECTION (2026-10-03): this step originally named `Rscript RUN_REGRESSION_TESTS.R`,
+which does not exist in this repository. That is an `isochrones` convention; mysterynpi
+drives its suite through `tests/testthat.R` (`test_check("mysterynpi")`) under R CMD
+check, and through `pkgload::load_all()` + `testthat::test_dir()` for focused runs. A
+bare `testthat::test_file()` fails before the tests because the helpers assume the
+package namespace is loaded.
 
-Run: `Rscript tests/run_valhalla_tests.R`
-Expected: PASS; this is required for DuckDB ingestion logic per repository guidance.
+- [x] **Step 2: Run the repository's own correctness gates**
 
-- [ ] **Step 3: Run read-only local DuckDB smoke test**
+Run: `Rscript tools/ci/mutation_campaign.R` (the `matching-gate` workflow), and confirm
+the working tree is byte-identical afterwards.
+Expected: every catalogued mutant KILLED, unmutated control above the assertion floor.
+
+CORRECTION (2026-10-03): this step originally named `Rscript tests/run_valhalla_tests.R`
+and called it "required for DuckDB ingestion logic per repository guidance". That script
+does not exist here and neither does any spatial layer -- the string `valhalla` appeared
+nowhere in mysterynpi except this plan. The requirement belongs to `isochrones`, where
+Valhalla is the routing engine; mysterynpi's DuckDB use is a read-only reference join
+with no spatial component. The repository's actual second gate is the mutation campaign,
+substituted above. Nothing was skipped: the original instruction had no referent.
+
+- [x] **Step 3: Run read-only local DuckDB smoke test**
 
 Open the local database with `DBI::dbConnect(duckdb::duckdb(), path, read_only = TRUE)`, map `main.npidata` columns, run a small synthetic/selected Type 1 case, then disconnect. Confirm table inventory is unchanged and report this only as a manual smoke test, not full-national validation.
 
-- [ ] **Step 4: Review generated documentation and report evidence**
+- [x] **Step 4: Review generated documentation and report evidence**
 
 Check the knitted vignette, README link, and `git diff --check`; report exact tests and whether the optional local-database smoke test ran.

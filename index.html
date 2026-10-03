@@ -35,7 +35,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
+<li><a class="dropdown-item" href="articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+    <li><a class="dropdown-item" href="articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
     <li><a class="dropdown-item" href="articles/vetoes-and-quarantine.html">Vetoes and quarantine: using conflicts without deleting people</a></li>
@@ -248,9 +249,30 @@
 <td>
 <code><a href="reference/assert_middle_agreement_contract.html">assert_middle_agreement_contract()</a></code> and one per agreement rule</td>
 </tr>
+<tr>
+<td>end-to-end NPPES matching</td>
+<td>
+<code><a href="reference/match_npi.html">match_npi()</a></code> — a roster to NPIs through bounded candidate blocks, shared evidence, and the one-to-one gate, from a data frame or a read-only DuckDB table; see <code><a href="articles/end-to-end-nppes-matching.html">vignette("end-to-end-nppes-matching")</a></code>
+</td>
+</tr>
 </tbody>
 </table>
 <p>See <code><a href="articles/resolving-a-roster.html">vignette("resolving-a-roster")</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="from-a-roster-to-npis-in-one-call">From a roster to NPIs in one call<a class="anchor" aria-label="anchor" href="#from-a-roster-to-npis-in-one-call"></a>
+</h2>
+<p><code><a href="reference/match_npi.html">match_npi()</a></code> runs the whole chain against user-supplied NPPES Type 1 data and returns every roster row in exactly one of <code>matches</code>, <code>review</code>, or <code>unmatched</code>, with the candidates it weighed and a stable reason for each:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/match_npi.html">match_npi</a></span><span class="op">(</span></span>
+<span>  <span class="va">roster</span>, <span class="va">nppes</span>,                       <span class="co"># or: con, table = "npidata" (DuckDB, read-only)</span></span>
+<span>  id <span class="op">=</span> <span class="st">"record"</span>, given <span class="op">=</span> <span class="st">"first"</span>, surname <span class="op">=</span> <span class="st">"last"</span>,</span>
+<span>  npi <span class="op">=</span> <span class="st">"NPI"</span>, entity_type <span class="op">=</span> <span class="st">"Entity Type Code"</span>,</span>
+<span>  nppes_given <span class="op">=</span> <span class="st">"Provider First Name"</span>, nppes_surname <span class="op">=</span> <span class="st">"Provider Last Name (Legal Name)"</span><span class="op">)</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">matches</span>   <span class="co"># unique_best_evidence</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">review</span>    <span class="co"># ties, contested NPIs, nickname-only and fuzzy-only candidates</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">unmatched</span> <span class="co"># no_candidate, missing_required_name</span></span></code></pre></div>
+<p>Candidates come from bounded blocks (never an all-pairs join); nothing resolves on a tie, a nickname alone, or a fuzzy route alone; the in-memory and DuckDB backends share one policy and one output schema. <code><a href="articles/end-to-end-nppes-matching.html">vignette("end-to-end-nppes-matching")</a></code> walks a synthetic roster through both paths, with diagrams and state maps.</p>
 <p>The split between <strong>mechanism</strong> and <strong>policy</strong> is the design. “Collapse to one row per (person, candidate), take the strongest class, resolve only when that class holds exactly one” is mechanism. <em>Which</em> classes exist and what evidence earns each one is policy, and stays with you.</p>
 </div>
 <div class="section level2">

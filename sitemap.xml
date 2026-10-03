@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://mufflyt.github.io/mysterynpi/404.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/LICENSE-text.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/articles/end-to-end-nppes-matching.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/articles/index.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/articles/nickname-policy.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.html</loc></url>
@@ -69,6 +70,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_anatomy.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_conformance.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/license_status_audit.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/match_npi.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/middle_tokens.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/name_given_match_position.html</loc></url>

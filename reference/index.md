@@ -233,6 +233,14 @@ Vendored and authored data; licenses in inst/COPYRIGHTS.
 - [`SURNAME_FREQUENCIES`](https://mufflyt.github.io/mysterynpi/reference/SURNAME_FREQUENCIES.md)
   : The 1,000 most frequent U.S. surnames, Census 2010
 
+## End-to-end NPPES matching
+
+A roster to NPIs in one call, from a data frame or a read-only DuckDB
+table.
+
+- [`match_npi()`](https://mufflyt.github.io/mysterynpi/reference/match_npi.md)
+  : Match a source roster against user-provided NPPES data
+
 ## NPI
 
 - [`npi_luhn_ok()`](https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.md)

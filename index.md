@@ -128,9 +128,36 @@ flowchart LR
 | board statuses | [`normalize_license_status()`](https://mufflyt.github.io/mysterynpi/reference/normalize_license_status.md) — six exit classes; death, discipline and lapses can never read as “retired”, and unmapped decides nothing |
 | corpora | `ROSTER_BENCHMARK` (190 labeled synthetic pairs; see [`vignette("roster-benchmark")`](https://mufflyt.github.io/mysterynpi/articles/roster-benchmark.md)), `WINKLER_CENSUS`, `SURNAME_FREQUENCIES`, `NICKNAME_EDGES` — licenses in `inst/COPYRIGHTS` |
 | contracts | [`assert_middle_agreement_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_middle_agreement_contract.md) and one per agreement rule |
+| end-to-end NPPES matching | [`match_npi()`](https://mufflyt.github.io/mysterynpi/reference/match_npi.md) — a roster to NPIs through bounded candidate blocks, shared evidence, and the one-to-one gate, from a data frame or a read-only DuckDB table; see [`vignette("end-to-end-nppes-matching")`](https://mufflyt.github.io/mysterynpi/articles/end-to-end-nppes-matching.md) |
 
 See
 [`vignette("resolving-a-roster")`](https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.md).
+
+## From a roster to NPIs in one call
+
+[`match_npi()`](https://mufflyt.github.io/mysterynpi/reference/match_npi.md)
+runs the whole chain against user-supplied NPPES Type 1 data and returns
+every roster row in exactly one of `matches`, `review`, or `unmatched`,
+with the candidates it weighed and a stable reason for each:
+
+``` r
+
+result <- match_npi(
+  roster, nppes,                       # or: con, table = "npidata" (DuckDB, read-only)
+  id = "record", given = "first", surname = "last",
+  npi = "NPI", entity_type = "Entity Type Code",
+  nppes_given = "Provider First Name", nppes_surname = "Provider Last Name (Legal Name)")
+result$matches   # unique_best_evidence
+result$review    # ties, contested NPIs, nickname-only and fuzzy-only candidates
+result$unmatched # no_candidate, missing_required_name
+```
+
+Candidates come from bounded blocks (never an all-pairs join); nothing
+resolves on a tie, a nickname alone, or a fuzzy route alone; the
+in-memory and DuckDB backends share one policy and one output schema.
+[`vignette("end-to-end-nppes-matching")`](https://mufflyt.github.io/mysterynpi/articles/end-to-end-nppes-matching.md)
+walks a synthetic roster through both paths, with diagrams and state
+maps.
 
 The split between **mechanism** and **policy** is the design. “Collapse
 to one row per (person, candidate), take the strongest class, resolve

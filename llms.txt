@@ -500,6 +500,9 @@ A blinded, class-stratified sample, and the precision it buys.
   : Resolve people whose strongest class holds exactly one candidate
 - [`resolve_ordered_classes()`](https://mufflyt.github.io/mysterynpi/reference/resolve_ordered_classes.md)
   : Ordered-class resolution end to end
+- [`resolve_one_to_one()`](https://mufflyt.github.io/mysterynpi/reference/resolve_one_to_one.md)
+  : Resolve a ranked candidate table to an unambiguous one-to-one
+  linkage
 - [`count_rivals()`](https://mufflyt.github.io/mysterynpi/reference/count_rivals.md)
   : Count RIVAL ids: alternative claimants who are a different PERSON
 - [`award_contested()`](https://mufflyt.github.io/mysterynpi/reference/award_contested.md)

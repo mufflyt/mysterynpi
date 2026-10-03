@@ -84,7 +84,7 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   # them in context, but a lone mark is not in the dictionary.
   chars <- intToUtf8(setdiff(seq_len(65535L), 55296L:57343L), multiple = TRUE)
   transliterated <- stringi::stri_trans_general(chars, "Latin-ASCII")
-  german <- c("ü", "Ü", "ö", "Ö", "ä", "Ä", "ß")
+  german <- c("\u00fc", "\u00dc", "\u00f6", "\u00d6", "\u00e4", "\u00c4", "\u00df")
   transliterated[match(german, chars)] <- c("UE", "UE", "OE", "OE", "AE", "AE", "SS")
   changed <- chars != transliterated
   transliteration <- write_temp("transliteration",
@@ -105,7 +105,7 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   normalized <- reg(normalized, "[][()]", " ")
   normalized <- reg(normalized, "\\s+", " ")
   name_key_sql <- macro("name_key", "value", paste0("trim(", normalized, ")"))
-  key_sql <- macro("key", "value", reg("value", "['’`]", ""))
+  key_sql <- macro("key", "value", reg("value", "['\u2019`]", ""))
   tokens_sql <- macro("tokens", "value", paste0(
     "list_filter(regexp_split_to_array(", key_sql,
     "(coalesce(value, '')), '[^A-Za-z]+'), x -> length(x) >= 2)"))

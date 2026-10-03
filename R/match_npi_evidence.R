@@ -179,7 +179,7 @@ partition_npi_matches <- function(roster, candidates, id = "source_id",
   if (is.null(result_columns)) {
     fields <- c("npi", "reason")
     result_columns <- c(source_id = id, stats::setNames(
-      tail(make.unique(c(names(roster), fields)), length(fields)), fields))
+      utils::tail(make.unique(c(names(roster), fields)), length(fields)), fields))
   }
   if (!is.character(result_columns) ||
       !all(c("source_id", "npi", "reason") %in% names(result_columns)) ||

@@ -79,7 +79,7 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
                   nppes_surname = nppes_surname, nppes_full_name = nppes_full_name)
   inputs <- .match_npi_inputs(roster, nppes, table, columns, entity_filter, backend)
   fields <- c("source_id", "npi", "reason")
-  output_names <- tail(make.unique(c(names(roster), fields)), length(fields))
+  output_names <- utils::tail(make.unique(c(names(roster), fields)), length(fields))
   result_columns <- stats::setNames(output_names, fields)
   generated <- if (inputs$backend == "duckdb") {
     generate_npi_candidates_duckdb(nppes, table, roster, columns, entity_filter)

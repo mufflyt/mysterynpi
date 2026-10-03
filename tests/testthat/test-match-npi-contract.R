@@ -24,14 +24,20 @@ test_that("match_npi keeps every source row in explicit result partitions", {
   expect_s3_class(result$matches, "data.frame")
   expect_s3_class(result$review, "data.frame")
   expect_s3_class(result$candidates, "data.frame")
-  expect_equal(nrow(result$matches), 0L)
+  expect_equal(nrow(result$matches), 1L)
   expect_equal(nrow(result$review), 0L)
-  expect_equal(nrow(result$candidates), 0L)
-  expect_identical(result$unmatched$record, c("r1", "r2"))
-  expect_identical(result$unmatched$state, c("CO", "RI"))
-  expect_identical(result$unmatched$reason[2], "missing_required_name")
-  expect_identical(result$unmatched$reason[1], "matching_pending")
-  expect_identical(result$run_manifest$execution_status, "matching_pending")
+  expect_equal(nrow(result$candidates), 1L)
+  expect_identical(result$matches$record, "r1")
+  expect_identical(result$matches$state, "CO")
+  expect_identical(result$matches$npi, "1234567893")
+  expect_identical(result$matches$reason, "unique_best_evidence")
+  expect_identical(result$unmatched$record, "r2")
+  expect_identical(result$unmatched$state, "RI")
+  expect_identical(result$unmatched$reason, "missing_required_name")
+  expect_identical(result$run_manifest$execution_status, "complete")
+  expect_identical(result$counts$matches, 1L)
+  expect_identical(result$counts$unmatched, 1L)
+  expect_identical(result$counts$missing_required_name, 1L)
   expect_type(result$matches$npi, "character")
   expect_type(result$candidates$npi, "character")
   expect_identical(roster, contract_roster())
@@ -76,12 +82,13 @@ test_that("match_npi accepts empty rosters and full-name mappings", {
               id = "record", full_name = "name", npi = "provider", entity_type = "type",
               nppes_full_name = "name")
   }
-  expect_identical(run_full_name(roster)$unmatched$reason, "matching_pending")
+  expect_identical(run_full_name(roster)$matches$reason, "unique_best_evidence")
   expect_equal(nrow(run_full_name(roster[FALSE, ])$unmatched), 0L)
 })
 
 test_that("match_npi rejects incompatible backend inputs and missing name mappings", {
   expect_error(contract_match(backend = "duckdb"), "connection")
+  expect_error(contract_match(table = "reference"), "table")
   expect_error(contract_match(nppes = list()), "data.frame|connection")
   expect_error(match_npi(contract_roster(), contract_nppes(), id = "record",
                         npi = "provider", entity_type = "type",
@@ -94,7 +101,14 @@ test_that("match_npi preserves source columns that share result metadata names",
   roster$reason <- c("a", "b")
   roster$source_id <- c("legacy1", "legacy2")
   result <- contract_match(roster)
-  expect_identical(result$unmatched[names(roster)], roster)
-  expect_identical(result$unmatched[[result$run_manifest$result_columns[["reason"]]]],
-                   c("matching_pending", "missing_required_name"))
+  returned <- rbind(result$matches, result$review, result$unmatched)
+  returned <- returned[order(returned$record), , drop = FALSE]
+  rownames(returned) <- NULL
+  expect_identical(returned[names(roster)], roster)
+  expect_identical(result$run_manifest$result_columns,
+                   c(source_id = "source_id.1", npi = "npi.1", reason = "reason.1"))
+  expect_identical(returned[[result$run_manifest$result_columns[["reason"]]]],
+                   c("unique_best_evidence", "missing_required_name"))
+  expect_identical(returned[[result$run_manifest$result_columns[["npi"]]]],
+                   c("1234567893", NA))
 })

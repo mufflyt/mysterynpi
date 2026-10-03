@@ -105,6 +105,7 @@ reference:
   - pool_stats
   - resolve_best_class
   - resolve_ordered_classes
+  - resolve_one_to_one
   - count_rivals
   - award_contested
   - duplicate_differences

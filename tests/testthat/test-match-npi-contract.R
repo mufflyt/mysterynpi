@@ -30,6 +30,8 @@ test_that("match_npi keeps every source row in explicit result partitions", {
   expect_identical(result$unmatched$record, c("r1", "r2"))
   expect_identical(result$unmatched$state, c("CO", "RI"))
   expect_identical(result$unmatched$reason[2], "missing_required_name")
+  expect_identical(result$unmatched$reason[1], "matching_pending")
+  expect_identical(result$run_manifest$execution_status, "matching_pending")
   expect_type(result$matches$npi, "character")
   expect_type(result$candidates$npi, "character")
   expect_identical(roster, contract_roster())
@@ -59,6 +61,9 @@ test_that("match_npi defaults to Type 1 and rejects an empty filtered universe",
 test_that("match_npi accepts empty rosters and full-name mappings", {
   result <- contract_match(roster = contract_roster()[FALSE, ])
   expect_equal(nrow(result$unmatched), 0L)
+  expect_type(result$unmatched$reason, "character")
+  expect_type(result$matches$reason, "character")
+  expect_type(result$review$reason, "character")
   expect_equal(result$counts$roster_rows, 0L)
   skip_if_not_installed("humaniformat")
   result <- match_npi(data.frame(record = "r1", name = " "), contract_nppes(),
@@ -71,7 +76,7 @@ test_that("match_npi accepts empty rosters and full-name mappings", {
               id = "record", full_name = "name", npi = "provider", entity_type = "type",
               nppes_full_name = "name")
   }
-  expect_identical(run_full_name(roster)$unmatched$reason, "no_candidates")
+  expect_identical(run_full_name(roster)$unmatched$reason, "matching_pending")
   expect_equal(nrow(run_full_name(roster[FALSE, ])$unmatched), 0L)
 })
 
@@ -91,5 +96,5 @@ test_that("match_npi preserves source columns that share result metadata names",
   result <- contract_match(roster)
   expect_identical(result$unmatched[names(roster)], roster)
   expect_identical(result$unmatched[[result$run_manifest$result_columns[["reason"]]]],
-                   c("no_candidates", "missing_required_name"))
+                   c("matching_pending", "missing_required_name"))
 })

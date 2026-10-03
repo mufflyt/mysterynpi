@@ -17,7 +17,9 @@
 #' @param backend One of "auto", "data.frame", or "duckdb".
 #' @return List with matches, review, unmatched, candidates, counts, and run_manifest.
 #'   NPI result columns are character. Missing source names are unmatched with
-#'   reason `missing_required_name`.
+#'   reason `missing_required_name`. Other rows have reason `matching_pending`
+#'   until candidate generation runs; the manifest execution status is also
+#'   `matching_pending`.
 #' @export
 match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NULL,
                       surname = NULL, full_name = NULL, npi, entity_type,
@@ -35,8 +37,9 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
   result_columns <- stats::setNames(output_names, fields)
   out[[result_columns[["source_id"]]]] <- as.character(roster[[id]])
   out[[result_columns[["npi"]]]] <- rep(NA_character_, nrow(roster))
-  out[[result_columns[["reason"]]]] <- ifelse(inputs$missing_name,
-                                               "missing_required_name", "no_candidates")
+  reasons <- rep("matching_pending", nrow(roster))
+  reasons[inputs$missing_name] <- "missing_required_name"
+  out[[result_columns[["reason"]]]] <- reasons
   empty <- out[FALSE, , drop = FALSE]
   list(
     matches = empty, review = empty, unmatched = out,
@@ -44,6 +47,7 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
     counts = list(roster_rows = nrow(roster), matches = 0L, review = 0L,
                   unmatched = nrow(roster), candidates = 0L),
     run_manifest = list(backend = inputs$backend, entity_filter = as.character(entity_filter),
+                        execution_status = "matching_pending",
                         columns = columns, result_columns = result_columns,
                         roster_rows = nrow(roster),
                         reference_rows = nrow(nppes),

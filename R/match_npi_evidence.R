@@ -176,6 +176,9 @@ partition_npi_matches <- function(roster, candidates, id = "source_id",
   if (any(candidates$source_id %in% ids[missing_name])) {
     stop("candidates must not include missing-name sources", call. = FALSE)
   }
+  if (!"attribute_rank" %in% names(candidates)) {
+    candidates$attribute_rank <- rep(0L, nrow(candidates))
+  }
   if (is.null(result_columns)) {
     fields <- c("npi", "reason")
     result_columns <- c(source_id = id, stats::setNames(
@@ -193,13 +196,15 @@ partition_npi_matches <- function(roster, candidates, id = "source_id",
   }
   eligible <- candidates[candidates$disposition == "eligible", , drop = FALSE]
   gate <- resolve_one_to_one(eligible, id = "source_id", candidate = "npi",
-                             rank_by = c(evidence_class = "desc", middle_rank = "desc"))
+                             rank_by = c(evidence_class = "desc", middle_rank = "desc",
+                                         attribute_rank = "desc"))
   # The resolver counts only unique selections as claims. Tied best pools must
   # also contest a supported NPI; compute that guard over bounded evidence only.
   strongest <- unlist(lapply(split(seq_len(nrow(eligible)), eligible$source_id),
     function(rows) {
       rows <- rows[eligible$evidence_class[rows] == max(eligible$evidence_class[rows])]
-      rows[eligible$middle_rank[rows] == max(eligible$middle_rank[rows])]
+      rows <- rows[eligible$middle_rank[rows] == max(eligible$middle_rank[rows])]
+      rows[eligible$attribute_rank[rows] == max(eligible$attribute_rank[rows])]
     }), use.names = FALSE)
   claims <- eligible[strongest, , drop = FALSE]
   contested <- names(Filter(function(sources) length(unique(sources)) > 1L,
@@ -220,7 +225,8 @@ partition_npi_matches <- function(roster, candidates, id = "source_id",
   for (source in unique(candidates$source_id)) {
     i <- match(source, ids)
     rows <- candidates[candidates$source_id == source, , drop = FALSE]
-    rank <- order(-as.integer(rows$evidence_class), -rows$middle_rank, rows$reason)
+    rank <- order(-as.integer(rows$evidence_class), -rows$middle_rank,
+                  -rows$attribute_rank, rows$reason)
     reasons[i] <- rows$reason[rank[1L]]
     disposition[i] <- "review"
   }

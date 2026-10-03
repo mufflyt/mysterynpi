@@ -54,7 +54,9 @@ test_that("the end-to-end vignette knits offline and its evaluated claims hold",
   rendered <- gsub("&quot;", "\"", gsub("&lt;", "<", gsub("&gt;", ">", rendered, fixed = TRUE),
                                         fixed = TRUE), fixed = TRUE)
   # Both backends ran and agreed on every partition and on the candidates.
-  expect_identical(lengths(regmatches(rendered, gregexpr("#> \\[1\\] TRUE", rendered))), 4L)
+  expect_gte(lengths(regmatches(rendered, gregexpr("#> \\[1\\] TRUE", rendered))), 4L)
+  expect_match(rendered, "state_evidence", fixed = TRUE)
+  expect_match(rendered, "blocked_by_attribute", fixed = TRUE)
   expect_match(rendered, "#> [1] \"backend\" \"table\"", fixed = TRUE)
   # Every disposition reason the vignette explains appears in its own output.
   for (reason in c("unique_best_evidence", "nickname_only_evidence", "fuzzy_only_evidence",

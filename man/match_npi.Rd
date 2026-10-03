@@ -20,7 +20,9 @@ match_npi(
   nppes_surname = NULL,
   nppes_full_name = NULL,
   entity_filter = "1",
-  backend = c("auto", "data.frame", "duckdb")
+  backend = c("auto", "data.frame", "duckdb"),
+  attributes = NULL,
+  block = character()
 )
 }
 \arguments{
@@ -42,6 +44,18 @@ connection; must be `NULL` for a data frame.}
 \item{entity_filter}{Entity type to include; defaults to individuals ("1").}
 
 \item{backend}{One of "auto", "data.frame", or "duckdb".}
+
+\item{attributes}{Optional named list of extra fields to weigh, keyed by a
+name in [MATCH_NPI_ATTRIBUTES] (`gender`, `credential`, `taxonomy`,
+`license`, `graduation_year`, `state`). Each value maps `roster` and
+`nppes` to column names (`license` also maps `roster_state` and
+`nppes_state`). A conflicting attribute vetoes the candidate into
+`review` with reason `<attribute>_conflict`; corroborating attributes
+break ties through `attribute_rank`; absence is uninformative.}
+
+\item{block}{Names from `attributes` to use as true blocking variables:
+candidates that conflict on them are removed before evidence (counted in
+`counts$blocked_by_attribute`) instead of being sent to review.}
 }
 \value{
 A list with:

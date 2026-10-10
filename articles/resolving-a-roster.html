@@ -294,6 +294,50 @@ stand for <code>ELIZABETH</code> is a claim about your population, not a
 fact about strings.</p>
 </div>
 <div class="section level2">
+<h2 id="two-name-lists-match-each-to-npi-then-join-on-npi">6. Two name lists: match each to NPI, then join on NPI<a class="anchor" aria-label="anchor" href="#two-name-lists-match-each-to-npi-then-join-on-npi"></a>
+</h2>
+<p>A question every consumer eventually asks: if we have two lists of
+physician names, should we match each list to its own NPIs, or match the
+names on one list to the names on the other?</p>
+<p>Match each list to NPI first, then join the two lists on NPI. That is
+the better design for physician data, for four reasons.</p>
+<ul>
+<li>
+<strong>NPI is a stable, unique key.</strong> Names are not:
+married-name changes, nickname variants, suffixes, and the same name
+held by two different doctors all break a direct name-to-name match.
+Once each list carries an NPI, the cross-list join is exact and
+auditable.</li>
+<li>
+<strong>NPPES gives you more fields to match on.</strong> Matching a
+name against NPPES lets you use specialty taxonomy, state, city,
+credential, and gender as blocking and scoring fields. Matching two thin
+name lists against each other gives you only what the two lists share,
+which is often just a name.</li>
+<li>
+<strong>Each list’s match quality can be measured
+separately.</strong> You get a per-list match rate and a per-list set of
+unresolved names, so availability and resolution are reported as two
+numbers. A direct name-to-name match blends both lists’ failures into
+one unexplained residual.</li>
+<li>
+<strong>The result is reusable.</strong> An NPI-keyed list joins to
+Medicare, board certification, and every other source a consumer holds.
+A name-to-name crosswalk is good for one pairing only.</li>
+</ul>
+<p>This package is the canonical identity layer that the isochrones
+project uses to resolve ABOG, ABMS, and NPPES physician names to NPI, so
+a new list goes through the same ordered-class resolution described
+above (or <code><a href="../reference/match_npi.html">match_npi()</a></code>, see
+<code><a href="../articles/end-to-end-nppes-matching.html">vignette("end-to-end-nppes-matching")</a></code>) rather than through
+a fresh fastLink or reclin2 model.</p>
+<p>Two caveats. If a list has no geography or specialty and the names
+are common, NPI matching will leave ambiguous residuals; use the second
+list as corroborating evidence for those cases rather than as the
+primary key. And always keep the unresolved names as an explicit bucket
+instead of dropping them, so the denominators still sum.</p>
+</div>
+<div class="section level2">
 <h2 id="pinning-the-behaviour-you-rely-on">Pinning the behaviour you rely on<a class="anchor" aria-label="anchor" href="#pinning-the-behaviour-you-rely-on"></a>
 </h2>
 <p>Run this in <em>your</em> test suite:</p>

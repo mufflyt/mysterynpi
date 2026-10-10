@@ -1,5 +1,12 @@
 # Changelog
 
+## mysterynpi (development version)
+
+- [`vignette("resolving-a-roster")`](https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.md)
+  section 6 answers how to reconcile two physician name lists: resolve
+  each list to NPI first, then join on NPI, never name to name. Four
+  reasons and two caveats recorded.
+
 ## mysterynpi 0.7.0
 
 - Blocking is now a first-class API family rather than a character-key

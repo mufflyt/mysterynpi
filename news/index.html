@@ -41,6 +41,11 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="mysterynpi-development-version">mysterynpi (development version)<a class="anchor" aria-label="anchor" href="#mysterynpi-development-version"></a></h2>
+<ul><li>
+<code><a href="../articles/resolving-a-roster.html">vignette("resolving-a-roster")</a></code> section 6 answers how to reconcile two physician name lists: resolve each list to NPI first, then join on NPI, never name to name. Four reasons and two caveats recorded.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.0" id="mysterynpi-070">mysterynpi 0.7.0<a class="anchor" aria-label="anchor" href="#mysterynpi-070"></a></h2>
 <ul><li>Blocking is now a first-class API family rather than a character-key utility alone. <code><a href="../reference/blocking_spec.html">blocking_spec()</a></code> records one governed blocking recipe, <code><a href="../reference/blocking_key_info.html">blocking_key_info()</a></code> returns the exact <code><a href="../reference/blocking_key.html">blocking_key()</a></code> plus auditable metadata (<code>mode</code>, <code>components_used</code>, <code>informative</code>, missingness reason, and normalized components), and <code><a href="../reference/blocking_keys.html">blocking_keys()</a></code> applies several labelled specs in long form with stable record/spec identifiers. Existing <code><a href="../reference/blocking_key.html">blocking_key()</a></code> behavior is unchanged. Multiple blocks are explicitly candidate-generation plumbing, never repeated identity evidence or a score.</li>
 </ul></div>

@@ -11,7 +11,14 @@ maximum-weight assignment.
 ## Usage
 
 ``` r
-resolve_one_to_one(candidates, id = "id", candidate = "candidate", rank_by)
+resolve_one_to_one(
+  candidates,
+  id = "id",
+  candidate = "candidate",
+  rank_by,
+  eligible = NULL,
+  output = c("list", "table")
+)
 ```
 
 ## Arguments
@@ -31,15 +38,35 @@ resolve_one_to_one(candidates, id = "id", candidate = "candidate", rank_by)
 - rank_by:
 
   A named character vector mapping ranking column names to directions:
-  `"asc"` (smaller is better) or `"desc"` (larger is better). Earlier
-  entries have precedence over later entries.
+  \`"asc"\` (smaller is better) or \`"desc"\` (larger is better).
+  Earlier entries have precedence over later entries.
+
+- eligible:
+
+  \`NULL\` (default) or one column name holding a logical flag, constant
+  within each record and never missing. Eligible records are resolved
+  first; ineligible records are then resolved only on candidates no
+  eligible record resolved to or contests, so an ineligible record (for
+  example one already outside a study cohort but kept for linkage) can
+  never quarantine an eligible record's candidate. Ineligible claims
+  that give way are returned in \`quarantined\` with status
+  \`"yielded_to_eligible"\`.
+
+- output:
+
+  \`"list"\` (default) returns the list described below. \`"table"\`
+  returns the \`resolved\` data frame with \`quarantined\`,
+  \`unmatched\`, and \`counts\` attached as attributes of the same
+  names.
 
 ## Value
 
-A list with `resolved`, `quarantined`, `unmatched`, and `counts`. The
-first three elements are data frames retaining the supplied columns and
-adding `resolution_status`; quarantine statuses distinguish a tie within
-a record from a candidate claimed by multiple records.
+A list with \`resolved\`, \`quarantined\`, \`unmatched\`, and
+\`counts\`. The first three elements are data frames retaining the
+supplied columns and adding \`resolution_status\`; quarantine statuses
+distinguish a tie within a record from a candidate claimed by multiple
+records. With \`output = "table"\`, the \`resolved\` data frame carrying
+the other three as attributes.
 
 ## Details
 
@@ -74,4 +101,14 @@ result$quarantined
 #>   person npi source_priority agreement             resolution_status
 #> 1      A  n1               1        90 ambiguous_contested_candidate
 #> 2      B  n1               1        85 ambiguous_contested_candidate
+
+# B is already outside the cohort: it may not block A, A gets n1.
+candidates$in_cohort <- c(TRUE, TRUE, FALSE)
+resolve_one_to_one(
+  candidates, id = "person", candidate = "npi",
+  rank_by = c(source_priority = "asc", agreement = "desc"),
+  eligible = "in_cohort", output = "table"
+)
+#>   person npi source_priority agreement in_cohort resolution_status
+#> 1      A  n1               1        90      TRUE          resolved
 ```

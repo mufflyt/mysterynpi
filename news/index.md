@@ -2,6 +2,22 @@
 
 ## mysterynpi (development version)
 
+- [`resolve_one_to_one()`](https://mufflyt.github.io/mysterynpi/reference/resolve_one_to_one.md)
+  gains `eligible` and `output`. `eligible` names a logical column
+  (constant per record, no `NA`): eligible records resolve first, and
+  ineligible records then resolve only on candidates no eligible record
+  resolved to or contests, so a record kept for linkage but outside the
+  analysed population cannot quarantine an eligible record’s candidate.
+  The claims that give way are returned in `quarantined` as
+  `"yielded_to_eligible"`. In isochrones’ 2026-10-09 ABOG run this
+  recovered 744 eligible physicians whose NPI an out-of-cohort namesake
+  had been contesting, with no eligible match lost or changed.
+  `output = "table"` returns the `resolved` data frame with
+  `quarantined`, `unmatched` and `counts` as attributes; the default
+  `"list"` is unchanged. `man/resolve_one_to_one.Rd` is now
+  roxygen-generated (it was hand-written, so the documentation drift
+  check could not see it).
+
 - [`vignette("resolving-a-roster")`](https://mufflyt.github.io/mysterynpi/articles/resolving-a-roster.md)
   section 6 answers how to reconcile two physician name lists: resolve
   each list to NPI first, then join on NPI, never name to name. Four

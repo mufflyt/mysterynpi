@@ -118,3 +118,66 @@ test_that("missing candidate IDs are unmatched, not contested identities", {
   expect_identical(result$unmatched$id, c("A", "B"))
   expect_true(all(result$unmatched$resolution_status == "no_candidate"))
 })
+
+eligibility_fixture <- function() {
+  data.frame(
+    id = c("A", "B", "C", "D", "E"),
+    candidate = c("n1", "n1", "n2", "n2", "n3"),
+    priority = 1L,
+    in_cohort = c(TRUE, FALSE, TRUE, TRUE, FALSE),
+    stringsAsFactors = FALSE
+  )
+}
+
+test_that("an ineligible record cannot quarantine an eligible record's candidate", {
+  result <- resolve_one_to_one(eligibility_fixture(), rank_by = c(priority = "asc"),
+                               eligible = "in_cohort")
+  expect_setequal(paste(result$resolved$id, result$resolved$candidate),
+                  c("A n1", "E n3"))
+  expect_setequal(
+    paste(result$quarantined$id, result$quarantined$resolution_status),
+    c("B yielded_to_eligible", "C ambiguous_contested_candidate",
+      "D ambiguous_contested_candidate")
+  )
+  expect_identical(result$counts[["resolved"]], 2L)
+  expect_identical(result$counts[["quarantined"]], 3L)
+})
+
+test_that("negative control: without eligible the namesake quarantines both", {
+  result <- resolve_one_to_one(eligibility_fixture(), rank_by = c(priority = "asc"))
+  expect_false("A" %in% result$resolved$id)
+  expect_true(all(c("A", "B") %in% result$quarantined$id))
+})
+
+test_that("all-eligible input gives the same answer as no eligible column", {
+  x <- eligibility_fixture()
+  x$in_cohort <- TRUE
+  with_flag <- resolve_one_to_one(x, rank_by = c(priority = "asc"), eligible = "in_cohort")
+  without <- resolve_one_to_one(x, rank_by = c(priority = "asc"))
+  expect_identical(with_flag$resolved, without$resolved)
+  expect_identical(with_flag$counts, without$counts)
+})
+
+test_that("table output is the resolved frame carrying the rest as attributes", {
+  args <- list(eligibility_fixture(), rank_by = c(priority = "asc"), eligible = "in_cohort")
+  as_list <- do.call(resolve_one_to_one, args)
+  as_table <- do.call(resolve_one_to_one, c(args, output = "table"))
+  expect_s3_class(as_table, "data.frame")
+  expect_identical(as.data.frame(as_table)[, names(as_list$resolved)], as_list$resolved)
+  expect_identical(attr(as_table, "quarantined"), as_list$quarantined)
+  expect_identical(attr(as_table, "unmatched"), as_list$unmatched)
+  expect_identical(attr(as_table, "counts"), as_list$counts)
+})
+
+test_that("eligible is validated", {
+  x <- eligibility_fixture()
+  rk <- c(priority = "asc")
+  expect_error(resolve_one_to_one(x, rank_by = rk, eligible = "nope"), "must name one column")
+  expect_error(resolve_one_to_one(x, rank_by = rk, eligible = "priority"), "cannot also be")
+  x$in_cohort[1] <- NA
+  expect_error(resolve_one_to_one(x, rank_by = rk, eligible = "in_cohort"), "no NA")
+  y <- rbind(eligibility_fixture(), data.frame(id = "A", candidate = "n9", priority = 2L,
+                                               in_cohort = FALSE))
+  expect_error(resolve_one_to_one(y, rank_by = rk, eligible = "in_cohort"), "constant within")
+  expect_error(resolve_one_to_one(x, rank_by = rk, output = "tibble"))
+})

@@ -1,6 +1,6 @@
 # Changelog
 
-## mysterynpi (development version)
+## mysterynpi 0.8.0
 
 - [`resolve_one_to_one()`](https://mufflyt.github.io/mysterynpi/reference/resolve_one_to_one.md)
   gains `eligible` and `output`. `eligible` names a logical column

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="mysterynpi-development-version">mysterynpi (development version)<a class="anchor" aria-label="anchor" href="#mysterynpi-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.8.0" id="mysterynpi-080">mysterynpi 0.8.0<a class="anchor" aria-label="anchor" href="#mysterynpi-080"></a></h2>
 <ul><li><p><code><a href="../reference/resolve_one_to_one.html">resolve_one_to_one()</a></code> gains <code>eligible</code> and <code>output</code>. <code>eligible</code> names a logical column (constant per record, no <code>NA</code>): eligible records resolve first, and ineligible records then resolve only on candidates no eligible record resolved to or contests, so a record kept for linkage but outside the analysed population cannot quarantine an eligible record’s candidate. The claims that give way are returned in <code>quarantined</code> as <code>"yielded_to_eligible"</code>. In isochrones’ 2026-10-09 ABOG run this recovered 744 eligible physicians whose NPI an out-of-cohort namesake had been contesting, with no eligible match lost or changed. <code>output = "table"</code> returns the <code>resolved</code> data frame with <code>quarantined</code>, <code>unmatched</code> and <code>counts</code> as attributes; the default <code>"list"</code> is unchanged. <code>man/resolve_one_to_one.Rd</code> is now roxygen-generated (it was hand-written, so the documentation drift check could not see it).</p></li>
 <li><p><code><a href="../articles/resolving-a-roster.html">vignette("resolving-a-roster")</a></code> section 6 answers how to reconcile two physician name lists: resolve each list to NPI first, then join on NPI, never name to name. Four reasons and two caveats recorded.</p></li>
 </ul></div>

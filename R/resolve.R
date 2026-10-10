@@ -162,10 +162,22 @@ resolve_ordered_classes <- function(candidates, id = "id",
 #' @param rank_by A named character vector mapping ranking column names to
 #'   directions: `"asc"` (smaller is better) or `"desc"` (larger is better).
 #'   Earlier entries have precedence over later entries.
+#' @param eligible `NULL` (default) or one column name holding a logical flag,
+#'   constant within each record and never missing. Eligible records are
+#'   resolved first; ineligible records are then resolved only on candidates no
+#'   eligible record resolved to or contests, so an ineligible record (for
+#'   example one already outside a study cohort but kept for linkage) can never
+#'   quarantine an eligible record's candidate. Ineligible claims that give way
+#'   are returned in `quarantined` with status `"yielded_to_eligible"`.
+#' @param output `"list"` (default) returns the list described below.
+#'   `"table"` returns the `resolved` data frame with `quarantined`,
+#'   `unmatched`, and `counts` attached as attributes of the same names.
 #' @return A list with `resolved`, `quarantined`, `unmatched`, and `counts`.
 #'   The first three elements are data frames retaining the supplied columns
 #'   and adding `resolution_status`; quarantine statuses distinguish a tie
-#'   within a record from a candidate claimed by multiple records.
+#'   within a record from a candidate claimed by multiple records. With
+#'   `output = "table"`, the `resolved` data frame carrying the other three as
+#'   attributes.
 #' @export
 #' @examples
 #' candidates <- data.frame(
@@ -178,8 +190,84 @@ resolve_ordered_classes <- function(candidates, id = "id",
 #' )
 #' result$resolved  # empty: A and B both uniquely claim n1
 #' result$quarantined
+#'
+#' # B is already outside the cohort: it may not block A, A gets n1.
+#' candidates$in_cohort <- c(TRUE, TRUE, FALSE)
+#' resolve_one_to_one(
+#'   candidates, id = "person", candidate = "npi",
+#'   rank_by = c(source_priority = "asc", agreement = "desc"),
+#'   eligible = "in_cohort", output = "table"
+#' )
 resolve_one_to_one <- function(candidates, id = "id", candidate = "candidate",
-                               rank_by) {
+                               rank_by, eligible = NULL,
+                               output = c("list", "table")) {
+  output <- match.arg(output)
+  if (is.null(eligible)) {
+    res <- .resolve_pass(candidates, id, candidate, rank_by)
+  } else {
+    if (!is.data.frame(candidates)) {
+      stop("candidates must be a data frame", call. = FALSE)
+    }
+    if (!is.character(eligible) || length(eligible) != 1L || is.na(eligible) ||
+        !eligible %in% names(candidates)) {
+      stop("eligible must name one column of candidates", call. = FALSE)
+    }
+    if (eligible %in% c(id, candidate, names(rank_by))) {
+      stop("eligible cannot also be the id, candidate, or a ranking column",
+           call. = FALSE)
+    }
+    flag <- candidates[[eligible]]
+    if (!is.logical(flag) || anyNA(flag)) {
+      stop("eligible column '", eligible, "' must be logical with no NA",
+           call. = FALSE)
+    }
+    mixed <- tapply(flag, candidates[[id]], function(x) length(unique(x)) > 1L)
+    if (any(mixed, na.rm = TRUE)) {
+      stop("eligible must be constant within each record", call. = FALSE)
+    }
+    first <- .resolve_pass(candidates[flag, , drop = FALSE], id, candidate, rank_by)
+    held <- c(first$resolved[[candidate]], first$quarantined[[candidate]])
+    held <- held[!is.na(held)]
+    yields <- !flag & candidates[[candidate]] %in% held
+    second <- .resolve_pass(candidates[!flag & !yields, , drop = FALSE],
+                            id, candidate, rank_by)
+    yielded <- candidates[yields, , drop = FALSE]
+    yielded$resolution_status <- rep("yielded_to_eligible", nrow(yielded))
+    bind <- function(...) {
+      x <- rbind(...)
+      if (nrow(x) > 1L) {
+        x <- x[order(x[[id]], x[[candidate]], x$resolution_status,
+                     na.last = TRUE, method = "radix"), , drop = FALSE]
+      }
+      rownames(x) <- NULL
+      x
+    }
+    res <- list(
+      resolved = bind(first$resolved, second$resolved),
+      quarantined = bind(first$quarantined, second$quarantined, yielded),
+      unmatched = bind(first$unmatched, second$unmatched)
+    )
+    res$counts <- c(
+      input_rows = as.integer(nrow(candidates)),
+      distinct_pairs = as.integer(first$counts[["distinct_pairs"]] +
+        second$counts[["distinct_pairs"]] +
+        nrow(unique(yielded[c(id, candidate)]))),
+      resolved = as.integer(nrow(res$resolved)),
+      quarantined = as.integer(nrow(res$quarantined)),
+      unmatched = as.integer(nrow(res$unmatched))
+    )
+  }
+  if (output == "list") return(res)
+  out <- res$resolved
+  attr(out, "quarantined") <- res$quarantined
+  attr(out, "unmatched") <- res$unmatched
+  attr(out, "counts") <- res$counts
+  out
+}
+
+# One resolution pass over a candidate table; resolve_one_to_one() calls it
+# once, or twice when `eligible` splits the records.
+.resolve_pass <- function(candidates, id, candidate, rank_by) {
   if (!is.data.frame(candidates)) {
     stop("candidates must be a data frame", call. = FALSE)
   }

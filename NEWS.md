@@ -1,4 +1,4 @@
-# mysterynpi (development version)
+# mysterynpi 0.8.0
 
 * `resolve_one_to_one()` gains `eligible` and `output`. `eligible` names a
   logical column (constant per record, no `NA`): eligible records resolve

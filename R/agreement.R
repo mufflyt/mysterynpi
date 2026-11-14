@@ -52,6 +52,60 @@ middle_agreement <- function(a_tokens, b_tokens) {
     if (length(intersect(a[nchar(a) >= 2L], b[nchar(b) >= 2L]))) {
       return("corroborates")
     }
+    # A HYPHEN IS PUNCTUATION HERE, NOT A NAME BOUNDARY (2026-11-14).
+    #
+    # middle_tokens() deliberately does not split on a hyphen: 503a37e found
+    # that splitting "Mary-Jane" into MARY/JANE let it satisfy
+    # person_matches()'s shared-token requirement against an unrelated "Jane".
+    # That reasoning is correct THERE and wrong HERE, because the direction of
+    # inference is opposite. In person_matches() a shared token is evidence
+    # FOR a match, so over-splitting manufactures false positives. In this
+    # function a token mismatch is evidence AGAINST -- it VETOES a candidate --
+    # so under-splitting manufactures false NEGATIVES, and the veto is silent.
+    #
+    # The cost, measured: AMCB roster "Debra Marie-Lefever Rhizal" against
+    # NPPES NPI 1619274149, which records the same middle name as
+    # "MARIE LEFEVER" in eight annual snapshots. One token ("MARIE-LEFEVER")
+    # versus two ("MARIE", "LEFEVER") shares nothing, so this returned
+    # "conflicts", the only candidate was vetoed, and a correctly identified
+    # midwife left the study cohort as "unmatched". Same person, same name,
+    # different punctuation.
+    #
+    # SET EQUALITY, NOT A SHARED TOKEN -- and that distinction is the whole
+    # rule. A first attempt folded both sides and corroborated on any shared
+    # token; this package's own test caught it, correctly. Two cases that look
+    # alike are not:
+    #
+    #   "MARIE-LEFEVER" vs "MARIE LEFEVER"  -> SAME components, same order,
+    #                                          only the separator differs.
+    #                                          One name, two spellings.
+    #   "ANNE-MARIE"    vs "MARIE"          -> a compound versus ONE HALF of
+    #                                          it. Possibly the same person,
+    #                                          possibly an unrelated Marie.
+    #                                          503a37e refuses this, and it is
+    #                                          right to: a veto suppressed on
+    #                                          half a compound is a match
+    #                                          asserted on half a name.
+    #
+    # So this branch requires the folded component SETS to be equal. The first
+    # case passes, the second falls through to the cascade below and still
+    # conflicts, and "GAIL-ROSANNE" vs "GAIL" likewise still conflicts.
+    #
+    # STRICTLY ADDITIVE. Reached only after the token comparison above has
+    # failed; it can turn "conflicts" into "corroborates" but never the
+    # reverse, so it cannot newly veto any candidate, and it does not touch
+    # given_tokens() or person_matches().
+    #
+    # NOT edit-distance tolerance. A hyphen is punctuation this package
+    # already folds elsewhere (split_given, blocking_key); JULIA/JULIE,
+    # LEE/LEA and ANN/ANNE still conflict, as the note above requires.
+    unhyphen <- function(t) {
+      u <- unique(unlist(strsplit(t, "-", fixed = TRUE), use.names = FALSE))
+      sort(u[nzchar(u)])
+    }
+    if (identical(unhyphen(a), unhyphen(b))) {
+      return("corroborates")
+    }
     if (initials_string_matches(a, b) || initials_string_matches(b, a)) {
       return("corroborates")
     }

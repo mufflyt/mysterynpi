@@ -12,6 +12,59 @@
   The five lambda sites in `R/match_npi_duckdb.R` now use `lambda x: ...`.
   Both spellings are accepted by duckdb 1.5.5, so this raises no version
   floor; the deprecated one will not survive DuckDB's next release.
+* **`middle_agreement()` no longer reads a hyphen as a name boundary when the
+  components are otherwise identical.** `"MARIE-LEFEVER"` and
+  `"MARIE LEFEVER"` are the same middle name differently punctuated, and the
+  function returned `"conflicts"` for them -- which VETOES a candidate.
+  `middle_tokens()` is unchanged; it still never splits a token on a hyphen,
+  as 503a37e set it, and the fold happens inside `middle_agreement()` only.
+
+  The asymmetry is the point. 503a37e stopped the tokenizers folding hyphens
+  because splitting `"Mary-Jane"` into `MARY`/`JANE` let it satisfy
+  `person_matches()`'s shared-token requirement against an unrelated
+  `"Jane"`. That reasoning holds where a shared token is evidence FOR a
+  match, and inverts where a token mismatch is a veto: there, under-splitting
+  produces false negatives instead of false positives, and the veto is
+  silent.
+
+  The branch requires the hyphen-folded component sets to be EQUAL, not
+  merely to overlap. `"ANNE-MARIE"` versus an unrelated `"MARIE"`, and
+  `"GAIL-ROSANNE"` versus `"GAIL"`, therefore still conflict: a compound
+  against one half of itself is not a spelling difference, and 503a37e's
+  refusal of it stands. An overlap-based first attempt at this fix was caught
+  by `test-tokens.R`, which is why the rule is equality. It is strictly
+  additive -- reached only after the token comparison has already failed, it
+  can turn `"conflicts"` into `"corroborates"` but never the reverse -- so it
+  cannot newly veto any candidate, and it does not touch `given_tokens()` or
+  `person_matches()`.
+
+  Not edit-distance tolerance: `JULIA`/`JULIE`, `LEE`/`LEA` and `ANN`/`ANNE`
+  still conflict, as this function's contract requires.
+
+  Measured on a downstream AMCB-NPPES linkage of 22,357 certification
+  records: 38 carry a hyphenated normalised middle name, 23 of those have an
+  observable registry middle name, and 2 change verdict from `"conflicts"` to
+  `"corroborates"` -- both pure punctuation differences
+  (`MARIE-LEFEVER`/`MARIE LEFEVER`, `NICOLE-DAILEY`/`NICOLE- DAILEY`). One of
+  them, AMCB certification CNM04881, had been vetoed out of a published study
+  cohort as `"unmatched"` on this basis.
+
+* **Recorded late, for the record: `split_given()` stripping punctuation
+  (cb86e56, 2026-09-13) changed matching semantics and was never announced
+  here.** `"Oluwatope B."` yields middle `"B"` rather than `"B."`, and
+  `"Sr. Mary"` yields given `"SR"` rather than `"SR."`. The rule is correct --
+  an initial and the same initial with a period are one initial -- but a
+  downstream study froze an AMCB-NPPES linkage cohort three days before it and
+  re-froze afterwards, and 1,278 normalised middle names and 129 given names
+  moved on byte-identical input, carrying three certification records in and
+  out of the published cohort. Nothing went red, because nothing had an
+  opinion on record.
+
+  `tests/testthat/test-name-punctuation-cohort-contract.R` now pins both
+  behaviours, the three verdicts of `middle_agreement()` on the shapes a
+  cohort actually hits, the compound-versus-half asymmetry above, and the
+  specific record named. Callers whose results are versioned artifacts should
+  record this package's version and commit alongside them.
 
 # mysterynpi 0.8.0
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,10 +41,71 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="mysterynpi-development-version">mysterynpi (development version)<a class="anchor" aria-label="anchor" href="#mysterynpi-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.9.0" id="mysterynpi-090">mysterynpi 0.9.0<a class="anchor" aria-label="anchor" href="#mysterynpi-090"></a></h2>
 <ul><li>
+<p><strong><code><a href="../reference/middle_agreement.html">middle_agreement()</a></code> now asks <code><a href="../reference/name_surname_match_type.html">name_surname_match_type()</a></code> about compound forms instead of deciding them itself</strong>, bringing it to parity with <code><a href="../reference/surname_agreement.html">surname_agreement()</a></code>, which had been treating a spelling <code><a href="../reference/middle_agreement.html">middle_agreement()</a></code> rejected. <code>"exact"</code>, <code>"separator_equivalent"</code> and <code>"concatenated_equivalent"</code> corroborate; <code>"component_subset"</code> deliberately does not, so a compound against one half of itself still conflicts.</p>
+<p>Found by auditing 0.3.1.9000 against 0.8.0 for a downstream study. Measured over that study’s full pre-veto candidate corpus – 319,744 roster x registry name-variant comparisons, 306,138 distinct candidate pairs – the delegation changes <strong>9</strong> middle-name verdicts and lifts <strong>8</strong> candidate vetoes, with <strong>none added</strong>:</p>
+<table class="table"><thead><tr><th>roster</th>
+<th>registry</th>
+</tr></thead><tbody><tr><td><code>MARIE-LEFEVER</code></td>
+<td><code>MARIE LEFEVER</code></td>
+</tr><tr><td><code>DE BRUIJN</code></td>
+<td><code>DEBRUIJN</code></td>
+</tr><tr><td><code>RAEANNE</code></td>
+<td><code>RAE ANNE</code></td>
+</tr><tr><td><code>VANHORN</code></td>
+<td><code>VAN HORN</code></td>
+</tr><tr><td><code>DE'JOURA</code></td>
+<td><code>DEJOURA</code></td>
+</tr><tr><td>
+<code>RENE</code> / <code>RENEE'</code> / <code>JENEE</code>
+</td>
+<td>
+<code>RENE'</code> / <code>RENEE</code> / <code>JENEE'</code>
+</td>
+</tr></tbody></table><p>Every one is the same name differently punctuated. A hand-rolled hyphen fold (the first attempt at this fix) caught only the first row; the apostrophe and separator-free cases came free with the primitive that already owned them.</p>
+</li>
+<li>
 <p><strong>DuckDB lambda syntax migrated off the deprecated <code>-&gt;</code> arrow.</strong> A DuckDB upgrade began rejecting it outright – <code>Binder Error: Deprecated lambda arrow (-&gt;) detected</code> – which errored all 14 DuckDB-backed tests (<code>test-match-npi-duckdb.R</code>, <code>test-match-npi-backend-parity.R</code>, <code>test-match-npi-attributes.R</code>) and so turned the whole matrix red, including the mutation campaign’s control gate. No code here had changed: <code>eae56b8</code> passed on 2026-10-10 and the same commit failed its scheduled run on 2026-11-09.</p>
 <p>The five lambda sites in <code>R/match_npi_duckdb.R</code> now use <code>lambda x: ...</code>. Both spellings are accepted by duckdb 1.5.5, so this raises no version floor; the deprecated one will not survive DuckDB’s next release.</p>
+</li>
+<li>
+<p><strong><code><a href="../reference/middle_agreement.html">middle_agreement()</a></code> no longer reads a hyphen as a name boundary when the components are otherwise identical.</strong> <code>"MARIE-LEFEVER"</code> and <code>"MARIE LEFEVER"</code> are the same middle name differently punctuated, and the function returned <code>"conflicts"</code> for them – which VETOES a candidate. <code><a href="../reference/middle_tokens.html">middle_tokens()</a></code> is unchanged; it still never splits a token on a hyphen, as 503a37e set it, and the fold happens inside <code><a href="../reference/middle_agreement.html">middle_agreement()</a></code> only.</p>
+<p>The asymmetry is the point. 503a37e stopped the tokenizers folding hyphens because splitting <code>"Mary-Jane"</code> into <code>MARY</code>/<code>JANE</code> let it satisfy <code><a href="../reference/person_matches.html">person_matches()</a></code>’s shared-token requirement against an unrelated <code>"Jane"</code>. That reasoning holds where a shared token is evidence FOR a match, and inverts where a token mismatch is a veto: there, under-splitting produces false negatives instead of false positives, and the veto is silent.</p>
+<p>The branch requires the hyphen-folded component sets to be EQUAL, not merely to overlap. <code>"ANNE-MARIE"</code> versus an unrelated <code>"MARIE"</code>, and <code>"GAIL-ROSANNE"</code> versus <code>"GAIL"</code>, therefore still conflict: a compound against one half of itself is not a spelling difference, and 503a37e’s refusal of it stands. An overlap-based first attempt at this fix was caught by <code>test-tokens.R</code>, which is why the rule is equality. It is strictly additive – reached only after the token comparison has already failed, it can turn <code>"conflicts"</code> into <code>"corroborates"</code> but never the reverse – so it cannot newly veto any candidate, and it does not touch <code><a href="../reference/given_tokens.html">given_tokens()</a></code> or <code><a href="../reference/person_matches.html">person_matches()</a></code>.</p>
+<p>Not edit-distance tolerance: <code>JULIA</code>/<code>JULIE</code>, <code>LEE</code>/<code>LEA</code> and <code>ANN</code>/<code>ANNE</code> still conflict, as this function’s contract requires.</p>
+<p>Measured on a downstream AMCB-NPPES linkage of 22,357 certification records: 38 carry a hyphenated normalised middle name, 23 of those have an observable registry middle name, and 2 change verdict from <code>"conflicts"</code> to <code>"corroborates"</code> – both pure punctuation differences (<code>MARIE-LEFEVER</code>/<code>MARIE LEFEVER</code>, <code>NICOLE-DAILEY</code>/<code>NICOLE- DAILEY</code>). One of them, AMCB certification CNM04881, had been vetoed out of a published study cohort as <code>"unmatched"</code> on this basis.</p>
+</li>
+<li>
+<p><strong>The three surname-classification changes between 0.3.1.9000 and 0.8.0 are now pinned by name</strong>, rather than left as incidental package drift. Over 3,000 real roster/registry surname pairs the two versions disagree on exactly three:</p>
+<table class="table"><colgroup><col width="25%"><col width="25%"><col width="25%"><col width="25%"></colgroup><thead><tr><th>pair</th>
+<th>0.3.1.9000</th>
+<th>0.8.0</th>
+<th></th>
+</tr></thead><tbody><tr><td>
+<code>Erickson-Owens</code> / <code>ERICKSONOWENS</code>
+</td>
+<td>conflicts</td>
+<td>corroborates</td>
+<td>correction</td>
+</tr><tr><td>
+<code>Meslar-Little</code> / <code>MESLARLITTLE</code>
+</td>
+<td>conflicts</td>
+<td>corroborates</td>
+<td>correction</td>
+</tr><tr><td>
+<code>Gener Montan</code> / <code>GENER BETANCOURT</code>
+</td>
+<td>corroborates</td>
+<td>conflicts</td>
+<td>tightening</td>
+</tr></tbody></table><p>The first two are one surname spelled with and without its separator. The third shares only its first component, where a married-name change and two different people are indistinguishable – conflicting is the conservative reading, and this function must not choose between them.</p>
+<p>Note for consumers: <code><a href="../reference/surname_agreement.html">surname_agreement()</a></code> is not used by every matcher that uses <code><a href="../reference/middle_agreement.html">middle_agreement()</a></code>. In the downstream study that prompted this audit it feeds an identity experiment, not the cohort linkage, so these three changes move classifications without moving cohort membership there. Check which of your own decisions each rule actually feeds.</p>
+</li>
+<li>
+<p><strong>Recorded late, for the record: <code><a href="../reference/split_given.html">split_given()</a></code> stripping punctuation (cb86e56, 2026-09-13) changed matching semantics and was never announced here.</strong> <code>"Oluwatope B."</code> yields middle <code>"B"</code> rather than <code>"B."</code>, and <code>"Sr. Mary"</code> yields given <code>"SR"</code> rather than <code>"SR."</code>. The rule is correct – an initial and the same initial with a period are one initial – but a downstream study froze an AMCB-NPPES linkage cohort three days before it and re-froze afterwards, and 1,278 normalised middle names and 129 given names moved on byte-identical input, carrying three certification records in and out of the published cohort. Nothing went red, because nothing had an opinion on record.</p>
+<p><code>tests/testthat/test-name-punctuation-cohort-contract.R</code> now pins both behaviours, the three verdicts of <code><a href="../reference/middle_agreement.html">middle_agreement()</a></code> on the shapes a cohort actually hits, the compound-versus-half asymmetry above, and the specific record named. Callers whose results are versioned artifacts should record this package’s version and commit alongside them.</p>
 </li>
 </ul></div>
     <div class="section level2">

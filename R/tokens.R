@@ -94,7 +94,21 @@ surname_tokens <- function(x, strip_alternates = TRUE) {
 #' @export
 middle_tokens <- function(x, strip_alternates = TRUE) {
   k <- blank_na(x, strip_alternates)
-  lapply(strsplit(k, "[^A-Z'-]+"), function(t) unique(t[nzchar(t)]))
+  # A TOKEN MUST CARRY A LETTER. The split class keeps `'` and `-` as token
+  # characters, so a middle-name field holding only punctuation yields a token
+  # made only of punctuation -- and that is not a name. Measured in a real
+  # NPPES panel: 11 registry rows record a PHONE NUMBER in the middle-name
+  # field ("646-704-2003") and 3 record a bare "-". Digits are separators here,
+  # so both collapsed to the token "-", which then reached middle_agreement()
+  # as a name that disagrees and VETOED the candidate.
+  #
+  # That inverts this package's own contract. middle_agreement() documents
+  # "uninformative" as what ABSENCE yields -- "absence of evidence [that] must
+  # never be read as evidence of difference" -- and a junk field is absence.
+  # `nzchar()` alone cannot see the difference, because "-" is not an empty
+  # string. Requiring a letter also subsumes nzchar(): no token with a letter
+  # is empty.
+  lapply(strsplit(k, "[^A-Z'-]+"), function(t) unique(t[grepl("[A-Z]", t)]))
 }
 
 #' Given-name tokens of length >= 2, initials EXCLUDED.
@@ -119,7 +133,11 @@ given_tokens <- function(given, middle = NULL, strip_alternates = TRUE) {
     trimws(paste(blank_na(given, strip_alternates), blank_na(middle, strip_alternates)))
   lapply(strsplit(b, "[^A-Z'-]+"), function(t) {
     t <- t[nchar(t) >= 2L]
-    unique(t[nzchar(t)])
+    # Same rule as middle_tokens(): a token with no letter is not a name. The
+    # >= 2 filter above already drops a bare "-", but not "--" or "''", and a
+    # punctuation-only token here would satisfy person_matches()'s shared-token
+    # requirement -- asserting a match on no name at all.
+    unique(t[grepl("[A-Z]", t)])
   })
 }
 

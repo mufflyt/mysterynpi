@@ -1,5 +1,21 @@
 # Changelog
 
+## mysterynpi (development version)
+
+- **DuckDB lambda syntax migrated off the deprecated `->` arrow.** A
+  DuckDB upgrade began rejecting it outright –
+  `Binder Error: Deprecated lambda arrow (->) detected` – which errored
+  all 14 DuckDB-backed tests (`test-match-npi-duckdb.R`,
+  `test-match-npi-backend-parity.R`, `test-match-npi-attributes.R`) and
+  so turned the whole matrix red, including the mutation campaign’s
+  control gate. No code here had changed: `eae56b8` passed on 2026-10-10
+  and the same commit failed its scheduled run on 2026-11-09.
+
+  The five lambda sites in `R/match_npi_duckdb.R` now use
+  `lambda x: ...`. Both spellings are accepted by duckdb 1.5.5, so this
+  raises no version floor; the deprecated one will not survive DuckDB’s
+  next release.
+
 ## mysterynpi 0.8.0
 
 - [`resolve_one_to_one()`](https://mufflyt.github.io/mysterynpi/reference/resolve_one_to_one.md)

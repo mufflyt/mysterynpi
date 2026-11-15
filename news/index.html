@@ -41,6 +41,13 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="mysterynpi-development-version">mysterynpi (development version)<a class="anchor" aria-label="anchor" href="#mysterynpi-development-version"></a></h2>
+<ul><li>
+<p><strong>DuckDB lambda syntax migrated off the deprecated <code>-&gt;</code> arrow.</strong> A DuckDB upgrade began rejecting it outright – <code>Binder Error: Deprecated lambda arrow (-&gt;) detected</code> – which errored all 14 DuckDB-backed tests (<code>test-match-npi-duckdb.R</code>, <code>test-match-npi-backend-parity.R</code>, <code>test-match-npi-attributes.R</code>) and so turned the whole matrix red, including the mutation campaign’s control gate. No code here had changed: <code>eae56b8</code> passed on 2026-10-10 and the same commit failed its scheduled run on 2026-11-09.</p>
+<p>The five lambda sites in <code>R/match_npi_duckdb.R</code> now use <code>lambda x: ...</code>. Both spellings are accepted by duckdb 1.5.5, so this raises no version floor; the deprecated one will not survive DuckDB’s next release.</p>
+</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.0" id="mysterynpi-080">mysterynpi 0.8.0<a class="anchor" aria-label="anchor" href="#mysterynpi-080"></a></h2>
 <ul><li><p><code><a href="../reference/resolve_one_to_one.html">resolve_one_to_one()</a></code> gains <code>eligible</code> and <code>output</code>. <code>eligible</code> names a logical column (constant per record, no <code>NA</code>): eligible records resolve first, and ineligible records then resolve only on candidates no eligible record resolved to or contests, so a record kept for linkage but outside the analysed population cannot quarantine an eligible record’s candidate. The claims that give way are returned in <code>quarantined</code> as <code>"yielded_to_eligible"</code>. In isochrones’ 2026-10-09 ABOG run this recovered 744 eligible physicians whose NPI an out-of-cohort namesake had been contesting, with no eligible match lost or changed. <code>output = "table"</code> returns the <code>resolved</code> data frame with <code>quarantined</code>, <code>unmatched</code> and <code>counts</code> as attributes; the default <code>"list"</code> is unchanged. <code>man/resolve_one_to_one.Rd</code> is now roxygen-generated (it was hand-written, so the documentation drift check could not see it).</p></li>
 <li><p><code><a href="../articles/resolving-a-roster.html">vignette("resolving-a-roster")</a></code> section 6 answers how to reconcile two physician name lists: resolve each list to NPI first, then join on NPI, never name to name. Four reasons and two caveats recorded.</p></li>

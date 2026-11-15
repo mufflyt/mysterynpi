@@ -1,5 +1,40 @@
 # Changelog
 
+## mysterynpi 0.9.1
+
+- **A token must carry a letter: a punctuation-only name field is
+  `"uninformative"`, not `"conflicts"`.**
+  [`middle_tokens()`](https://mufflyt.github.io/mysterynpi/reference/middle_tokens.md),
+  [`given_tokens()`](https://mufflyt.github.io/mysterynpi/reference/given_tokens.md)
+  and
+  [`name_leading_given()`](https://mufflyt.github.io/mysterynpi/reference/name_leading_given.md)
+  keep `'` and `-` as token characters, so a field holding only
+  punctuation produced a token made only of punctuation – and
+  punctuation is not a name.
+
+  Found by a full-corpus differential audit of a downstream AMCB-NPPES
+  linkage (22,357 roster rows x 527,756 registry name variants). 12
+  candidate pairs moved from `"uninformative"` to `"conflicts"` between
+  0.3.1.9000 and 0.9.0, and **every one was dirty registry data rather
+  than a name**: 11 rows record a PHONE NUMBER in the middle-name field
+  (`"646-704-2003"`, whose digits are separators here, collapsing it to
+  the token `"-"`) and 3 record a bare `"-"`.
+
+  A `"conflicts"` verdict **vetoes a candidate**, so junk in a registry
+  field was silently deleting matches – and it inverted this package’s
+  own documented contract, which says `"uninformative"` is what ABSENCE
+  yields and “must never be read as evidence of difference”.
+  [`nzchar()`](https://rdrr.io/r/base/nchar.html) alone cannot see the
+  difference, because `"-"` is not an empty string.
+
+  Requiring a letter subsumes
+  [`nzchar()`](https://rdrr.io/r/base/nchar.html): no token containing a
+  letter is empty. Every input that carries a letter tokenizes exactly
+  as before – `middle_tokens("MARIE-LEFEVER")` is still one token,
+  `given_tokens("Mary-Jane")` is still `MARY-JANE` – so the 0.9.0
+  corrections are untouched and asserted so in
+  `test-punctuation-only-tokens.R`.
+
 ## mysterynpi 0.9.0
 
 - **[`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md)

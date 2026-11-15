@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,15 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.9.1" id="mysterynpi-091">mysterynpi 0.9.1<a class="anchor" aria-label="anchor" href="#mysterynpi-091"></a></h2>
+<ul><li>
+<p><strong>A token must carry a letter: a punctuation-only name field is <code>"uninformative"</code>, not <code>"conflicts"</code>.</strong> <code><a href="../reference/middle_tokens.html">middle_tokens()</a></code>, <code><a href="../reference/given_tokens.html">given_tokens()</a></code> and <code><a href="../reference/name_leading_given.html">name_leading_given()</a></code> keep <code>'</code> and <code>-</code> as token characters, so a field holding only punctuation produced a token made only of punctuation – and punctuation is not a name.</p>
+<p>Found by a full-corpus differential audit of a downstream AMCB-NPPES linkage (22,357 roster rows x 527,756 registry name variants). 12 candidate pairs moved from <code>"uninformative"</code> to <code>"conflicts"</code> between 0.3.1.9000 and 0.9.0, and <strong>every one was dirty registry data rather than a name</strong>: 11 rows record a PHONE NUMBER in the middle-name field (<code>"646-704-2003"</code>, whose digits are separators here, collapsing it to the token <code>"-"</code>) and 3 record a bare <code>"-"</code>.</p>
+<p>A <code>"conflicts"</code> verdict <strong>vetoes a candidate</strong>, so junk in a registry field was silently deleting matches – and it inverted this package’s own documented contract, which says <code>"uninformative"</code> is what ABSENCE yields and “must never be read as evidence of difference”. <code><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar()</a></code> alone cannot see the difference, because <code>"-"</code> is not an empty string.</p>
+<p>Requiring a letter subsumes <code><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar()</a></code>: no token containing a letter is empty. Every input that carries a letter tokenizes exactly as before – <code>middle_tokens("MARIE-LEFEVER")</code> is still one token, <code>given_tokens("Mary-Jane")</code> is still <code>MARY-JANE</code> – so the 0.9.0 corrections are untouched and asserted so in <code>test-punctuation-only-tokens.R</code>.</p>
+</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9.0" id="mysterynpi-090">mysterynpi 0.9.0<a class="anchor" aria-label="anchor" href="#mysterynpi-090"></a></h2>
 <ul><li>

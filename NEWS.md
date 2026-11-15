@@ -1,4 +1,30 @@
-# mysterynpi (development version)
+# mysterynpi 0.9.0
+
+* **`middle_agreement()` now asks `name_surname_match_type()` about compound
+  forms instead of deciding them itself**, bringing it to parity with
+  `surname_agreement()`, which had been treating a spelling `middle_agreement()`
+  rejected. `"exact"`, `"separator_equivalent"` and `"concatenated_equivalent"`
+  corroborate; `"component_subset"` deliberately does not, so a compound
+  against one half of itself still conflicts.
+
+  Found by auditing 0.3.1.9000 against 0.8.0 for a downstream study. Measured
+  over that study's full pre-veto candidate corpus -- 319,744 roster x registry
+  name-variant comparisons, 306,138 distinct candidate pairs -- the delegation
+  changes **9** middle-name verdicts and lifts **8** candidate vetoes, with
+  **none added**:
+
+  | roster | registry |
+  |---|---|
+  | `MARIE-LEFEVER` | `MARIE LEFEVER` |
+  | `DE BRUIJN` | `DEBRUIJN` |
+  | `RAEANNE` | `RAE ANNE` |
+  | `VANHORN` | `VAN HORN` |
+  | `DE'JOURA` | `DEJOURA` |
+  | `RENE` / `RENEE'` / `JENEE` | `RENE'` / `RENEE` / `JENEE'` |
+
+  Every one is the same name differently punctuated. A hand-rolled hyphen fold
+  (the first attempt at this fix) caught only the first row; the apostrophe and
+  separator-free cases came free with the primitive that already owned them.
 
 * **DuckDB lambda syntax migrated off the deprecated `->` arrow.** A DuckDB
   upgrade began rejecting it outright -- `Binder Error: Deprecated lambda arrow
@@ -12,6 +38,7 @@
   The five lambda sites in `R/match_npi_duckdb.R` now use `lambda x: ...`.
   Both spellings are accepted by duckdb 1.5.5, so this raises no version
   floor; the deprecated one will not survive DuckDB's next release.
+
 * **`middle_agreement()` no longer reads a hyphen as a name boundary when the
   components are otherwise identical.** `"MARIE-LEFEVER"` and
   `"MARIE LEFEVER"` are the same middle name differently punctuated, and the
@@ -48,6 +75,28 @@
   (`MARIE-LEFEVER`/`MARIE LEFEVER`, `NICOLE-DAILEY`/`NICOLE- DAILEY`). One of
   them, AMCB certification CNM04881, had been vetoed out of a published study
   cohort as `"unmatched"` on this basis.
+
+* **The three surname-classification changes between 0.3.1.9000 and 0.8.0 are
+  now pinned by name**, rather than left as incidental package drift. Over
+  3,000 real roster/registry surname pairs the two versions disagree on
+  exactly three:
+
+  | pair | 0.3.1.9000 | 0.8.0 | |
+  |---|---|---|---|
+  | `Erickson-Owens` / `ERICKSONOWENS` | conflicts | corroborates | correction |
+  | `Meslar-Little` / `MESLARLITTLE` | conflicts | corroborates | correction |
+  | `Gener Montan` / `GENER BETANCOURT` | corroborates | conflicts | tightening |
+
+  The first two are one surname spelled with and without its separator. The
+  third shares only its first component, where a married-name change and two
+  different people are indistinguishable -- conflicting is the conservative
+  reading, and this function must not choose between them.
+
+  Note for consumers: `surname_agreement()` is not used by every matcher that
+  uses `middle_agreement()`. In the downstream study that prompted this audit
+  it feeds an identity experiment, not the cohort linkage, so these three
+  changes move classifications without moving cohort membership there. Check
+  which of your own decisions each rule actually feeds.
 
 * **Recorded late, for the record: `split_given()` stripping punctuation
   (cb86e56, 2026-09-13) changed matching semantics and was never announced

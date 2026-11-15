@@ -46,6 +46,14 @@ middle_agreement <- function(a_tokens, b_tokens) {
   if (length(a_tokens) != length(b_tokens)) {
     stop("a_tokens and b_tokens must be the same length", call. = FALSE)
   }
+  # Compound-form equivalence is decided by the package's own surname
+  # primitive rather than re-derived here; see the note in the cascade below.
+  # Computed once for the whole vector, outside the loop: it is vectorised,
+  # and calling it per element turned a 300,000-row comparison into a
+  # per-row function call.
+  compound <- name_surname_match_type(
+    vapply(a_tokens, function(z) paste(z, collapse = " "), character(1)),
+    vapply(b_tokens, function(z) paste(z, collapse = " "), character(1)))
   vapply(seq_along(a_tokens), function(i) {
     a <- a_tokens[[i]]; b <- b_tokens[[i]]
     if (!length(a) || !length(b)) return("uninformative")
@@ -87,23 +95,38 @@ middle_agreement <- function(a_tokens, b_tokens) {
     #                                          half a compound is a match
     #                                          asserted on half a name.
     #
-    # So this branch requires the folded component SETS to be equal. The first
-    # case passes, the second falls through to the cascade below and still
-    # conflicts, and "GAIL-ROSANNE" vs "GAIL" likewise still conflicts.
+    # DELEGATED TO name_surname_match_type(), NOT RE-DERIVED. A first attempt
+    # here hand-rolled a hyphen fold and corroborated on any shared folded
+    # token; this package's own test-tokens.R caught it. A second attempt
+    # required folded SET EQUALITY, which was correct but handled only the
+    # hyphen-versus-space case -- and surname_agreement() had meanwhile been
+    # treating a THIRD spelling correctly all along:
+    #
+    #   "ERICKSON-OWENS" vs "ERICKSON OWENS"  separator_equivalent
+    #   "ERICKSON-OWENS" vs "ERICKSONOWENS"   concatenated_equivalent
+    #   "ANNE-MARIE"     vs "MARIE"           component_subset
+    #
+    # So the compound-form question is answered by the primitive that already
+    # owns it, and these three verdicts mean here exactly what they mean for a
+    # surname. Two spellings of the same components corroborate; a compound
+    # against one HALF of itself does NOT -- component_subset is deliberately
+    # absent from the list below, because 503a37e is right that suppressing a
+    # veto on half a compound asserts a match on half a name. ("MARIE LEFEVER"
+    # against a bare "MARIE" still corroborates, via the shared whole-token
+    # branch above, which runs first; this branch does not change that.)
     #
     # STRICTLY ADDITIVE. Reached only after the token comparison above has
     # failed; it can turn "conflicts" into "corroborates" but never the
     # reverse, so it cannot newly veto any candidate, and it does not touch
-    # given_tokens() or person_matches().
+    # middle_tokens(), given_tokens() or person_matches() -- the false
+    # positive 503a37e fixed stays fixed.
     #
-    # NOT edit-distance tolerance. A hyphen is punctuation this package
-    # already folds elsewhere (split_given, blocking_key); JULIA/JULIE,
-    # LEE/LEA and ANN/ANNE still conflict, as the note above requires.
-    unhyphen <- function(t) {
-      u <- unique(unlist(strsplit(t, "-", fixed = TRUE), use.names = FALSE))
-      sort(u[nzchar(u)])
-    }
-    if (identical(unhyphen(a), unhyphen(b))) {
+    # NOT edit-distance tolerance: "none" falls through to the cascade, so
+    # JULIA/JULIE, LEE/LEA and ANN/ANNE still conflict, and an initials-only
+    # record ("M L" against "MARIE LEFEVER") is still decided by
+    # initials_string_matches() below rather than here.
+    if (compound[i] %in% c("exact", "separator_equivalent",
+                           "concatenated_equivalent")) {
       return("corroborates")
     }
     if (initials_string_matches(a, b) || initials_string_matches(b, a)) {

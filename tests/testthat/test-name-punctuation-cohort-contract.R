@@ -179,6 +179,53 @@ test_that("CNM04881 (RHIZAL): every NPPES spelling corroborates the roster", {
   expect_identical(blank_na("Marie-Lefever"), "MARIE-LEFEVER")
 })
 
+test_that("compound middle names meet across all three spellings, like surnames do", {
+  # PARITY, FOUND BY AUDITING 0.3.1.9000 AGAINST 0.8.0. The migration audit
+  # surfaced three surname-classification changes, and in chasing them it
+  # became clear that surname_agreement() had been treating a spelling
+  # middle_agreement() rejected: the SEPARATOR-FREE compound.
+  #
+  #   "ERICKSON-OWENS" vs "ERICKSON OWENS"  separator_equivalent
+  #   "ERICKSON-OWENS" vs "ERICKSONOWENS"   concatenated_equivalent  <- missed
+  #
+  # middle_agreement() now asks name_surname_match_type(), the primitive that
+  # already owns compound-form equivalence, instead of re-deriving it. These
+  # assertions are the parity claim.
+  for (p in list(c("ERICKSON-OWENS", "ERICKSON OWENS"),
+                 c("ERICKSON-OWENS", "ERICKSONOWENS"),
+                 c("ERICKSON OWENS", "ERICKSONOWENS"),
+                 c("MESLAR-LITTLE",  "MESLARLITTLE"),
+                 c("MESLAR-LITTLE",  "MESLAR LITTLE"),
+                 c("MARIE-LEFEVER",  "MARIE LEFEVER"))) {
+    expect_identical(ag(p[1], p[2]), "corroborates",
+                     info = paste(p[1], "vs", p[2]))
+    expect_identical(surname_agreement(p[1], p[2]), "corroborates",
+                     info = paste("surname parity:", p[1], "vs", p[2]))
+  }
+})
+
+test_that("the three surname changes the 0.3.1.9000 -> 0.8.0 audit found", {
+  # RECORDED BECAUSE THEY ARE LINKAGE DECISIONS, NOT INCIDENTAL PACKAGE
+  # CHANGES. Comparing the two versions over 3,000 real AMCB-NPPES surname
+  # pairs produced exactly three verdict changes. All three are pinned here
+  # with the reasoning, so a future change to surname handling has to argue
+  # with a named case rather than move a count.
+  #
+  # Two are corrections: a hyphen and its separator-free spelling are one
+  # surname.
+  expect_identical(surname_agreement("Erickson-Owens", "ERICKSONOWENS"), "corroborates")
+  expect_identical(surname_agreement("Meslar-Little",  "MESLARLITTLE"),  "corroborates")
+  # One is a TIGHTENING, and the conservative direction: two two-component
+  # surnames that share only their first component are not established as one
+  # person. A married-name change and two different people look identical
+  # here, and this function must not decide between them.
+  expect_identical(surname_agreement("Gener Montan", "GENER BETANCOURT"), "conflicts")
+  # The component_subset shape that underlies the tightening, stated directly.
+  expect_identical(name_surname_match_type("Gener Montan", "GENER BETANCOURT"), "none")
+  expect_identical(name_surname_match_type("Erickson-Owens", "ERICKSONOWENS"),
+                   "concatenated_equivalent")
+})
+
 test_that("a hyphen still carries meaning for compound-versus-half, and that is a decision", {
   # AN ASYMMETRY THIS FILE RECORDS RATHER THAN RESOLVES.
   #

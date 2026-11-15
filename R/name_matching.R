@@ -263,7 +263,10 @@ name_leading_given <- function(first) {
   vapply(k, function(s) {
     if (is.na(s) || !nzchar(s)) return(NA_character_)
     t <- strsplit(s, "[^A-Za-z-]+")[[1]]
-    t <- t[nzchar(t)]
+    # A letter, not merely a non-empty string: the split class keeps "-", so a
+    # name field holding only punctuation would otherwise return "-" as the
+    # leading given name. See middle_tokens() for the measured case.
+    t <- t[grepl("[A-Za-z]", t)]
     if (length(t) == 0L) NA_character_ else toupper(t[1])
   }, character(1), USE.NAMES = FALSE)
 }

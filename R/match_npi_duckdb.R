@@ -108,14 +108,14 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   key_sql <- macro("key", "value", reg("value", "['\u2019`]", ""))
   tokens_sql <- macro("tokens", "value", paste0(
     "list_filter(regexp_split_to_array(", key_sql,
-    "(coalesce(value, '')), '[^A-Za-z]+'), x -> length(x) >= 2)"))
+    "(coalesce(value, '')), '[^A-Za-z]+'), lambda x: length(x) >= 2)"))
   # list_distinct reorders values; retain the first occurrence for surname
   # concatenation, whose order is part of the memory backend's contract.
   unique_sql <- macro("unique_tokens", "value", paste0(
-    "list_filter(value, (x, i) -> list_position(value, x) = i)"))
+    "list_filter(value, lambda x, i: list_position(value, x) = i)"))
   deletion_sql <- macro("deletions", "value", paste0(
     "CASE WHEN length(value) >= 3 THEN list_prepend(value, ",
-    "list_transform(range(1, length(value) + 1), i -> ",
+    "list_transform(range(1, length(value) + 1), lambda i: ",
     "substr(value, 1, i - 1) || substr(value, i + 1))) ELSE []::VARCHAR[] END"))
   pair_key <- macro("pair_key", "a, b", "length(a)::VARCHAR || ':' || a || length(b) || ':' || b")
   selected <- paste0("SELECT ", field("npi"), " AS npi, ",
@@ -126,7 +126,7 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
   # Luhn's 80840 prefix contributes 24; positions 1,3,5,7,9 are doubled.
   luhn <- paste0(
     "coalesce(regexp_full_match(npi, '[0-9]{10}') AND ",
-    "(24 + list_sum(list_transform(range(1, 11), i -> CASE WHEN i % 2 = 1 THEN ",
+    "(24 + list_sum(list_transform(range(1, 11), lambda i: CASE WHEN i % 2 = 1 THEN ",
     "(try_cast(substr(npi, i, 1) AS INTEGER) * 2) // 10 + ",
     "(try_cast(substr(npi, i, 1) AS INTEGER) * 2) % 10 ELSE ",
     "try_cast(substr(npi, i, 1) AS INTEGER) END))) % 10 = 0, FALSE)")
@@ -139,7 +139,7 @@ generate_npi_candidates_duckdb <- function(con, table, roster, columns, entity_f
     luhn, " AS valid FROM names) SELECT row_number() OVER () AS row_id, *, ",
     "lead IS NOT NULL AND length(components) > 0 AS present, ",
     "list_prepend(array_to_string(components, ''), ",
-    "list_filter(components, x -> x NOT IN (", particles, "))) AS family FROM keys"))
+    "list_filter(components, lambda x: x NOT IN (", particles, "))) AS family FROM keys"))
   counts <- DBI::dbGetQuery(con, paste0(
     "SELECT (SELECT count(*) FROM ", source_table, ") AS input, count(*) AS entity_type, ",
     "count(*) FILTER (WHERE NOT valid) AS invalid_npi, ",

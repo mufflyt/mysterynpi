@@ -11,7 +11,12 @@ as they would in \[middle_agreement()\].
 ## Usage
 
 ``` r
-nickname_agreement(a, b, edges = mysterynpi::NICKNAME_EDGES)
+nickname_agreement(
+  a,
+  b,
+  edges = mysterynpi::NICKNAME_EDGES,
+  na_action = NA_ACTIONS
+)
 ```
 
 ## Arguments
@@ -25,6 +30,16 @@ nickname_agreement(a, b, edges = mysterynpi::NICKNAME_EDGES)
   the edge table; defaults to \[NICKNAME_EDGES\]. A caller with a
   study-specific table supplies it here and the rule's behaviour over it
   stays identical.
+
+- na_action:
+
+  \[character(1)\] how to treat a missing value on either side: one of
+  \[NA_ACTIONS\]. The default \`"uninformative"\` is the behaviour of
+  every release before 0.10.0 – absence decides nothing. \`"warn"\` does
+  the same and says so once per call; \`"error"\` refuses to compare.
+  Imputation is deliberately absent: an imputed name is a fabricated
+  identity claim (srr G2.14a, G2.14b; G2.14c refused with reason in
+  \`R/missing_policy.R\`).
 
 ## Value
 

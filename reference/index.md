@@ -300,3 +300,71 @@ Assertions a caller runs in its own suite.
 - [`assert_org_name_matches_person_contract()`](https://mufflyt.github.io/mysterynpi/reference/assert_org_name_matches_person_contract.md)
   : Assert that the person/organization name bridge still behaves as
   relied on.
+
+## Missing and undefined values
+
+The policy every agreement rule applies, selectable since 0.10.0 with
+the previous behaviour as its default. Imputation is deliberately
+absent: an imputed name is a fabricated identity claim.
+
+- [`NA_ACTIONS`](https://mufflyt.github.io/mysterynpi/reference/NA_ACTIONS.md)
+  : Missing-data policies accepted across the agreement rules
+- [`resolve_na_action()`](https://mufflyt.github.io/mysterynpi/reference/resolve_na_action.md)
+  : Resolve and apply a missing-data policy
+- [`count_missing_values()`](https://mufflyt.github.io/mysterynpi/reference/count_missing_values.md)
+  : Count the missing values in a character or list input
+- [`is_undefined_number()`](https://mufflyt.github.io/mysterynpi/reference/is_undefined_number.md)
+  : Is this value undefined rather than merely missing?
+- [`finite_or_na()`](https://mufflyt.github.io/mysterynpi/reference/finite_or_na.md)
+  : Replace undefined numbers with NA
+
+## Input structures
+
+The shapes a caller may pass, and the diagnostics emitted when a
+conversion loses something. One place decides input shape, so the entry
+points stop each making their own partial version of it.
+
+- [`as_linkage_table()`](https://mufflyt.github.io/mysterynpi/reference/as_linkage_table.md)
+  : Coerce any tabular input to a plain data frame, loudly
+- [`read_name_column()`](https://mufflyt.github.io/mysterynpi/reference/read_name_column.md)
+  : Read one column as character, announcing any loss
+- [`reject_list_columns()`](https://mufflyt.github.io/mysterynpi/reference/reject_list_columns.md)
+  : Refuse list columns, with the reason
+- [`drop_vector_attributes()`](https://mufflyt.github.io/mysterynpi/reference/drop_vector_attributes.md)
+  : Strip attributes from one-dimensional input
+- [`check_scalar()`](https://mufflyt.github.io/mysterynpi/reference/check_scalar.md)
+  : Assert that an argument is a single value
+- [`affirm_unique_index()`](https://mufflyt.github.io/mysterynpi/reference/affirm_unique_index.md)
+  : Affirm that an index column is unique
+
+## The match result
+
+match_npi() returns an object with methods rather than a bare list. The
+class is additive: the same five elements under the same names, so every
+existing caller keeps working.
+
+- [`new_npi_match_result()`](https://mufflyt.github.io/mysterynpi/reference/new_npi_match_result.md)
+  : Give a match result its class
+- [`print(`*`<npi_match_result>`*`)`](https://mufflyt.github.io/mysterynpi/reference/print.npi_match_result.md)
+  : Print a match result
+- [`format(`*`<npi_match_result>`*`)`](https://mufflyt.github.io/mysterynpi/reference/format.npi_match_result.md)
+  : Format a match result for printing
+- [`summary(`*`<npi_match_result>`*`)`](https://mufflyt.github.io/mysterynpi/reference/summary.npi_match_result.md)
+  : Standardised statistics from a match result
+- [`print(`*`<summary.npi_match_result>`*`)`](https://mufflyt.github.io/mysterynpi/reference/print.summary.npi_match_result.md)
+  : Print a match-result summary
+- [`nobs(`*`<npi_match_result>`*`)`](https://mufflyt.github.io/mysterynpi/reference/nobs.npi_match_result.md)
+  : Number of roster rows a match result was built from
+
+## Benchmark and comparison
+
+The reference evaluation that vignette(“roster-benchmark”) narrates, as
+callable functions, plus the head-to-head against the edit-distance
+matcher these rules reject.
+
+- [`benchmark_axes()`](https://mufflyt.github.io/mysterynpi/reference/benchmark_axes.md)
+  : The six agreement axes for a benchmark-shaped table
+- [`benchmark_decisions()`](https://mufflyt.github.io/mysterynpi/reference/benchmark_decisions.md)
+  : The accept / review / reject decision for benchmark pairs
+- [`benchmark_comparison()`](https://mufflyt.github.io/mysterynpi/reference/benchmark_comparison.md)
+  : Evaluate the agreement rules against the shipped benchmark

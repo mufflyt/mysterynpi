@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/comparison-with-alternatives.html">Compared with an edit-distance matcher</a></li>
+    <li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
     <li><a class="dropdown-item" href="../articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="../articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
@@ -943,6 +944,182 @@
 
         </dt>
         <dd>Assert that the person/organization name bridge still behaves as relied on.</dd>
+      </dl></div><div class="section level2">
+      <h2 id="missing-and-undefined-values">Missing and undefined values<a class="anchor" aria-label="anchor" href="#missing-and-undefined-values"></a></h2>
+
+      <div class="section-desc"><p>The policy every agreement rule applies, selectable since 0.10.0 with the previous behaviour as its default. Imputation is deliberately absent: an imputed name is a fabricated identity claim.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="NA_ACTIONS.html">NA_ACTIONS</a></code>
+
+        </dt>
+        <dd>Missing-data policies accepted across the agreement rules</dd>
+
+        <dt>
+
+          <code><a href="resolve_na_action.html">resolve_na_action()</a></code>
+
+        </dt>
+        <dd>Resolve and apply a missing-data policy</dd>
+
+        <dt>
+
+          <code><a href="count_missing_values.html">count_missing_values()</a></code>
+
+        </dt>
+        <dd>Count the missing values in a character or list input</dd>
+
+        <dt>
+
+          <code><a href="is_undefined_number.html">is_undefined_number()</a></code>
+
+        </dt>
+        <dd>Is this value undefined rather than merely missing?</dd>
+
+        <dt>
+
+          <code><a href="finite_or_na.html">finite_or_na()</a></code>
+
+        </dt>
+        <dd>Replace undefined numbers with NA</dd>
+      </dl></div><div class="section level2">
+      <h2 id="input-structures">Input structures<a class="anchor" aria-label="anchor" href="#input-structures"></a></h2>
+
+      <div class="section-desc"><p>The shapes a caller may pass, and the diagnostics emitted when a conversion loses something. One place decides input shape, so the entry points stop each making their own partial version of it.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_linkage_table.html">as_linkage_table()</a></code>
+
+        </dt>
+        <dd>Coerce any tabular input to a plain data frame, loudly</dd>
+
+        <dt>
+
+          <code><a href="read_name_column.html">read_name_column()</a></code>
+
+        </dt>
+        <dd>Read one column as character, announcing any loss</dd>
+
+        <dt>
+
+          <code><a href="reject_list_columns.html">reject_list_columns()</a></code>
+
+        </dt>
+        <dd>Refuse list columns, with the reason</dd>
+
+        <dt>
+
+          <code><a href="drop_vector_attributes.html">drop_vector_attributes()</a></code>
+
+        </dt>
+        <dd>Strip attributes from one-dimensional input</dd>
+
+        <dt>
+
+          <code><a href="check_scalar.html">check_scalar()</a></code>
+
+        </dt>
+        <dd>Assert that an argument is a single value</dd>
+
+        <dt>
+
+          <code><a href="affirm_unique_index.html">affirm_unique_index()</a></code>
+
+        </dt>
+        <dd>Affirm that an index column is unique</dd>
+      </dl></div><div class="section level2">
+      <h2 id="the-match-result">The match result<a class="anchor" aria-label="anchor" href="#the-match-result"></a></h2>
+
+      <div class="section-desc"><p>match_npi() returns an object with methods rather than a bare list. The class is additive: the same five elements under the same names, so every existing caller keeps working.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="new_npi_match_result.html">new_npi_match_result()</a></code>
+
+        </dt>
+        <dd>Give a match result its class</dd>
+
+        <dt>
+
+          <code><a href="print.npi_match_result.html">print(<i>&lt;npi_match_result&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a match result</dd>
+
+        <dt>
+
+          <code><a href="format.npi_match_result.html">format(<i>&lt;npi_match_result&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Format a match result for printing</dd>
+
+        <dt>
+
+          <code><a href="summary.npi_match_result.html">summary(<i>&lt;npi_match_result&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Standardised statistics from a match result</dd>
+
+        <dt>
+
+          <code><a href="print.summary.npi_match_result.html">print(<i>&lt;summary.npi_match_result&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a match-result summary</dd>
+
+        <dt>
+
+          <code><a href="nobs.npi_match_result.html">nobs(<i>&lt;npi_match_result&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Number of roster rows a match result was built from</dd>
+      </dl></div><div class="section level2">
+      <h2 id="benchmark-and-comparison">Benchmark and comparison<a class="anchor" aria-label="anchor" href="#benchmark-and-comparison"></a></h2>
+
+      <div class="section-desc"><p>The reference evaluation that vignette(“roster-benchmark”) narrates, as callable functions, plus the head-to-head against the edit-distance matcher these rules reject.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="benchmark_axes.html">benchmark_axes()</a></code>
+
+        </dt>
+        <dd>The six agreement axes for a benchmark-shaped table</dd>
+
+        <dt>
+
+          <code><a href="benchmark_decisions.html">benchmark_decisions()</a></code>
+
+        </dt>
+        <dd>The accept / review / reject decision for benchmark pairs</dd>
+
+        <dt>
+
+          <code><a href="benchmark_comparison.html">benchmark_comparison()</a></code>
+
+        </dt>
+        <dd>Evaluate the agreement rules against the shipped benchmark</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

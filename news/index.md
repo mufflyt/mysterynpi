@@ -1,5 +1,133 @@
 # Changelog
 
+## mysterynpi 0.10.0
+
+Every srr standard this package can meet is now met *and tagged*, rather
+than assessed as reachable. `srr::srr_stats_pre_submit()` reports all
+applicable standards documented: 104 complied with, 104 not applicable,
+none missing. The full assessment, with a verdict for each of the 145
+checklist IDs and a per-subsection table, is in
+`srr/standards-compliance.md`.
+
+### New features
+
+- **A selectable missing-data policy.** Every agreement rule takes
+  `na_action = c("uninformative", "warn", "error")`. The default is the
+  behaviour of every previous release – absence decides nothing and
+  never conflicts – so no existing caller moves and the contract
+  asserters still run against it. `"warn"` says so once per call;
+  `"error"` refuses to compare. One change closes srr G2.14, RE2.1 and
+  TS2.1, which are the same request in three standard sets.
+
+  **Imputation is deliberately not offered.** srr G2.14c asks for it; an
+  imputed name is a fabricated identity claim, and this package exists
+  because absence of evidence was once read as evidence of difference.
+  Reading it as evidence of sameness is worse: it resolves a match on a
+  name nobody recorded. It is refused on the numeric year scale too,
+  where it would at least be defined, because imputing a year
+  manufactures the compatibility
+  [`graduation_year_agreement()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.md)
+  is asked to judge.
+
+- **Undefined values are separated from missing ones.**
+  [`is_undefined_number()`](https://mufflyt.github.io/mysterynpi/reference/is_undefined_number.md)
+  and
+  [`finite_or_na()`](https://mufflyt.github.io/mysterynpi/reference/finite_or_na.md),
+  plus
+  `graduation_year_agreement(undefined = c( "uninformative", "error"))`:
+  `NaN` and the infinities are an arithmetic that went wrong upstream,
+  not a year nobody recorded (srr G2.16).
+
+- **Wider input shapes, and loud conversions.**
+  [`as_linkage_table()`](https://mufflyt.github.io/mysterynpi/reference/as_linkage_table.md)
+  accepts `data.frame`, `tbl_df`, `data.table` and a named matrix;
+  [`read_name_column()`](https://mufflyt.github.io/mysterynpi/reference/read_name_column.md)
+  converts explicitly and says what each conversion costs;
+  [`reject_list_columns()`](https://mufflyt.github.io/mysterynpi/reference/reject_list_columns.md)
+  refuses a list column rather than letting it stringify into a
+  comparison;
+  [`check_scalar()`](https://mufflyt.github.io/mysterynpi/reference/check_scalar.md)
+  refuses a multi-valued `seed` or `entity_filter` rather than
+  truncating it;
+  [`affirm_unique_index()`](https://mufflyt.github.io/mysterynpi/reference/affirm_unique_index.md)
+  affirms an index rather than assuming it.
+  [`match_npi()`](https://mufflyt.github.io/mysterynpi/reference/match_npi.md)
+  applies these at the top of the call.
+
+  A numeric identifier no longer reaches a comparison as `1.23e+09`.
+
+- **[`match_npi()`](https://mufflyt.github.io/mysterynpi/reference/match_npi.md)
+  returns an object with methods.** The new `npi_match_result` class
+  carries [`print()`](https://rdrr.io/r/base/print.html),
+  [`format()`](https://rdrr.io/r/base/format.html),
+  [`summary()`](https://rdrr.io/r/base/summary.html) and
+  [`nobs()`](https://rdrr.io/r/stats/nobs.html). The class is additive –
+  the same five elements under the same names – so every existing caller
+  keeps working, while [`print()`](https://rdrr.io/r/base/print.html)
+  now shows six lines of summary instead of every matched row, numbers
+  are formatted at a stated precision, and `summary()$columns` reports
+  the class and storage mode of each column.
+
+- **The benchmark is callable.**
+  [`benchmark_axes()`](https://mufflyt.github.io/mysterynpi/reference/benchmark_axes.md),
+  [`benchmark_decisions()`](https://mufflyt.github.io/mysterynpi/reference/benchmark_decisions.md)
+  and
+  [`benchmark_comparison()`](https://mufflyt.github.io/mysterynpi/reference/benchmark_comparison.md)
+  are the evaluation
+  [`vignette("roster-benchmark")`](https://mufflyt.github.io/mysterynpi/articles/roster-benchmark.md)
+  narrates: 126 accepts all true matches, 58 rejects all true
+  nonmatches, 6 reviews all true matches, precision 1.000 among accepts,
+  with each claimed property carrying a pass column.
+
+- **The edit-distance argument is now measured**, in the new
+  [`vignette("comparison-with-alternatives")`](https://mufflyt.github.io/mysterynpi/articles/comparison-with-alternatives.md):
+  these rules against a base-R edit-distance baseline on the same 190
+  pairs, precision 1.000 / recall 0.955 / 0 false accepts against 0.854
+  / 0.265 / 6. The six false accepts land in the `spelling-trap` family
+  – the `JULIA` versus `JULIE` case `R/agreement.R` has described in
+  prose since the rule was removed from the real pipeline.
+
+  It is a vignette and not an exported function because the package’s
+  own no-fuzzy guard refused the function, correctly: `test-no-fuzzy.R`
+  admits no approximate-matching call anywhere in `R/`, not even one
+  written to argue against approximate matching. A vignette is runnable
+  code outside the namespace, so the comparison ships and the rule stays
+  absolute.
+
+### Documentation
+
+- README gains “What this re-implements, and what is original” (the
+  primitives are established linkage practice; the refusals are what is
+  ours), “Compared with an edit-distance matcher”, and a “Life cycle”
+  statement.
+- `GRADUATION_YEAR_BANDS` states that its unit is a whole calendar year,
+  that a band boundary is not a date boundary, and why no argument
+  accepts a month.
+
+### Testing
+
+- Four new suites: the missing-data policy, the input structures, the
+  result class and benchmark, and an extended lane gated on
+  `MYSTERYNPI_EXTENDED_TESTS` that fetches an NPPES extract rather than
+  shipping one (`MYSTERYNPI_NPPES_CSV` points at a local copy instead).
+  The extended lane documents its flag, platform, memory, runtime,
+  network, asset and artefacts.
+- The benchmark properties are asserted per defect family, so a rule
+  that holds only on the mixed corpus fails.
+
+### Fixes found while implementing the above
+
+- [`read_name_column()`](https://mufflyt.github.io/mysterynpi/reference/read_name_column.md)’s
+  ancestor checked
+  [`is.character()`](https://rdrr.io/r/base/character.html) before
+  inspecting the class, so a character vector carrying a `units`-like
+  class passed through with its attributes intact – the exact input srr
+  G2.6 and G2.11 are about. The class check now runs first.
+- `tests/testthat/test-pkgdown-reference-index-complete.R` could not
+  read a hyphenated topic name from `_pkgdown.yml`, so any such topic
+  was reported absent from the index no matter what the index said.
+  srr’s own naming convention surfaced it.
+
 ## mysterynpi 0.9.1
 
 - **A token must carry a letter: a punctuation-only name field is

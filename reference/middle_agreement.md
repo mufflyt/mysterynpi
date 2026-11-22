@@ -7,7 +7,7 @@ disagreement:
 ## Usage
 
 ``` r
-middle_agreement(a_tokens, b_tokens)
+middle_agreement(a_tokens, b_tokens, na_action = NA_ACTIONS)
 ```
 
 ## Arguments
@@ -15,6 +15,16 @@ middle_agreement(a_tokens, b_tokens)
 - a_tokens, b_tokens:
 
   lists of character vectors from \[middle_tokens()\], the same length.
+
+- na_action:
+
+  \[character(1)\] how to treat a missing value on either side: one of
+  \[NA_ACTIONS\]. The default \`"uninformative"\` is the behaviour of
+  every release before 0.10.0 – absence decides nothing. \`"warn"\` does
+  the same and says so once per call; \`"error"\` refuses to compare.
+  Imputation is deliberately absent: an imputed name is a fabricated
+  identity claim (srr G2.14a, G2.14b; G2.14c refused with reason in
+  \`R/missing_policy.R\`).
 
 ## Value
 

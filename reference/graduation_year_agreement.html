@@ -23,7 +23,7 @@ the person's training, not the registry's paperwork."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,8 @@ the person's training, not the registry's paperwork."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/comparison-with-alternatives.html">Compared with an edit-distance matcher</a></li>
+    <li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
     <li><a class="dropdown-item" href="../articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="../articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
@@ -74,7 +75,9 @@ the person's training, not the registry's paperwork.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">graduation_year_agreement</span><span class="op">(</span></span>
 <span>  <span class="va">credentialing_year</span>,</span>
 <span>  <span class="va">graduation_year</span>,</span>
-<span>  bands <span class="op">=</span> <span class="va">GRADUATION_YEAR_BANDS</span></span>
+<span>  bands <span class="op">=</span> <span class="va">GRADUATION_YEAR_BANDS</span>,</span>
+<span>  na_action <span class="op">=</span> <span class="va">NA_ACTIONS</span>,</span>
+<span>  undefined <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"uninformative"</span>, <span class="st">"error"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,6 +94,18 @@ person graduated BEFORE they credentialed.</p></dd>
 
 <dt id="arg-bands">bands<a class="anchor" aria-label="anchor" href="#arg-bands"></a></dt>
 <dd><p>the band table; defaults to [GRADUATION_YEAR_BANDS].</p></dd>
+
+
+<dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>[character(1)] how to treat a missing year: one of
+[NA_ACTIONS]. Default `"uninformative"`, the behaviour of every release
+before 0.10.0.</p></dd>
+
+
+<dt id="arg-undefined">undefined<a class="anchor" aria-label="anchor" href="#arg-undefined"></a></dt>
+<dd><p>[character(1)] how to treat `NaN`, `Inf` or `-Inf`, which
+are not years: `"uninformative"` (the default) converts them to `NA` and
+scores them as deciding nothing; `"error"` refuses (srr G2.16).</p></dd>
 
 </dl></div>
     <div class="section level2">

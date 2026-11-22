@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/comparison-with-alternatives.html">Compared with an edit-distance matcher</a></li>
+    <li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
     <li><a class="dropdown-item" href="../articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="../articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
@@ -40,6 +41,46 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.10.0" id="mysterynpi-0100">mysterynpi 0.10.0<a class="anchor" aria-label="anchor" href="#mysterynpi-0100"></a></h2>
+<p>Every srr standard this package can meet is now met <em>and tagged</em>, rather than assessed as reachable. <code>srr::srr_stats_pre_submit()</code> reports all applicable standards documented: 104 complied with, 104 not applicable, none missing. The full assessment, with a verdict for each of the 145 checklist IDs and a per-subsection table, is in <code>srr/standards-compliance.md</code>.</p>
+<div class="section level3">
+<h3 id="new-features-0-10-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-10-0"></a></h3>
+<ul><li>
+<p><strong>A selectable missing-data policy.</strong> Every agreement rule takes <code>na_action = c("uninformative", "warn", "error")</code>. The default is the behaviour of every previous release – absence decides nothing and never conflicts – so no existing caller moves and the contract asserters still run against it. <code>"warn"</code> says so once per call; <code>"error"</code> refuses to compare. One change closes srr G2.14, RE2.1 and TS2.1, which are the same request in three standard sets.</p>
+<p><strong>Imputation is deliberately not offered.</strong> srr G2.14c asks for it; an imputed name is a fabricated identity claim, and this package exists because absence of evidence was once read as evidence of difference. Reading it as evidence of sameness is worse: it resolves a match on a name nobody recorded. It is refused on the numeric year scale too, where it would at least be defined, because imputing a year manufactures the compatibility <code><a href="../reference/graduation_year_agreement.html">graduation_year_agreement()</a></code> is asked to judge.</p>
+</li>
+<li><p><strong>Undefined values are separated from missing ones.</strong> <code><a href="../reference/is_undefined_number.html">is_undefined_number()</a></code> and <code><a href="../reference/finite_or_na.html">finite_or_na()</a></code>, plus <code>graduation_year_agreement(undefined = c( "uninformative", "error"))</code>: <code>NaN</code> and the infinities are an arithmetic that went wrong upstream, not a year nobody recorded (srr G2.16).</p></li>
+<li>
+<p><strong>Wider input shapes, and loud conversions.</strong> <code><a href="../reference/as_linkage_table.html">as_linkage_table()</a></code> accepts <code>data.frame</code>, <code>tbl_df</code>, <code>data.table</code> and a named matrix; <code><a href="../reference/read_name_column.html">read_name_column()</a></code> converts explicitly and says what each conversion costs; <code><a href="../reference/reject_list_columns.html">reject_list_columns()</a></code> refuses a list column rather than letting it stringify into a comparison; <code><a href="../reference/check_scalar.html">check_scalar()</a></code> refuses a multi-valued <code>seed</code> or <code>entity_filter</code> rather than truncating it; <code><a href="../reference/affirm_unique_index.html">affirm_unique_index()</a></code> affirms an index rather than assuming it. <code><a href="../reference/match_npi.html">match_npi()</a></code> applies these at the top of the call.</p>
+<p>A numeric identifier no longer reaches a comparison as <code>1.23e+09</code>.</p>
+</li>
+<li><p><strong><code><a href="../reference/match_npi.html">match_npi()</a></code> returns an object with methods.</strong> The new <code>npi_match_result</code> class carries <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and <code><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs()</a></code>. The class is additive – the same five elements under the same names – so every existing caller keeps working, while <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> now shows six lines of summary instead of every matched row, numbers are formatted at a stated precision, and <code>summary()$columns</code> reports the class and storage mode of each column.</p></li>
+<li><p><strong>The benchmark is callable.</strong> <code><a href="../reference/benchmark_axes.html">benchmark_axes()</a></code>, <code><a href="../reference/benchmark_decisions.html">benchmark_decisions()</a></code> and <code><a href="../reference/benchmark_comparison.html">benchmark_comparison()</a></code> are the evaluation <code><a href="../articles/roster-benchmark.html">vignette("roster-benchmark")</a></code> narrates: 126 accepts all true matches, 58 rejects all true nonmatches, 6 reviews all true matches, precision 1.000 among accepts, with each claimed property carrying a pass column.</p></li>
+<li>
+<p><strong>The edit-distance argument is now measured</strong>, in the new <code><a href="../articles/comparison-with-alternatives.html">vignette("comparison-with-alternatives")</a></code>: these rules against a base-R edit-distance baseline on the same 190 pairs, precision 1.000 / recall 0.955 / 0 false accepts against 0.854 / 0.265 / 6. The six false accepts land in the <code>spelling-trap</code> family – the <code>JULIA</code> versus <code>JULIE</code> case <code>R/agreement.R</code> has described in prose since the rule was removed from the real pipeline.</p>
+<p>It is a vignette and not an exported function because the package’s own no-fuzzy guard refused the function, correctly: <code>test-no-fuzzy.R</code> admits no approximate-matching call anywhere in <code>R/</code>, not even one written to argue against approximate matching. A vignette is runnable code outside the namespace, so the comparison ships and the rule stays absolute.</p>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-10-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-10-0"></a></h3>
+<ul><li>README gains “What this re-implements, and what is original” (the primitives are established linkage practice; the refusals are what is ours), “Compared with an edit-distance matcher”, and a “Life cycle” statement.</li>
+<li>
+<code>GRADUATION_YEAR_BANDS</code> states that its unit is a whole calendar year, that a band boundary is not a date boundary, and why no argument accepts a month.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="testing-0-10-0">Testing<a class="anchor" aria-label="anchor" href="#testing-0-10-0"></a></h3>
+<ul><li>Four new suites: the missing-data policy, the input structures, the result class and benchmark, and an extended lane gated on <code>MYSTERYNPI_EXTENDED_TESTS</code> that fetches an NPPES extract rather than shipping one (<code>MYSTERYNPI_NPPES_CSV</code> points at a local copy instead). The extended lane documents its flag, platform, memory, runtime, network, asset and artefacts.</li>
+<li>The benchmark properties are asserted per defect family, so a rule that holds only on the mixed corpus fails.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixes-found-while-implementing-the-above-0-10-0">Fixes found while implementing the above<a class="anchor" aria-label="anchor" href="#fixes-found-while-implementing-the-above-0-10-0"></a></h3>
+<ul><li>
+<code><a href="../reference/read_name_column.html">read_name_column()</a></code>’s ancestor checked <code><a href="https://rdrr.io/r/base/character.html" class="external-link">is.character()</a></code> before inspecting the class, so a character vector carrying a <code>units</code>-like class passed through with its attributes intact – the exact input srr G2.6 and G2.11 are about. The class check now runs first.</li>
+<li>
+<code>tests/testthat/test-pkgdown-reference-index-complete.R</code> could not read a hyphenated topic name from <code>_pkgdown.yml</code>, so any such topic was reported absent from the index no matter what the index said. srr’s own naming convention surfaced it.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9.1" id="mysterynpi-091">mysterynpi 0.9.1<a class="anchor" aria-label="anchor" href="#mysterynpi-091"></a></h2>
 <ul><li>

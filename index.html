@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+<li><a class="dropdown-item" href="articles/comparison-with-alternatives.html">Compared with an edit-distance matcher</a></li>
+    <li><a class="dropdown-item" href="articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
     <li><a class="dropdown-item" href="articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
@@ -308,6 +309,62 @@
     AL["AL"] --&gt;|"one hop"| ALBERT["ALBERT"]
     AL --&gt;|"one hop"| ALEXANDER["ALEXANDER"]
     ALBERT -.-&gt;|"NEVER inferred"| ALEXANDER</code></pre>
+</div>
+<div class="section level2">
+<h2 id="what-this-re-implements-and-what-is-original">What this re-implements, and what is original<a class="anchor" aria-label="anchor" href="#what-this-re-implements-and-what-is-original"></a>
+</h2>
+<p>Nothing here is a novel algorithm, and the distinction matters for anyone deciding whether to trust it (srr G1.1).</p>
+<p>The <strong>primitives are established practice</strong>: transliterating a name to a comparison key, tokenising given/middle/surname, blocking on exact keys plus deletion signatures, and classifying a pair as agreeing / conflicting / uninformative are all standard record-linkage machinery, with the agree-disagree-uninformative vocabulary and the blocking-then-compare shape going back to Fellegi and Sunter, and the surname-frequency weighting to Winkler’s census work (<code>WINKLER_CENSUS</code> ships that table). The full-name parser is not ours at all: <code><a href="reference/parse_person.html">parse_person()</a></code> wraps <a href="https://cran.r-project.org/package=humaniformat" class="external-link">humaniformat</a>.</p>
+<p>What is <strong>original is the refusals</strong>, and they are the reason the package exists: that a missing middle name is uninformative rather than conflicting; that middle names compare as token <em>sets</em> rather than by position; that there is no edit-distance tolerance on names; that a nickname is evidence but never an expansion; that a conflict is a flag for review rather than a veto. Each is a decision a general linkage library leaves to the caller, and each one is here because the opposite shipped and produced a wrong cohort.</p>
+</div>
+<div class="section level2">
+<h2 id="compared-with-an-edit-distance-matcher">Compared with an edit-distance matcher<a class="anchor" aria-label="anchor" href="#compared-with-an-edit-distance-matcher"></a>
+</h2>
+<p>The claim that a one-edit tolerance on names costs more than it buys is measured rather than asserted, in <code><a href="articles/comparison-with-alternatives.html">vignette("comparison-with-alternatives")</a></code> (srr G1.5, G1.6):</p>
+<table class="table">
+<thead><tr>
+<th>approach</th>
+<th align="right">accepted</th>
+<th align="right">precision</th>
+<th align="right">recall</th>
+<th align="right">false accepts</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>mysterynpi rules</td>
+<td align="right">126</td>
+<td align="right">1.000</td>
+<td align="right">0.955</td>
+<td align="right">0</td>
+</tr>
+<tr>
+<td>edit distance &lt;= 1</td>
+<td align="right">41</td>
+<td align="right">0.854</td>
+<td align="right">0.265</td>
+<td align="right">6</td>
+</tr>
+</tbody>
+</table>
+<p>On the 190 <code>ROSTER_BENCHMARK</code> pairs, a one-edit baseline accepts a third as many true matches and makes six false accepts — concentrated in the <code>spelling-trap</code> family, which is exactly the <code>JULIA</code>/<code>JULIE</code> case <code>R/agreement.R</code> records being measured and removed from the real pipeline. The vignette lists every pair the two approaches decide differently, with the truth and the edit count beside it.</p>
+<p>The comparison is a <strong>vignette rather than an exported function</strong>, and that is the package’s own rule enforcing itself: <code>tests/testthat/test-no-fuzzy.R</code> refuses any approximate-matching call anywhere in <code>R/</code>, including one written to argue against approximate matching. It rejected the first version of this comparison, correctly. The baseline is base R on purpose: it needs no new dependency, and edit distance is the specific alternative these rules reject. It is not a comparison against <a href="https://cran.r-project.org/package=reclin2" class="external-link">reclin2</a> or <a href="https://cran.r-project.org/package=fastLink" class="external-link">fastLink</a>, which solve the <em>scoring</em> problem this package deliberately stops short of.</p>
+</div>
+<div class="section level2">
+<h2 id="life-cycle">Life cycle<a class="anchor" aria-label="anchor" href="#life-cycle"></a>
+</h2>
+<p><strong>Maturing.</strong> The API is in production use and the agreement rules are stable: every exported rule ships with a contract asserter a consumer runs in their own suite, and breaking one is a major version bump by the policy below.</p>
+<ul>
+<li>
+<strong>Stable, and depended upon:</strong> the agreement rules, the name keys and tokenisers, <code><a href="reference/parse_person.html">parse_person()</a></code>, the blocking-key constructors, and the <code>assert_*_contract()</code> functions. Two downstream repositories pin this package and run its contracts in their CI.</li>
+<li>
+<strong>Maturing, may gain arguments:</strong> <code><a href="reference/match_npi.html">match_npi()</a></code> and its backends, the resolution helpers, the clerical-review sampling. Arguments will be added (<code>na_action</code> was added in 0.10.0 without changing any default); none will be removed without a major bump.</li>
+<li>
+<strong>Expected to grow:</strong> the nickname and surname-particle dictionaries, which are data rather than rules.</li>
+<li>
+<strong>Deliberately out of scope, and not planned:</strong> blended scoring, probabilistic weights, candidate-generation policy per dataset, and anything that decides what a study may claim. <code>DESCRIPTION</code> states this boundary; it is a design position, not a backlog.</li>
+<li>
+<strong>Not yet 1.0</strong> because the <code><a href="reference/match_npi.html">match_npi()</a></code> surface is younger than the rules it composes. Reaching 1.0 means that surface stops gaining arguments, not that the rules change.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a>

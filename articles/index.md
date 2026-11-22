@@ -2,6 +2,8 @@
 
 ### All vignettes
 
+- [Compared with an edit-distance
+  matcher](https://mufflyt.github.io/mysterynpi/articles/comparison-with-alternatives.md):
 - [End-to-end NPPES matching: a roster to NPIs with
   match_npi()](https://mufflyt.github.io/mysterynpi/articles/end-to-end-nppes-matching.md):
 - [Appendix: the nickname policy, and the ablation that decided

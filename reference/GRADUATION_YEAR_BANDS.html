@@ -19,7 +19,7 @@ set exists."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,7 +30,8 @@ set exists."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/comparison-with-alternatives.html">Compared with an edit-distance matcher</a></li>
+    <li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
     <li><a class="dropdown-item" href="../articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="../articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
@@ -111,6 +112,24 @@ Two independent implementations over the same directory snapshot reached
 that conclusion; the second also found the middle bands NEGATIVE, so a
 caller that scores `|d|` of 2 or 3 as evidence FOR a link has the sign
 wrong (see `log2_lr` below, and the note in [graduation_year_agreement()]).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="the-unit-is-a-whole-calendar-year-and-nothing-finer">The unit is a whole calendar year, and nothing finer<a class="anchor" aria-label="anchor" href="#the-unit-is-a-whole-calendar-year-and-nothing-finer"></a></h2>
+
+
+<p>A band is a difference of **integer calendar years**, not of days, months or
+academic years, and the package never converts between them (srr TS1.8). The
+reason is that neither input carries a finer grain to convert from: a
+graduation year in a registry is a four-digit number with no month, and a
+credentialing year is the year a board records, which may differ from the
+date on the certificate. `band = "one_after"` therefore means "the recorded
+graduation year is one greater than the recorded credentialing year", which
+can be anything from one day to twenty-three months of real time.</p>
+<p>Two consequences a caller should know. A spring graduate credentialed the
+following January lands in `one_after` and is scored `corroborates`, which
+is intended: that is the ordinary sequence. And a band boundary is not a
+date boundary, so no band can be made sharper by supplying a month –
+passing one would be false precision, which is why no argument accepts one.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

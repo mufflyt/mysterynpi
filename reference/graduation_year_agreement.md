@@ -15,7 +15,9 @@ the registry's paperwork.
 graduation_year_agreement(
   credentialing_year,
   graduation_year,
-  bands = GRADUATION_YEAR_BANDS
+  bands = GRADUATION_YEAR_BANDS,
+  na_action = NA_ACTIONS,
+  undefined = c("uninformative", "error")
 )
 ```
 
@@ -31,6 +33,18 @@ graduation_year_agreement(
 - bands:
 
   the band table; defaults to \[GRADUATION_YEAR_BANDS\].
+
+- na_action:
+
+  \[character(1)\] how to treat a missing year: one of \[NA_ACTIONS\].
+  Default \`"uninformative"\`, the behaviour of every release before
+  0.10.0.
+
+- undefined:
+
+  \[character(1)\] how to treat \`NaN\`, \`Inf\` or \`-Inf\`, which are
+  not years: \`"uninformative"\` (the default) converts them to \`NA\`
+  and scores them as deciding nothing; \`"error"\` refuses (srr G2.16).
 
 ## Value
 

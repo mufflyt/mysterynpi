@@ -15,6 +15,12 @@
 #' package can fail; they are standards about software it is not.
 #'
 #' @srrstatsNA {G2.14c} G2.14c asks that missing values be replaceable with imputed ones. Refused for names: an imputed name is a fabricated identity claim, and this package exists because absence of evidence was once read as evidence of difference. Reading it as evidence of sameness is worse -- it resolves a match on a name nobody recorded. Imputation is not offered on the numeric year scale either, for the reason given at graduation_year_agreement(): imputing a year manufactures the compatibility the function is asked to judge.
+#' @srrstatsNA {G2.4b} No parameter in this package takes a continuous value. A
+#'   graduation year is a whole calendar year converted with `as.integer()`
+#'   (G2.4a) and every other comparable field is character, so there is nothing
+#'   to convert to continuous. The first pass of tags claimed this one as
+#'   complied; that was an overcount, found by writing out what each tag
+#'   actually pointed at.
 #' @srrstatsNA {G2.5} No argument is ever expected to be a factor: the API is
 #'   character-and-data.frame. A factor column arriving in a tabular input is
 #'   converted to its labels by `read_name_column()`, which says so.

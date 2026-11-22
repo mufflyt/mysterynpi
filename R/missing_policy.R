@@ -173,12 +173,32 @@ finite_or_na <- function(x) {
 #' can count them. The implementations and their reasoning are in the functions
 #' below; this block only records which standard each one serves.
 #'
-#' @srrstats {G2.14} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.14a} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.14b} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.16} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {RE2.1} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {TS2.1} implemented in this file; see the function documentation and the file header for the defect it prevents.
+#' @srrstats {G2.14} `na_action = c("uninformative", "warn", "error")` on
+#'   all eight agreement rules, resolved by `resolve_na_action()` and
+#'   counted by `count_missing_values()`. The default reproduces the
+#'   behaviour of every release before 0.10.0: absence decides nothing and
+#'   never conflicts.
+#' @srrstats {G2.14a} `na_action = "error"` stops before any comparison is
+#'   made, reporting how many values were missing and which side they were
+#'   on.
+#' @srrstats {G2.14b} `na_action = "warn"` scores the pair "uninformative"
+#'   and warns once per call with the count, rather than once per row. The
+#'   default `"uninformative"` does the same silently, which is this
+#'   package's documented policy rather than an unreported choice.
+#' @srrstats {G2.16} `is_undefined_number()` identifies `NaN` and the
+#'   infinities, `finite_or_na()` maps them to `NA`, and
+#'   `graduation_year_agreement(undefined = c("uninformative", "error"))`
+#'   lets a caller refuse them outright. They are kept distinct from
+#'   missing values on purpose: `NaN` is arithmetic that went wrong
+#'   upstream, not a year nobody recorded.
+#' @srrstats {RE2.1} The same `na_action` parameter answers this standard,
+#'   and it draws the distinction the standard asks for: a missing value is
+#'   resolved by `resolve_na_action()`, while an undefined one (`NaN`,
+#'   `Inf`) is handled separately by `finite_or_na()` and by the
+#'   `undefined` parameter of `graduation_year_agreement()`.
+#' @srrstats {TS2.1} The same `na_action` parameter again. `TS2.1a` and
+#'   `TS2.1b` ask about missing values within a series and are tagged not
+#'   applicable separately, with their reasons.
 
 #' @name srr-missing-policy
 #' @keywords internal

@@ -240,18 +240,53 @@ affirm_unique_index <- function(x, col, arg = "input",
 #' can count them. The implementations and their reasoning are in the functions
 #' below; this block only records which standard each one serves.
 #'
-#' @srrstats {G2.2} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.4} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.4a} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.4b} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.4c} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.6} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.7} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.9} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.11} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G2.12} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {EA2.5} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {EA2.6} implemented in this file; see the function documentation and the file header for the defect it prevents.
+#' @srrstats {G2.2} `check_scalar()` refuses a value of length other than
+#'   one for a parameter documented as scalar, naming the argument and the
+#'   length it received. `match_npi()` applies it to `seed`, `table` and
+#'   `entity_filter`; before it existed, a two-element `entity_filter` was
+#'   silently truncated to its first element.
+#' @srrstats {G2.4} `read_name_column()` is the single conversion point for
+#'   a comparable column. It dispatches on class before type, converts a
+#'   factor to its labels, a numeric to its digits and anything else to a
+#'   bare vector, and reports what each conversion costs.
+#' @srrstats {G2.4c} `read_name_column()` converts a numeric column with
+#'   `format(x, scientific = FALSE, trim = TRUE)` rather than
+#'   `as.character()`, because `as.character(1.23e+09)` yields the string
+#'   "1.23e+09" and that string is the defect this function exists to
+#'   prevent. Neither `paste()` nor `paste0()` appears anywhere in the
+#'   conversion path.
+#' @srrstats {G2.6} `drop_vector_attributes()` returns the underlying
+#'   values with class and other attributes removed, and
+#'   `read_name_column()` calls it before any comparison, so a character
+#'   vector carrying a `units`-like class is pre-processed rather than
+#'   dispatched on. The class check runs before the type check for exactly
+#'   this input: checking type first let such a vector through untouched,
+#'   which is the bug the test for this standard found.
+#' @srrstats {G2.7} `as_linkage_table()` accepts `data.frame`, `tbl_df`,
+#'   `data.table` and a named matrix, converts each to a plain
+#'   `data.frame`, and messages when the conversion drops something the
+#'   caller may expect to keep.
+#' @srrstats {G2.9} Every lossy conversion in `read_name_column()` says
+#'   what it cost: factor to character reports that level order is
+#'   discarded, numeric to character warns that leading zeros are lost and
+#'   the value can round, and an unrecognised class reports that its
+#'   attributes do not survive.
+#' @srrstats {G2.11} `read_name_column()` inspects `class()` before
+#'   `is.character()`, so a column whose class is not one of the standard
+#'   ones is stripped to a bare vector instead of reaching a comparison
+#'   with its attributes intact.
+#' @srrstats {G2.12} `reject_list_columns()` refuses a list column by name
+#'   rather than letting it stringify into a comparison, where a
+#'   two-element entry would arrive as the literal text `c("A", "B")` and
+#'   conflict with every real name.
+#' @srrstats {EA2.5} `affirm_unique_index()` affirms that the named index
+#'   column is present, complete and unique, and names the duplicated
+#'   values when it is not, rather than assuming an index the caller never
+#'   promised.
+#' @srrstats {EA2.6} `drop_vector_attributes()`, called from
+#'   `read_name_column()` ahead of the type checks, means a vector's
+#'   additional attributes never reach a comparison regardless of how the
+#'   caller stored it.
 #' @name srr-input-structures
 #' @keywords internal
 NULL

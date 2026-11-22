@@ -160,6 +160,10 @@ graduation_year_band <- function(credentialing_year, graduation_year,
 #' graduation_year_agreement(2015, 2017)   # "uninformative" (weakly against)
 #' graduation_year_agreement(2015, 1980)   # "conflicts" -- a flag, not a veto
 #' graduation_year_agreement(2015, NA)     # "uninformative"
+#' @srrstats {G2.4a} `graduation_year_agreement()` converts both years with
+#'   `suppressWarnings(as.integer())` and routes the resulting `NA` through
+#'   `na_action`, so a year that will not parse is missing evidence rather
+#'   than a silent zero.
 #' @seealso [GRADUATION_YEAR_BANDS] for the weights and their provenance,
 #'   [graduation_year_band()] for the band a pair falls in.
 #' @export

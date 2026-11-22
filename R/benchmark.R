@@ -160,10 +160,25 @@ benchmark_comparison <- function(data = mysterynpi::ROSTER_BENCHMARK,
 #' can count them. The implementations and their reasoning are in the functions
 #' below; this block only records which standard each one serves.
 #'
-#' @srrstats {EA3.1} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {RE4.11} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G1.5} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {G5.7} implemented in this file; see the function documentation and the file header for the defect it prevents.
+#' @srrstats {EA3.1} `benchmark_comparison()` puts this package's rules and
+#'   an alternative decision procedure on the same 190 pairs with the same
+#'   columns and the same rounding, so a comparison that reference
+#'   implementations leave to prose is a table the caller recomputes.
+#' @srrstats {RE4.11} `benchmark_comparison()` reports precision, recall
+#'   and a pass column per claimed property. For a procedure that produces
+#'   no coefficients and no fitted values, these are the goodness-of-fit
+#'   statistics that exist.
+#' @srrstats {G1.5} `benchmark_axes()`, `benchmark_decisions()` and
+#'   `benchmark_comparison()` recompute every number in
+#'   `vignette("roster-benchmark")`: 126 accepts, all true matches; 58
+#'   rejects, all true nonmatches; 6 reviews, all true matches; precision
+#'   1.000 among accepts.
+#' @srrstats {G5.7} The benchmark properties are asserted once per defect
+#'   family as well as on the pooled corpus
+#'   (`tests/testthat/test-srr-result-and-benchmark.R`), so a rule that
+#'   holds on the mixture while failing on one family of defects fails the
+#'   test. That is behaviour as a property of the data changes, which is
+#'   what this standard asks for.
 #' @name srr-benchmark
 #' @keywords internal
 NULL

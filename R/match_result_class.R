@@ -167,13 +167,33 @@ print.summary.npi_match_result <- function(x, ...) {
 #' can count them. The implementations and their reasoning are in the functions
 #' below; this block only records which standard each one serves.
 #'
-#' @srrstats {EA3.0} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {EA4.0} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {EA4.1} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {EA4.2} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {EA5.2} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {EA5.3} implemented in this file; see the function documentation and the file header for the defect it prevents.
-#' @srrstats {RE4.5} implemented in this file; see the function documentation and the file header for the defect it prevents.
+#' @srrstats {EA3.0} `summary.npi_match_result()$statistics` is a data
+#'   frame of `statistic`, `value` and `denominator`, so the nine reported
+#'   quantities and what each share is computed over are extracted
+#'   programmatically instead of parsed out of printed output.
+#' @srrstats {EA4.0} The result carries the types it was given.
+#'   `as_linkage_table()` converts once at the boundary and the verdict
+#'   columns are character, so a character roster column comes back as
+#'   character and never as a factor.
+#' @srrstats {EA4.1} `summary()`, `format()` and `print()` for
+#'   `npi_match_result` each take `digits`, defaulting to `3L`, and
+#'   `check_scalar(digits)` refuses a vector. Rounding happens where the
+#'   share is computed, so the returned value and the printed value agree.
+#' @srrstats {EA4.2} `print()`, `format()` and `summary()` are all defined
+#'   for `npi_match_result`, and `print.summary.npi_match_result()` prints
+#'   the statistics and the per-column table. No `plot()` method exists,
+#'   and this file records why, so the absence is a stated decision rather
+#'   than an omission.
+#' @srrstats {EA5.2} `format.npi_match_result()` sends every share through
+#'   `formatC(digits = 1, width = 5)` and every count through
+#'   `format(big.mark = ",")`, so screen output never varies with the
+#'   caller's `options(digits)`.
+#' @srrstats {EA5.3} `summary.npi_match_result()$columns` reports the
+#'   `class`, the `storage_mode` and the missing count of every column of
+#'   the matched table, one row per column.
+#' @srrstats {RE4.5} `nobs.npi_match_result()` returns the number of roster
+#'   rows submitted, which is the denominator the result's shares are
+#'   computed over and is named as such in `summary()$statistics`.
 #' @name srr-match-result-class
 #' @keywords internal
 NULL

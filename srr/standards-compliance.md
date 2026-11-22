@@ -83,8 +83,8 @@ reported throughout, the conservative one first because that is what was asked:
 
 | convention | formula | result |
 |---|---|---|
-| this assessment, as instructed | Y / (Y + N + NA) | 101 / 205 = **49.3%** |
-| rOpenSci's own applicable-standards convention | Y / (Y + N) | 101 / 111 = **91.0%** |
+| this assessment, as instructed | Y / (Y + N + NA) | 100 / 205 = **48.8%** |
+| rOpenSci's own applicable-standards convention | Y / (Y + N) | 100 / 110 = **90.9%** |
 
 Neither number is the interesting one on its own. The instruction's scope
 question is asked per category combined with General, and all three clear the
@@ -97,11 +97,11 @@ bar; the per-category spread is what actually decides the submission.
 | subsection | Y | N | NA | total | proportion |
 |---|---:|---:|---:|---:|---:|
 | Documentation | 8 | 0 | 0 | 8 | 1.00 |
-| Input Structures | 27 | 0 | 2 | 29 | 0.93 |
+| Input Structures | 26 | 0 | 3 | 29 | 0.90 |
 | Algorithms | 1 | 0 | 2 | 3 | 0.33 |
 | Output Structures | 0 | 0 | 1 | 1 | 0.00 |
 | Testing | 24 | 0 | 3 | 27 | 0.89 |
-| **total** | **60** | **0** | **8** | **68** | **0.882** |
+| **total** | **59** | **0** | **9** | **68** | **0.868** |
 
 ### Key evidence and gaps
 
@@ -114,7 +114,7 @@ linkage practice, and what is original is the set of refusals. `G1.2` is the
 `G1.4` is complete `roxygen2` documentation across 123 exports and 5 S3 methods. `G1.5` and
 `G1.6` are the benchmark and the comparison described below.
 
-**Input Structures is the strongest section, 27 of 29**, and most of it was
+**Input Structures is the strongest section, 26 of 29**, and most of it was
 built for this assessment. `R/input_structures.R` holds `as_linkage_table()`
 (accepting `data.frame`, `tbl_df`, `data.table` and a named matrix, and
 reporting what each conversion costs), `reject_list_columns()`,
@@ -150,10 +150,12 @@ flag, platform, memory, runtime, network dependency, asset and artefacts, and
 fetching a National Plan and Provider Enumeration System extract rather than
 shipping one.
 
-**The two Input Structures NAs** are `G2.4d` and `G2.4e` (explicit conversion to
-and from factor): the package refuses factors at the boundary rather than
-converting them, which is a stronger position than the standard asks for, and
-documented as such.
+**The three Input Structures NAs** are `G2.4d` and `G2.4e` (explicit conversion
+to and from factor), where the package refuses factors at the boundary rather
+than converting them, which is a stronger position than the standard asks for;
+and `G2.4b` (conversion to continuous), which was claimed as complied in the
+first pass of tags and is an overcount: no parameter in this package takes a
+continuous value. See "Writing out the thin tags" below.
 
 **The three Algorithms and Output Structures NAs are the honest heart of this
 assessment.** `G4.0` (outputs written to local files) has no referent:
@@ -307,6 +309,32 @@ belongs in, whatever the combined proportion with General works out to.
 
 ---
 
+## Writing out the thin tags, and what it found
+
+This assessment originally listed as its first follow-up item that 29 of the
+complied tags carried a generated justification, "implemented in this file; see
+the function documentation and the file header for the defect it prevents",
+which tells a reviewer only which file to open. They have since been written
+out, each naming the function that satisfies the standard and what it does, so
+that item is gone from the list below.
+
+Writing them out found an overcount, which is the argument for doing it rather
+than leaving a boilerplate tag in place. **`G2.4b`, explicit conversion to
+continuous via `as.numeric()`, was claimed as complied and is not.** No
+parameter in this package takes a continuous value: a graduation year is a
+whole calendar year converted with `as.integer()`, and every other comparable
+field is character. There is nothing to convert to continuous. It is now tagged
+`@srrstatsNA` with that reason, which moves General from 60 to 59 complied.
+
+One tag also moved. `G2.4a` (conversion to integer) was tagged in
+`R/input_structures.R`, but the conversion it describes is in
+`graduation_year_agreement()`, so the tag now sits beside the
+`suppressWarnings(as.integer())` call it refers to. A tag in the wrong file
+sends a reviewer to code that does not contain the thing claimed.
+
+Both of these are the same lesson in different form: a tag whose justification
+is generic cannot be checked, by a reviewer or by the person who wrote it.
+
 ## A disagreement between the tags and this table
 
 Worth flagging for anyone reading both. The source tags ten standards
@@ -330,18 +358,18 @@ Per category combined with General, which is how the question is posed:
 
 | standards set | Y | total | Y / (Y + N + NA) | clears 50% |
 |---|---:|---:|---:|:---:|
-| General + Exploratory Data Analysis | 85 | 102 | **83.3%** | yes |
-| General + Regression | 72 | 116 | **62.1%** | yes |
-| General + Time Series | 64 | 123 | **52.0%** | yes |
+| General + Exploratory Data Analysis | 84 | 102 | **82.4%** | yes |
+| General + Regression | 71 | 116 | **61.2%** | yes |
+| General + Time Series | 63 | 123 | **51.2%** | yes |
 
 All three clear the bar on the conservative denominator, and the applicable
-standards convention puts the package at 91.0% overall. **The package is in
+standards convention puts the package at 90.9% overall. **The package is in
 scope.**
 
 Two honest qualifications. The Time Series figure clears 50% only because the
 General standards carry it: the category itself is at 7.3%, so that row should
 be read as evidence about the General standards, not about Time Series. And the
-all-standards figure of 49.3% falls just under half, which is a fact about
+all-standards figure of 48.8% falls just under half, which is a fact about
 assessing a rules engine against three model-shaped standard sets at once, not a
 scope failure against any one of them.
 
@@ -390,28 +418,16 @@ absence.
 
 ## Ranked follow-up work, cheapest first
 
-1. **Twenty-nine of the 101 complied tags carry a generated justification
-   rather than a specific one.** They read "implemented in this file; see the
-   function documentation and the file header for the defect it prevents",
-   which tells a reviewer nothing beyond which file to open. The code behind
-   them is real and tested; the tag text is not evidence. The identifiers:
-   `EA2.5`, `EA2.6`, `EA3.0`, `EA3.1`, `EA4.0`, `EA4.1`, `EA4.2`, `EA5.2`,
-   `EA5.3`, `G1.5`, `G2.2`, `G2.4`, `G2.4a`, `G2.4b`, `G2.4c`, `G2.6`, `G2.7`,
-   `G2.9`, `G2.11`, `G2.12`, `G2.14`, `G2.14a`, `G2.14b`, `G2.16`, `G5.7`,
-   `RE2.1`, `RE4.5`, `RE4.11`, `TS2.1`. This is the largest remaining gap
-   between what the package does and what a reviewer reading its tags would
-   learn, and it is a writing task rather than an engineering one.
-
-2. **No `srr` badge grade has been pursued.** The standards offer graded badges
+1. **No `srr` badge grade has been pursued.** The standards offer graded badges
    and this assessment does not estimate which grade the current coverage would
    earn.
 
-3. **`autotest` has not been run.** rOpenSci's statistical review uses it
+2. **`autotest` has not been run.** rOpenSci's statistical review uses it
    alongside `srr`, and it tests input-handling assumptions automatically. The
    input-structure work in `R/input_structures.R` is exactly what it probes, so
    it is likely to find something.
 
-4. **The benchmark corpus is self-built.** `ROSTER_BENCHMARK` is constructed
+3. **The benchmark corpus is self-built.** `ROSTER_BENCHMARK` is constructed
    from this package's own defect taxonomy, so the clean separation it shows is
    consistency rather than proof of generality, as `vignette("roster-benchmark")`
    already states. An external roster with known truth would make `G5.4` and

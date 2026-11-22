@@ -127,6 +127,9 @@ flowchart LR
 | joins | `ledgered_join()`, `join_ledger_entry()` — cardinality declared and verified, NA keys never match, and a row-count reconciliation ledger per step |
 | board statuses | `normalize_license_status()` — six exit classes; death, discipline and lapses can never read as "retired", and unmapped decides nothing |
 | corpora | `ROSTER_BENCHMARK` (190 labeled synthetic pairs; see `vignette("roster-benchmark")`), `WINKLER_CENSUS`, `SURNAME_FREQUENCIES`, `NICKNAME_EDGES` — licenses in `inst/COPYRIGHTS` |
+| missing and undefined | `na_action = c("uninformative", "warn", "error")` on all eight agreement rules; `is_undefined_number()`, `finite_or_na()` — absence decides nothing by default, and `NaN`/`Inf` are kept distinct from a value nobody recorded. Imputation is refused; see `vignette("missing-values-inputs-and-results")` |
+| input shapes | `as_linkage_table()`, `read_name_column()`, `reject_list_columns()`, `check_scalar()`, `affirm_unique_index()` — `data.frame`/`tbl_df`/`data.table`/named matrix in, one conversion at the boundary, and every lossy conversion says what it cost |
+| the result object | `match_npi()` returns an `npi_match_result` with `print()`, `format()`, `summary()` and `nobs()`; `summary()$statistics` carries a `denominator` column and `summary()$columns` the class, storage mode and missing count per column. No `plot()` method, on purpose |
 | contracts | `assert_middle_agreement_contract()` and one per agreement rule |
 | end-to-end NPPES matching | `match_npi()` — a roster to NPIs through bounded candidate blocks, shared evidence, and the one-to-one gate, from a data frame or a read-only DuckDB table; see `vignette("end-to-end-nppes-matching")` |
 
@@ -337,6 +340,39 @@ suite, and breaking one is a major version bump by the policy below.
 - **Not yet 1.0** because the `match_npi()` surface is younger than the rules
   it composes. Reaching 1.0 means that surface stops gaining arguments, not
   that the rules change.
+
+## rOpenSci statistical standards
+
+Assessed against the rOpenSci statistical software standards for General,
+Exploratory Data Analysis, Regression and Time Series. `srr::srr_stats_pre_submit()`
+reports every applicable standard documented: **102 complied with, 105 not
+applicable, none missing**, across all 205 individual standard identifiers.
+
+| standards set | complied | not viable | not applicable | total | proportion |
+|---|---:|---:|---:|---:|---:|
+| General | 59 | 0 | 9 | 68 | 86.8% |
+| Exploratory Data Analysis | 25 | 1 | 8 | 34 | 73.5% |
+| Regression and Supervised Learning | 12 | 6 | 30 | 48 | 25.0% |
+| Time Series | 4 | 3 | 48 | 55 | 7.3% |
+
+Exploratory Data Analysis is the submission category: four of its six
+subsections are complete, and those four are the ones that describe what this
+package does. Regression is not viable, since a formula interface, a model
+object, `predict()` and a fitted-versus-residual plot are all out of scope for
+a rules engine that fits nothing, and they are that standard set's centre
+rather than its periphery.
+
+The refusals are the interesting part of the assessment and each is tagged with
+its reasoning rather than left as an absence: imputation (`G2.14c`), a formula
+interface (`RE1.0`), any plot method (`EA5.x`, `RE6.0`, `TS5.0`), and an
+edit-distance comparison function, which this package's own `test-no-fuzzy.R`
+refused even though it existed to argue *against* edit distance.
+
+- `srr/standards-compliance.md` — the full assessment, with a per-subsection
+  table and the evidence for each verdict.
+- `srr/verdict-ledger.csv` — one row per standard: verdict, which tag carries
+  it, and which file to read. `tests/testthat/test-srr-verdict-ledger.R` keeps
+  it from drifting out of step with the tags.
 
 ## Versioning
 

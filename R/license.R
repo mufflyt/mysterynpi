@@ -58,9 +58,20 @@ normalize_license <- function(x) {
 #' @param state_a,state_b character vectors of issuing-state codes. Compared
 #'   after uppercasing and trimming; a missing state makes the pair
 #'   uninformative, because a number without its state is not yet a license.
+#' @param na_action [character(1)] how to treat a missing value on either
+#'   side: one of [NA_ACTIONS]. The default `"uninformative"` is the
+#'   behaviour of every release before 0.10.0 -- absence decides nothing.
+#'   `"warn"` does the same and says so once per call; `"error"` refuses to
+#'   compare. Imputation is deliberately absent: an imputed name is a
+#'   fabricated identity claim (srr G2.14a, G2.14b; G2.14c refused with
+#'   reason in `R/missing_policy.R`).
 #' @return character: `"corroborates"` or `"uninformative"`.
 #' @export
-license_agreement <- function(a, state_a, b, state_b) {
+license_agreement <- function(a, state_a, b, state_b,
+                             na_action = NA_ACTIONS) {
+  na_action <- resolve_na_action(
+    na_action, count_missing_values(a) + count_missing_values(b),
+    "license number")
   n <- length(a)
   if (length(state_a) != n || length(b) != n || length(state_b) != n) {
     stop("a, state_a, b and state_b must be the same length", call. = FALSE)

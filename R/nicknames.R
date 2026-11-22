@@ -104,12 +104,23 @@ nickname_dictionary_version <- function() {
 #' is not consulted for it.
 #'
 #' @param a,b character vectors of given-name tokens, the same length.
+#' @param na_action [character(1)] how to treat a missing value on either
+#'   side: one of [NA_ACTIONS]. The default `"uninformative"` is the
+#'   behaviour of every release before 0.10.0 -- absence decides nothing.
+#'   `"warn"` does the same and says so once per call; `"error"` refuses to
+#'   compare. Imputation is deliberately absent: an imputed name is a
+#'   fabricated identity claim (srr G2.14a, G2.14b; G2.14c refused with
+#'   reason in `R/missing_policy.R`).
 #' @param edges the edge table; defaults to [NICKNAME_EDGES]. A caller with
 #'   a study-specific table supplies it here and the rule's behaviour over it
 #'   stays identical.
 #' @return character: `"corroborates"`, `"conflicts"`, or `"uninformative"`.
 #' @export
-nickname_agreement <- function(a, b, edges = mysterynpi::NICKNAME_EDGES) {
+nickname_agreement <- function(a, b, edges = mysterynpi::NICKNAME_EDGES,
+                               na_action = NA_ACTIONS) {
+  na_action <- resolve_na_action(
+    na_action, count_missing_values(a) + count_missing_values(b),
+    "given name")
   if (length(a) != length(b)) {
     stop("a and b must be the same length", call. = FALSE)
   }

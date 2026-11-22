@@ -76,9 +76,23 @@ normalize_gender <- function(x) {
 #'
 #' @param a,b character vectors of recorded gender codes, the same length.
 #'   Raw encodings are fine; normalisation is applied internally.
+#' @param na_action [character(1)] how to treat a missing value on either
+#'   side: one of [NA_ACTIONS]. The default `"uninformative"` is the
+#'   behaviour of every release before 0.10.0 -- absence decides nothing.
+#'   `"warn"` does the same and says so once per call; `"error"` refuses
+#'   to compare. Imputation is deliberately absent: an imputed name is a
+#'   fabricated identity claim (srr G2.14a, G2.14b; G2.14c refused with
+#'   reason in `R/missing_policy.R`).
 #' @return character: `"corroborates"`, `"conflicts"`, or `"uninformative"`.
 #' @export
-gender_agreement <- function(a, b) {
+gender_agreement <- function(a, b, na_action = NA_ACTIONS) {
+  # The policy this function always had, now selectable. The default
+  # reproduces every previous release exactly; see R/missing_policy.R for
+  # why imputation is not on the menu.
+  na_action <- resolve_na_action(
+    na_action,
+    count_missing_values(a) + count_missing_values(b),
+    "gender")
   if (length(a) != length(b)) {
     stop("a and b must be the same length", call. = FALSE)
   }

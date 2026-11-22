@@ -1,0 +1,113 @@
+---
+title: "Compared with an edit-distance matcher"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Compared with an edit-distance matcher}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(mysterynpi)
+```
+
+`R/agreement.R` has carried this sentence since the rule was removed from the
+real pipeline:
+
+> **No edit-distance tolerance.** A one-edit rule was added and removed the
+> same day: measured, it changed 64 of 30,740 candidate pairs and was worth 22
+> records, while admitting pairs that are genuinely different given names
+> (`JULIA`/`JULIE`, `LEE`/`LEA`, `ANN`/`ANNE`).
+
+That is a performance claim about an alternative implementation, and until now
+it was prose. This vignette is the measurement, on the 190 pairs of
+`ROSTER_BENCHMARK` whose truth is known by construction.
+
+## Why this is a vignette and not a function
+
+`tests/testthat/test-no-fuzzy.R` refuses any approximate-matching call
+anywhere in `R/`: source scan, parse-tree scan, and call-graph reachability
+over the installed namespace, with no exempt module. An exported
+`compare_with_edit_distance()` was written first and the guard rejected it,
+correctly — a package whose argument is that approximate spelling similarity
+has no place in identity resolution should not ship fuzzy machinery reachable
+from its own namespace, not even to argue against it.
+
+A vignette is code you can run and read, and it is outside the namespace. The
+comparison lives here; the rule stays absolute there.
+
+## The two approaches
+
+The package's decision is `benchmark_decisions()`: any conflicting axis
+rejects (a middle-name conflict excused when the roster's middle token *is*
+the registry surname), a pair without both surname and given corroboration
+goes to review, a gender conflict goes to review rather than deletion.
+
+The baseline is the simplest credible alternative and needs no new dependency:
+accept when the two full names are within one edit of each other.
+
+```{r}
+b <- ROSTER_BENCHMARK
+rules_accept <- benchmark_decisions(b) == "accept"
+
+roster_full <- normalize_string(b$roster_name)
+reference_full <- normalize_string(paste(b$npi_first, b$npi_last))
+edits <- vapply(seq_along(roster_full), function(i)
+  as.integer(utils::adist(roster_full[i], reference_full[i])[1, 1]), integer(1))
+edit_accept <- !is.na(edits) & edits <= 1L
+```
+
+```{r}
+score <- function(accept, truth) {
+  tp <- sum(accept & truth == "match")
+  fp <- sum(accept & truth == "nonmatch")
+  fn <- sum(!accept & truth == "match")
+  data.frame(accepted = sum(accept),
+             precision = round(tp / max(tp + fp, 1L), 3),
+             recall = round(tp / max(tp + fn, 1L), 3),
+             false_accepts = fp)
+}
+rbind(`mysterynpi rules` = score(rules_accept, b$truth),
+      `edit distance <= 1` = score(edit_accept, b$truth))
+```
+
+The baseline accepts a third as many true matches and makes false accepts the
+rules do not make.
+
+## Where the false accepts land
+
+```{r}
+false_accepts <- b[edit_accept & b$truth == "nonmatch",
+                   c("family", "roster_name", "npi_first", "npi_last")]
+false_accepts$edits <- edits[edit_accept & b$truth == "nonmatch"]
+false_accepts
+```
+
+They concentrate in the `spelling-trap` family, which is the `JULIA`/`JULIE`
+case the comment describes: one edit apart, and different people.
+
+## Where each approach loses the other's matches
+
+```{r}
+differs <- rules_accept != edit_accept
+data.frame(family = b$family[differs], truth = b$truth[differs],
+           rules = ifelse(rules_accept[differs], "accept", "-"),
+           edit = ifelse(edit_accept[differs], "accept", "-"))[1:12, ]
+```
+
+Edit distance misses what structure explains: a maiden surname in a middle
+slot, a nickname, concatenated initials, a credential suffix, a formatting
+difference. None of those are spelling errors, and a distance threshold loose
+enough to catch them is loose enough to accept `JULIA`/`JULIE`.
+
+## What this does not show
+
+The corpus is built from this package's own defect taxonomy, so clean
+separation is **consistency, not proof of generality** — the same caveat
+`vignette("roster-benchmark")` states. It also compares against *one*
+alternative. It is not a comparison with
+[reclin2](https://cran.r-project.org/package=reclin2) or
+[fastLink](https://cran.r-project.org/package=fastLink), which solve the
+scoring problem this package deliberately stops short of; `DESCRIPTION` draws
+that boundary and this vignette does not cross it.

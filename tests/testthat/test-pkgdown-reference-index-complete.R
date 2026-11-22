@@ -27,7 +27,11 @@
 
 .idx_listed <- function(root) {
   ln <- readLines(file.path(root, "_pkgdown.yml"), warn = FALSE)
-  hits <- grep("^\\s*-\\s+[A-Za-z._][A-Za-z0-9._]*\\s*$", ln, value = TRUE)
+  # HYPHENS ARE LEGAL IN A TOPIC NAME, and this pattern used to omit them, so a
+  # hyphenated topic could not be satisfied by any entry: it was read as absent
+  # from the index no matter what the index said. srr's own convention produces
+  # exactly such names (srr-stats-standards), which is how it surfaced.
+  hits <- grep("^\\s*-\\s+[A-Za-z._][A-Za-z0-9._-]*\\s*$", ln, value = TRUE)
   topics <- trimws(sub("^\\s*-\\s+", "", hits))
   unique(topics)
 }

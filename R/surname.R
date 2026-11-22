@@ -83,6 +83,13 @@
 #' apostrophe -- it is a join key with its own parity contract -- so the
 #' erasure is local to this rule.
 #'
+#' @param na_action [character(1)] how to treat a missing value on either
+#'   side: one of [NA_ACTIONS]. The default `"uninformative"` is the
+#'   behaviour of every release before 0.10.0 -- absence decides nothing.
+#'   `"warn"` does the same and says so once per call; `"error"` refuses to
+#'   compare. Imputation is deliberately absent: an imputed name is a
+#'   fabricated identity claim (srr G2.14a, G2.14b; G2.14c refused with
+#'   reason in `R/missing_policy.R`).
 #' @param detail logical(1). `FALSE` (the default) returns the coarse
 #'   three-valued character vector unchanged - every existing caller keeps
 #'   its contract. `TRUE` returns a `data.frame(verdict, reason)` in the
@@ -108,7 +115,9 @@
 #' @export
 surname_agreement <- function(a, b, middle_a = NULL, middle_b = NULL,
                               alternates_a = NULL, alternates_b = NULL,
-                              detail = FALSE) {
+                              detail = FALSE, na_action = NA_ACTIONS) {
+  na_action <- resolve_na_action(
+    na_action, count_missing_values(a) + count_missing_values(b), "surname")
   if (!is.logical(detail) || length(detail) != 1L || is.na(detail)) {
     stop("detail must be TRUE or FALSE", call. = FALSE)
   }

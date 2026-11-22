@@ -1,490 +1,441 @@
-# mysterynpi against the rOpenSci statistical software standards
+# mysterynpi and the rOpenSci statistical software standards
 
-**Assessed 2026-11-22 at `edaae4b` (0.9.1); every feasible standard then
-implemented on `feat/srr-feasible-standards`.** Every one of the 145 standard
-IDs in [`srr-standards.md`](srr-standards.md) carries an individual verdict,
-and the tables below are counted from those verdicts rather than estimated
-from subsection headings.
+Second assessment, 2026-11-22. The first assessment in this file was made
+before any standards work existed in the package; this one is made after it,
+and it reaches a different set of numbers for a reason worth stating up front
+(see "What changed, and why the numbers moved"). The first version is in git
+history if you want to compare.
 
-**What changed between the assessment and this version of the document.** The
-first assessment found 67 `Y` verdicts of which only 36 were implemented; the
-other 31 were "feasible, not yet implemented". All 31 are now implemented, so
-every `Y` in the tables below is already-done and the "Y (feasible)" column is
-zero everywhere. The proportions are unchanged, because potential compliance
-was what they always measured -- what changed is that they are now actual.
+**The package.** `mysterynpi` resolves whether a roster name and a National
+Provider Identifier record describe the same person. It is a rules engine, not
+a model: each comparable attribute (surname, given name, middle name, suffix,
+gender, licence, graduation year, nickname) produces one of three verdicts,
+`corroborates`, `conflicts` or `uninformative`, and the decision is composed
+from those verdicts rather than from a score. There is no fitted model, no
+probability, no threshold to tune, and this is deliberate: the package exists
+because a probabilistic matcher once resolved identity on evidence nobody had
+recorded.
 
-`srr::srr_stats_pre_submit()` reports **"All applicable standards [v0.3.0]
-have been documented in this package (104 complied with; 104 N/A standards)"**,
-with zero undocumented. srr counts sub-lettered IDs (`G2.4a`, `TS4.6c`) that
-the 145-item checklist collapses, which is why its totals are larger; 104 of
-208 is exactly srr's own 50% bar.
+**Categories assessed.** Exploratory Data Analysis, Regression and Supervised
+Learning, and Time Series, each combined with the General standards, which
+apply regardless of category.
 
-## What the package is
+## What changed, and why the numbers moved
 
-`mysterynpi` is record-linkage machinery: one definition of the name handling
-a provider linkage needs. It transliterates join keys, tokenises
-given/middle/surnames, and decides whether two records name the same person.
-It is deliberately deterministic — `middle_agreement()` returns
-`"corroborates"`, `"conflicts"` or `"uninformative"`, with no edit-distance
-tolerance and no score — and its `DESCRIPTION` draws an explicit scope
-boundary: it "stops short of dataset-specific candidate-generation policy and
-blended scoring", because "which blocking plans to deploy and what a study
-claims from the resulting evidence are pipeline science, not shared
-machinery."
+Three things, and only the third is an improvement in the package.
 
-Measured surface: 7,539 lines across 39 files in `R/`, 108 exports, 115 `.Rd`
-pages, 58 test files carrying 1,654 expectations, 5 vignettes, 4 exported
-datasets (`WINKLER_CENSUS`, `ROSTER_BENCHMARK`, `SURNAME_FREQUENCIES`,
-`NICKNAME_EDGES`), and 6 GitHub workflows including `R-CMD-check`,
-`test-coverage` and `pkgdown`. Imports are `stringi` and `stats` only.
+**1. The counting granularity was wrong the first time.** The first assessment
+counted the 145 top-level items in `srr-standards.md`. But many of those items
+carry sub-lettered identifiers (`G2.4a` through `G2.4e`, `TS4.6c`, `RE4.17`),
+each of which is a separate standard with its own requirement, and the skill
+asks for a verdict on every individual identifier. At that granularity there
+are **205** standards, not 145: General 68, Exploratory Data Analysis 34,
+Regression 48, Time Series 55. The instruction's own expectation of "roughly 70
+General standards" matches 68 and not 40, which is the clue that 145 was the
+wrong denominator. Every proportion below is therefore computed over a larger
+and more demanding denominator than the first assessment used.
 
-## Categories assessed
+**2. The `srr` tooling is now the source of the verdicts, not my reading.**
+Every verdict below is derived mechanically from the tags in the package source
+rather than transcribed from a judgement I made in prose. The cross-check:
 
-General (mandatory), plus **EDA**, **Regression and Supervised Learning**, and
-**Time Series**, as requested. Full standards texts are in
-[`general.Rmd`](general.Rmd), [`eda.Rmd`](eda.Rmd),
-[`regression.Rmd`](regression.Rmd) and [`time-series.Rmd`](time-series.Rmd).
+```
+identifiers in srr-standards.md                 205
+identifiers carrying an @srrstats or @srrstatsNA tag   205
+tagged but not a real standard                    0
+a real standard with no tag                       0
+```
 
-## Reading the verdicts
+`srr::srr_stats_pre_submit()` agrees: "All applicable standards [v0.3.0] have
+been documented in this package (103 complied with; 104 N/A standards)". Its
+103 counts tag occurrences, two identifiers being tagged in two files; the
+unique count is 101.
 
-- **Y** — satisfied, or achievable with ordinary engineering given the current
-  architecture. The tables split these into **Y (done)** and **Y (feasible)**
-  because the distinction matters to a maintainer even though both count the
-  same: *feasible* is exactly where follow-up work would go.
-- **N** — would need a capability that conflicts with the package's scope.
-- **NA** — the concept is absent from the package. **NA counts in the
-  denominator.** A category that mostly does not apply scores low, which is
-  the point.
+**3. The work itself.** The first assessment found 67 standards achievable of
+which 36 were already done, the other 31 being "feasible, not yet
+implemented". All 31 were then implemented. That column is now empty, which is
+the one change here that reflects the package getting better rather than the
+assessment getting more careful.
 
-Proportion reported throughout is **Y / (Y + N + NA)**, over every standard in
-the set.
+## How to read the verdicts
 
+- **Y** means a tagged `@srrstats` claim backed by code in this package. There
+  are no "feasible but not yet done" Y verdicts left, so unlike the first
+  assessment, Y here means done.
+- **N** means possible in principle but outside what this package is. Ten
+  standards. They are tagged `@srrstatsNA` in the source because `srr` offers
+  no other tag, and the distinction matters to a reader, so they are counted
+  separately here. See the caveat in "A disagreement between the tags and this
+  table" below.
+- **NA** means the concept has no referent in a package with no model, no
+  series, and no graphical output. Ninety-four standards. Every one carries a
+  justification on its own line, which the test suite enforces: a bare
+  `@srrstatsNA {ID}` with no reason fails
+  `tests/testthat/test-srr-standards-tags.R`.
+
+**The denominator.** The instruction asks for `Y / (Y + N + NA)`, counting
+not-applicable standards against the package, and its stated reason is that "at
+this early, pre-implementation stage NA calls are estimates rather than
+developer-asserted `@srrstatsNA` tags". That reason has now expired: the NA
+calls in this package are exactly developer-asserted `@srrstatsNA` tags, each
+justified and validated by `srr_stats_pre_submit()`. Both numbers are therefore
+reported throughout, the conservative one first because that is what was asked:
+
+| convention | formula | result |
+|---|---|---|
+| this assessment, as instructed | Y / (Y + N + NA) | 101 / 205 = **49.3%** |
+| rOpenSci's own applicable-standards convention | Y / (Y + N) | 101 / 111 = **91.0%** |
+
+Neither number is the interesting one on its own. The instruction's scope
+question is asked per category combined with General, and all three clear the
+bar; the per-category spread is what actually decides the submission.
+
+---
 
 ## General Standards
 
-### General — verdict table
-
-| Subsection | Y (done) | Y (feasible) | N | NA | total |
+| subsection | Y | N | NA | total | proportion |
 |---|---:|---:|---:|---:|---:|
-| Documentation | 7 | 0 | 0 | 0 | 7 |
-| Input Structures | 16 | 0 | 0 | 1 | 17 |
-| Algorithms | 1 | 0 | 0 | 1 | 2 |
-| Output Structures | 0 | 0 | 0 | 1 | 1 |
-| Testing | 12 | 0 | 0 | 1 | 13 |
-| **total** | **36** | **0** | **0** | **4** | **40** |
+| Documentation | 8 | 0 | 0 | 8 | 1.00 |
+| Input Structures | 27 | 0 | 2 | 29 | 0.93 |
+| Algorithms | 1 | 0 | 2 | 3 | 0.33 |
+| Output Structures | 0 | 0 | 1 | 1 | 0.00 |
+| Testing | 24 | 0 | 3 | 27 | 0.89 |
+| **total** | **60** | **0** | **8** | **68** | **0.882** |
 
-**Proportion Y / (Y + N + NA) = 36 / 40 = 90.0%**, all of it implemented.
+### Key evidence and gaps
 
-### General — key evidence and gaps
+**Documentation is complete, 8 of 8.** `G1.1` is answered in the README section
+"What this re-implements, and what is original": the primitives (blocking keys,
+agreement vectors, declared nickname equivalence) are established record
+linkage practice, and what is original is the set of refusals. `G1.2` is the
+"Life cycle" statement. `G1.3` is the terminology section defining
+"corroborates", "conflicts" and "uninformative" as the package uses them.
+`G1.4` is complete `roxygen2` documentation across 123 exports and 5 S3 methods. `G1.5` and
+`G1.6` are the benchmark and the comparison described below.
 
-**Already satisfied, and strongly.** `G1.4` is beyond argument: roxygen2
-throughout, 115 `.Rd` files, a published pkgdown site. `G1.3` is unusually well
-served — the three agreement classes, the evidence classes, the veto and
-quarantine vocabulary are each defined in roxygen *and* narrated in
-`vignettes/vetoes-and-quarantine.Rmd`. `G1.0` is met in substance: Winkler and
-Jaro are cited in `R/surname.R` and `R/name_matching.R`, and
-`data/WINKLER_CENSUS.rda` ships the reference surname frequency table, so the
-literature is in the package rather than only in the prose.
+**Input Structures is the strongest section, 27 of 29**, and most of it was
+built for this assessment. `R/input_structures.R` holds `as_linkage_table()`
+(accepting `data.frame`, `tbl_df`, `data.table` and a named matrix, and
+reporting what each conversion costs), `reject_list_columns()`,
+`read_name_column()`, `drop_vector_attributes()`, `check_scalar()` and
+`affirm_unique_index()`. `match_npi()` applies them at the top of the call, so
+a numeric identifier no longer reaches a comparison formatted as `1.23e+09`.
 
-The input-validation standards land well because validation is this package's
-subject. `R/contracts.R` alone carries 28 `stop()` calls;
-`.match_npi_inputs()` (`R/match_npi.R:221`) checks class, backend consistency
-and the table/connection pairing with `call. = FALSE` messages that name the
-offending argument. `G2.10` is satisfied by construction: every column is
-addressed through a caller-supplied name, never by position or by a default,
-and the README explains why — an upstream consolidation moved a resolver's
-default identifier column and a caller "died fifteen minutes into a run,
-twice", with the silent variant being the dangerous one. `G2.13` and `G2.15`
-are the package's origin story: `blank_na()` and `has_name_information()`
-exist because `nzchar(NA)` is `TRUE`, which made every absent middle name
-agree with every other.
+`G2.14`, and with it `RE2.1` and `TS2.1`, is `R/missing_policy.R`:
+`na_action = c("uninformative", "warn", "error")` on all eight agreement rules.
+One parameter closed three standards because they are the same request in three
+standard sets. The default reproduces the behaviour of every previous release,
+so the contract asserters still run against it unchanged.
 
-Testing is the other strength. `G5.0` and `G5.1` are both met already, which
-is rarer than it sounds: the test data are *exported* datasets, so a user can
-re-run any assertion. `G5.2` holds across 30 of the 58 test files, asserting
-on message text rather than merely on failure. `G5.5` is enforced at the API
-level — `clerical_sample()` refuses to run without a `seed`, with the error
-"the draw must be reproducible from the methods section alone". `G5.8` is the
-suite's centre of gravity: empty strings, `NA`, single-character given names,
-concatenated initials, and — as of `HEAD` — punctuation-only tokens.
+`G2.14c` (imputation) is the one General standard refused on principle rather
+than for absence of a referent, and the refusal is tagged with its reasoning:
+an imputed name is a fabricated identity claim. This package exists because
+absence of evidence was once read as evidence of difference; reading it as
+evidence of sameness is worse, because it resolves a match on a name nobody
+recorded. It is refused on the numeric graduation-year scale too, where it would
+at least be well defined, because imputing a year manufactures the very
+compatibility `graduation_year_agreement()` is asked to judge.
 
-**The eighteen that were feasible are now done.** They clustered in three
-places, and each cluster became one change:
+**Testing is 24 of 27.** The suite is 2,579 passing assertions. What matters for
+these standards is what they cover, not that they exist: `G5.2` error and
+warning messages are asserted by message text, not merely by condition class;
+`G5.3` missingness and undefined values have their own suite
+(`test-srr-missing-policy.R`); `G5.5` and `G5.6` seeded tests fix the seed and
+assert the recovered value, after a defect where the comparison was between two
+`NULL`s and passed trivially; `G5.9` noise susceptibility is covered by the
+trivial-noise and seed-independence tests; `G5.10` to `G5.12` extended tests are
+`test-srr-extended.R`, gated on `MYSTERYNPI_EXTENDED_TESTS`, documenting its
+flag, platform, memory, runtime, network dependency, asset and artefacts, and
+fetching a National Plan and Provider Enumeration System extract rather than
+shipping one.
 
-1. *Two one-paragraph documentation gaps.* `G1.2` has no Life Cycle Statement
-   at all, which is conspicuous for a package at 0.9.1 whose `DESCRIPTION`
-   already articulates a deliberate scope boundary. `G1.1` never says whether
-   these rules re-implement established linkage practice or invent it — the
-   README says each rule encodes a shipped defect, which is a different claim.
-2. *A missing-data parameter.* `G2.14` wants user-selectable `NA` handling.
-   The package has exactly one policy (absence is uninformative, never
-   conflicting), it is the right default, and it is tested — but it is not a
-   parameter. The same gap is `RE2.1` and `TS2.1` in the category sets, so one
-   change closes three standards.
-3. *Tabular-form and type-conversion breadth.* `G2.2`, `G2.4`, `G2.6`, `G2.7`,
-   `G2.9`, `G2.11`, `G2.12` and `G2.16` are all variations on "accept more
-   input shapes, and say something when a conversion loses information". Today
-   the API is `data.frame`-only and silent on lossy coercion; an identifier
-   read as numeric and compared as character would pass unremarked. These are
-   dispatch and diagnostics, not redesign.
+**The two Input Structures NAs** are `G2.4d` and `G2.4e` (explicit conversion to
+and from factor): the package refuses factors at the boundary rather than
+converting them, which is a stronger position than the standard asks for, and
+documented as such.
 
-The extended-test standards `G5.10`–`G5.12` are now one lane:
-`tests/testthat/test-srr-extended.R`, gated on `MYSTERYNPI_EXTENDED_TESTS`,
-fetching the NPPES extract rather than shipping it (or reading a local copy
-named by `MYSTERYNPI_NPPES_CSV`), with the flag, platform, memory, runtime,
-network, asset and artefact conditions stated in a block at the top. `G5.7` is
-now asserted rather than narrated: the benchmark properties are checked per
-defect family, so a rule that holds only on the mixed corpus fails.
+**The three Algorithms and Output Structures NAs are the honest heart of this
+assessment.** `G4.0` (outputs written to local files) has no referent:
+`match_npi()` returns an object and writes nothing. `G3.0` and `G3.1` concern
+floating-point comparison and covariance methods; there is no floating-point
+arithmetic in a verdict and no covariance anywhere. A package that composes
+three-valued verdicts has very little surface for the General standards about
+numeric algorithms, and that is a real limit on how much of this standard set
+can ever apply, not an omission.
 
-**No `N` verdicts, and I looked for them.** The four `NA`s are
-concept-absence, not evasion: `G2.5` (no argument is ever expected to be a
-factor), `G3.1` (no covariance calculation exists), `G4.0` (nothing writes a
-user-named local file; the DuckDB backend writes into a caller-supplied
-connection), and `G5.6` (nothing is estimated, so there is no parameter to
-recover). I specifically re-examined `G1.6`, `G2.7` and `G5.6` as `N`
-candidates and rejected each: comparing against `fastLink` or `reclin2` needs
-a benchmark, not a new inferential framework; tibble acceptance is a dispatch
-change; and parameter recovery is genuinely inapplicable to a decision
-function with no parameters. The General set is where this package is
-strongest, and that is unsurprising — these standards largely encode software
-engineering practice, which is what the package is built out of.
+**No N verdicts in General, and I looked for them twice.** Every General
+standard is either satisfied or has no referent.
 
-## EDA Standards
+---
 
-### EDA — verdict table
+## Exploratory Data Analysis
 
-| Subsection | Y (done) | Y (feasible) | N | NA | total |
+| subsection | Y | N | NA | total | proportion |
 |---|---:|---:|---:|---:|---:|
-| Documentation Standards | 4 | 0 | 0 | 0 | 4 |
-| Input Data | 6 | 0 | 1 | 0 | 7 |
-| Analytic Algorithms | 2 | 0 | 0 | 0 | 2 |
-| Return Results / Output Data | 3 | 0 | 0 | 0 | 3 |
-| Visualization and Summary Output | 2 | 0 | 0 | 5 | 7 |
-| Testing | 1 | 0 | 0 | 1 | 2 |
-| **total** | **18** | **0** | **1** | **6** | **25** |
+| Documentation Standards | 4 | 0 | 0 | 4 | 1.00 |
+| Input Data | 8 | 1 | 0 | 9 | 0.89 |
+| Analytic Algorithms | 2 | 0 | 0 | 2 | 1.00 |
+| Return Results / Output Data | 3 | 0 | 0 | 3 | 1.00 |
+| Visualization and Summary Output | 2 | 0 | 7 | 9 | 0.22 |
+| Testing | 6 | 0 | 1 | 7 | 0.86 |
+| **total** | **25** | **1** | **8** | **34** | **0.735** |
 
-**Proportion Y / (Y + N + NA) = 18 / 25 = 72.0%**, all of it implemented.
+### Key evidence and gaps
 
-N verdicts: `EA2.4`
+Four of the six subsections are complete. This is the only category in which
+that is true, and it is the reason the recommendation at the end is what it is.
 
-### EDA — key evidence and gaps
+**`EA1.x` fits without strain.** The standards ask the software to state its
+target audience, the kinds of question it answers and the data it expects, and
+`DESCRIPTION`, the README and `vignette("resolving-a-roster")` already did.
+This category's premise, software whose purpose is to help a user understand a
+dataset rather than to fit a model to it, is a fair description of what this
+package does: it tells you which roster rows it can resolve, which it refuses,
+and why for each one.
 
-**This is the category the package actually resembles**, and the reason is
-`EA2`. The Input Data subsection is about index columns and joins, and
-`mysterynpi` is a join engine: `R/blocking.R`, `R/match_npi_memory.R` and
-`R/match_npi_duckdb.R` are table filter and join operations over named
-columns. `EA2.1` is satisfied by `resolve_one_to_one()` and `R/bijection.R`,
-which *affirm* identifier uniqueness rather than assuming it, and
-`count_rivals()` quantifies the violations instead of discarding them.
-`EA2.2` and `EA2.3` are met emphatically: index columns are required
-arguments (`id`, `npi`), and no join anywhere uses an assumed column name —
-again, because a moved default column is the defect that motivated the
-package.
+**Return results, 3 of 3, is new work.** `R/match_result_class.R` adds the
+`npi_match_result` class with `print()`, `format()`, `summary()` and `nobs()`.
+`summary()$columns` reports the class, storage mode and missing count of each
+column, which is `EA4.1` and `EA4.2` (precision and the general tabular
+summary). The class is additive: the same five elements under the same names, so
+every existing caller keeps working, while printing a result now gives six lines
+of summary instead of every matched row.
 
-`EA1.0`–`EA1.3` are all already met from the README and the per-function
-roxygen: the audience (pipelines linking person rosters to NPI), the data
-kinds (character name fields on a roster and an NPPES-shaped reference), the
-questions (do these two records name the same person; which candidate wins
-one-to-one), and the per-function input types.
+**`EA2.4`, a relational data class, is the one N in this set.** The standard
+asks for explicit relational structure, naming the `dm` package. The package's
+whole input contract is "you name the columns, we never guess", across a
+123-export surface. Adopting a relational class system would be a different
+package rather than an increment on this one, which is what an N verdict is
+for.
 
-**The eight that were feasible are now done.** `EA3.0` and `EA3.1` were
-close enough to be annoying -- `pool_stats()` and `clerical_precision()`
-already computed statistics, and `ROSTER_BENCHMARK` plus
-`roster-benchmark.Rmd` already constituted a reference comparison -- and are
-now `summary.npi_match_result()` and `benchmark_comparison()`, both callable
-and both tested. `EA4.1`, `EA5.2` and `EA5.3` were the same omission three
-times and are closed by the one `npi_match_result` class: `digits` on
-`summary()`/`format()`/`print()`, every number formatted rather than
-default-printed, and a `summary()$columns` frame reporting class, storage mode
-and missing count per column. `EA2.5` and `EA2.6` are
-`affirm_unique_index()` and `drop_vector_attributes()`.
+**The whole Visualization subsection except two standards is NA, and that is
+the ceiling on this category.** `EA5.0` through `EA5.6` concern colour
+perception, contrast, scaling, axis labelling and graphical output formats.
+There is no graphical output: no plot method exists, and
+`R/match_result_class.R` records why in a comment rather than leaving the
+absence to be inferred. A plot of a three-valued verdict table would be a bar
+chart of counts that `summary()` already prints more precisely. The two Y
+verdicts here are the summary-output standards, `EA5.4` on the number of
+digits reported (`summary.npi_match_result(digits = 3L)`) and the printed
+general summary.
 
-**The one `N`.** `EA2.4` asks for an explicit relational class system (the
-standard names `dm`). Adopting one across a 108-function API whose contract is
-"you name the columns, we never guess" would be a different package, not an
-increment on this one.
+---
 
-**The whole Visualization subsection is `NA` except two standards, and that is
-what caps this category at 72%.** The package draws nothing: there are no
-`plot`, `print`, `summary` or `format` methods anywhere in `R/`, and the only
-plots in the repository are two base `barplot()` calls inside
-`vignettes/end-to-end-nppes-matching.Rmd`. So `EA5.0`, `EA5.1`, `EA5.4`,
-`EA5.5`, `EA5.6` and `EA6.1` have nothing to apply to. Under the stated
-denominator rule that is a real cost, correctly applied: a package with no
-graphical output is a weaker EDA package, not a neutral one.
+## Regression and Supervised Learning
 
-## Regression and Supervised Learning Standards
-
-### Regression — verdict table
-
-| Subsection | Y (done) | Y (feasible) | N | NA | total |
+| subsection | Y | N | NA | total | proportion |
 |---|---:|---:|---:|---:|---:|
-| Input data structures and validation | 1 | 0 | 2 | 2 | 5 |
-| Pre-processing and Variable Transformation | 2 | 0 | 0 | 3 | 5 |
-| Algorithms | 0 | 0 | 0 | 4 | 4 |
-| Return Results | 2 | 0 | 3 | 14 | 19 |
-| Documentation | 1 | 0 | 0 | 0 | 1 |
-| Visualization | 0 | 0 | 1 | 3 | 4 |
-| Testing | 3 | 0 | 0 | 2 | 5 |
-| **total** | **9** | **0** | **6** | **28** | **43** |
+| Input data structures and validation | 2 | 2 | 2 | 6 | 0.33 |
+| Pre-processing and Variable Transformation | 2 | 0 | 5 | 7 | 0.29 |
+| Algorithms | 0 | 0 | 4 | 4 | 0.00 |
+| Return Results | 2 | 3 | 14 | 19 | 0.11 |
+| Documentation | 1 | 0 | 0 | 1 | 1.00 |
+| Visualization | 0 | 1 | 3 | 4 | 0.00 |
+| Testing | 5 | 0 | 2 | 7 | 0.71 |
+| **total** | **12** | **6** | **30** | **48** | **0.250** |
 
-**Proportion Y / (Y + N + NA) = 9 / 43 = 20.9%**, all of it implemented.
+### Key evidence and gaps
 
-N verdicts: `RE1.0`, `RE1.1`, `RE4.0`, `RE4.17`, `RE4.18`, `RE6.0`
+**One quarter, and the shape of the gap is more informative than the number.**
+Two subsections score zero and a third scores 0.11. What the package can satisfy
+here is almost entirely what it already satisfies for General: input validation
+(`RE1.4`), the missing-data parameter (`RE2.1`, the same one as `G2.14`),
+testing discipline, and the return-value standards that happen to coincide with
+having a result class (`RE4.5` on the number of observations, `RE4.11` on
+goodness of fit, answered by the benchmark).
 
-### Regression and Supervised Learning — key evidence and gaps
+**Six N verdicts, and they are the honest ones.** `RE1.0` and `RE1.1` ask for a
+formula interface and for documentation of how a formula becomes a model
+matrix. A formula interface over a function that takes two character vectors
+would tell a reader the package fits something it does not. `RE4.0` asks the
+return object to be a model object; it is a match result, which is a different
+thing. `RE4.17` and `RE4.18` ask for prediction intervals and for a `predict()`
+method on new data: there is nothing fitted to predict with, and a `predict()`
+method that re-ran the rules would be `match_npi()` with a misleading name.
+`RE6.0` asks for a default plot method showing fitted values against residuals,
+and there are no fitted values and no residuals.
 
-**20.9%, and the shape of the failure is more informative than the number.**
-There is no model. `middle_agreement()` is a decision function over two token
-sets; nothing is fitted, nothing iterates to convergence, nothing has
-coefficients. Consequently the entire `RE3` Algorithms subsection (4
-standards) is `NA` — no convergence to warn about, no thresholds to set — and
-14 of the 19 `RE4` Return Results standards are `NA` for the same reason:
-`coef()`, `confint()`, `vcov()`, residuals, modelled values, forecast errors
-and categorical-group subsetting have no referent here.
+**The fourteen NAs in Return Results** are the model-object accessors:
+coefficients, standard errors, degrees of freedom, the variance-covariance
+matrix, the model call, convergence diagnostics. None has a referent in a rules
+engine. This is the subsection that decides the category: a standard set in
+which the largest section is mostly about describing a fitted model is a poor
+description of software that never fits one.
 
-**Six `N` verdicts, and they are the honest ones.** `RE1.0`/`RE1.1` (a formula
-interface and its matrix conversion), `RE4.0`/`RE4.17`/`RE4.18` (a model
-object with `print` and `summary` methods) and `RE6.0` (a default plot method
-on that object) could all be *built*, but each would be a facade: a formula
-interface over a function that takes two character vectors, or a "model"
-object that fits nothing, would tell a reader this package does something it
-does not. That is the distinction the `N` verdict exists for.
+---
 
-**What genuinely holds.** `RE1.3` is satisfied and worth noting, because it is
-the one `RE1` standard that is about data plumbing rather than models: the
-output frame retains the caller's roster columns and appends `source_id`,
-`npi` and `reason` through `make.unique()`, so input structure survives onto
-output without silent collisions. `RE2.0` is fully met — every transformation
-(`normalize_string()`, `name_key()`, `strip_parenthetical()`,
-`strip_med_suffix()`) is documented together with the defect it prevents.
-`RE5.0` is met by `roster-benchmark.Rmd`, which documents how runtime and
-candidate counts scale with roster size; that is precisely what the standard
-asks and it is already written. And the `RE7` Testing standards are the
-package's strong suit: `RE7.0`, `RE7.1` and `RE7.2` are all already satisfied
-because exact, noiseless relationships *are* the test suite — identical names
-must corroborate, disjoint names must conflict, roster identifiers must
-survive onto the output.
+## Time Series
 
-**The three that were feasible are now done.** `RE4.5` is
-`nobs.npi_match_result()`. `RE4.11` is the precision-among-accepts statistic in
-`benchmark_comparison()$rates` plus the precision/recall table in
-`vignette("comparison-with-alternatives")`. `RE2.1` is the same missing-data parameter as
-`G2.14`, which is the point: one change, three standard sets.
-
-## Time Series Standards
-
-### Time Series — verdict table
-
-| Subsection | Y (done) | Y (feasible) | N | NA | total |
+| subsection | Y | N | NA | total | proportion |
 |---|---:|---:|---:|---:|---:|
-| Input data structures and validation | 2 | 0 | 2 | 5 | 9 |
-| Pre-processing and Variable Transformation | 1 | 0 | 0 | 6 | 7 |
-| Analytic Algorithms | 0 | 0 | 0 | 4 | 4 |
-| Return Results | 1 | 0 | 0 | 7 | 8 |
-| Visualization | 0 | 0 | 1 | 8 | 9 |
-| **total** | **4** | **0** | **3** | **30** | **37** |
+| Input data structures and validation | 2 | 2 | 5 | 9 | 0.22 |
+| Pre-processing and Variable Transformation | 1 | 0 | 11 | 12 | 0.08 |
+| Analytic Algorithms | 0 | 0 | 6 | 6 | 0.00 |
+| Return Results | 1 | 0 | 18 | 19 | 0.05 |
+| Visualization | 0 | 1 | 8 | 9 | 0.00 |
+| **total** | **4** | **3** | **48** | **55** | **0.073** |
 
-**Proportion Y / (Y + N + NA) = 4 / 37 = 10.8%**, all of it implemented.
+### Key evidence and gaps
 
-N verdicts: `TS1.0`, `TS1.2`, `TS5.0`
+**Seven per cent. This category does not apply, and the assessment should say so
+without softening it.** Three of five subsections score zero or near it, and
+forty-eight of fifty-five standards have no referent at all.
 
-### Time Series — key evidence and gaps
+The four Y verdicts are real but incidental: `TS2.1` (the missing-data
+parameter, the same `na_action` as `G2.14`), `TS1.8` (the unit of time is
+stated, which `GRADUATION_YEAR_BANDS` now documents as a whole calendar year
+with band boundaries that are not date boundaries), and two input-validation
+standards that coincide with the General ones.
 
-**10.8%, and it should be.** There is no time series anywhere in the package.
-30 of 37 standards are `NA` because the concepts are absent outright:
-stationarity (`TS2.2`–`TS2.4`), forecasting and forecast-error widening
-(`TS3.0`–`TS3.3`, `TS4.4`–`TS4.7`), temporal axes and forecast-interval plots
-(`TS5.1`–`TS5.8`), auto-covariance units (`TS2.6`), the `units` package
-(`TS1.7`).
+**Three N verdicts.** `TS1.0` and `TS1.2` ask the software to accept and
+validate time-series classes (`ts`, `xts`, `tsibble`). Adopting them would
+require inventing a temporal dimension the data does not have. `TS5.0` asks for
+a default plot method with time on the horizontal axis, and there is no time
+axis.
 
-The only time-like quantity in the package is a graduation year, used for
-plausibility banding: `GRADUATION_YEAR_BANDS`, `graduation_year_band()` and
-`graduation_year_agreement()`. A year on a roster row is a scalar attribute
-used to decide whether two records can be the same person — not an ordered
-index, not a series, and not something with a frequency. That is why `TS1.1`
-and `TS4.2` are the only two already-met standards: both are domain-neutral
-documentation requirements (document the input types; document the type and
-class of return values) that the package's roxygen satisfies incidentally.
+**Forty-eight NAs, covering stationarity, differencing, seasonality, lag
+selection, autocorrelation, forecast horizons and prediction intervals.** The
+package has one date-like field, a graduation year, and it is used as a
+compatibility band rather than as a position in a series. Two records are
+compared to each other, never a record to its own past. There is no series
+anywhere in the package.
 
-**Three `N` verdicts.** `TS1.0` and `TS1.2` ask the software to use and
-validate explicit time-series classes (`ts`, `xts`, `tsibble`); accepting them
-would mean inventing a temporal dimension the data does not have. `TS5.0` asks
-for a default plot method on an implemented class system — there is no class
-system, and a plot of a match table is not a time-series plot.
+A category in which the best available verdict for forty-eight of fifty-five
+standards is "the concept has no referent here" is not a category this package
+belongs in, whatever the combined proportion with General works out to.
 
-**The two that were feasible are now done.** `TS1.8` is a section on
-`GRADUATION_YEAR_BANDS` stating that the unit is a whole calendar year,
-that a band boundary is not a date boundary, and why no argument accepts a
-month -- passing one would be false precision. `TS2.1` is once more the
-`G2.14` missing-data parameter.
+---
 
-A category in which the best available verdict for 30 of 37 standards is "the
-concept does not arise" is not a category this package should be submitted
-under, and the proportion says so without needing interpretation.
+## A disagreement between the tags and this table
 
-## What was built to close the 31
+Worth flagging for anyone reading both. The source tags ten standards
+`@srrstatsNA` that this assessment counts as **N**: `EA2.4`, `RE1.0`, `RE1.1`,
+`RE4.0`, `RE4.17`, `RE4.18`, `RE6.0`, `TS1.0`, `TS1.2`, `TS5.0`. This is not a
+contradiction and not a fudge. `srr` has exactly two tags, complied and not
+applicable, with no slot for "possible, but it would make this a different
+package", which is what the N verdict means here. In `srr`'s own taxonomy these
+really are not applicable: there is no formula interface, so there is nothing to
+document about one. The distinction only exists in this assessment's taxonomy,
+so it is reported in this assessment's tables and the justification text on each
+tag says which of the two situations it is.
 
-Each item lists the standards it closed. Everything here is on
-`feat/srr-feasible-standards`; the tests that hold it are named.
+---
 
-| Change | Standards closed |
-|---|---|
-| `R/missing_policy.R` — `na_action = c("uninformative", "warn", "error")` on all eight agreement rules, default unchanged; `is_undefined_number()` / `finite_or_na()`; `graduation_year_agreement(undefined=)` | `G2.14`, `G2.16`, `RE2.1`, `TS2.1` |
-| `R/input_structures.R` — `as_linkage_table()`, `read_name_column()`, `reject_list_columns()`, `drop_vector_attributes()`, `check_scalar()`, `affirm_unique_index()`, wired into `match_npi()` | `G2.2`, `G2.4`, `G2.6`, `G2.7`, `G2.9`, `G2.11`, `G2.12`, `EA2.5`, `EA2.6` |
-| `R/match_result_class.R` — `npi_match_result` class with `print()`, `format()`, `summary()`, `nobs()` | `EA3.0`, `EA4.1`, `EA4.2`, `EA5.2`, `EA5.3`, `RE4.5` |
-| `R/benchmark.R` — `benchmark_axes()`, `benchmark_decisions()`, `benchmark_comparison()` | `EA3.1`, `RE4.11`, `G1.5`, `G5.7` |
-| `vignettes/comparison-with-alternatives.Rmd` — the head-to-head against an edit-distance baseline | `G1.6` |
-| README sections "What this re-implements", "Compared with an edit-distance matcher", "Life cycle"; calendar-convention section on `GRADUATION_YEAR_BANDS` | `G1.1`, `G1.2`, `G1.6`, `TS1.8` |
-| `tests/testthat/test-srr-missing-policy.R`, `-input-structures.R`, `-result-and-benchmark.R`, `-extended.R` | `G5.3`, `G5.7`, `G5.9`, `G5.10`, `G5.11`, `G5.12` |
+## Task 3: scope and category fit
 
-Three of these are worth reading rather than counting.
+### Is the package in scope?
 
-**The missing-data parameter closed three standards with one change**, which is
-what the assessment predicted: `G2.14`, `RE2.1` and `TS2.1` are the same
-request in three standard sets. The default is unchanged and the contract
-asserters still run against it, so no existing caller moves. What is new is
-that a pipeline which would rather fail than carry an uninformative row can
-say so. **`G2.14c` — imputation — is refused**, and the refusal is the
-interesting part: an imputed name is a fabricated identity claim, and this
-package exists because absence of evidence was once read as evidence of
-difference. Reading it as evidence of *sameness* is worse. Imputation is not
-offered on the numeric year scale either, where it would at least be defined,
-because imputing a year manufactures the compatibility the function is asked
-to judge.
+Per category combined with General, which is how the question is posed:
 
-**`G1.6` turned an assertion into a measurement.** The claim that a one-edit
-tolerance on names costs more than it buys was prose in `R/agreement.R`;
-`vignette("comparison-with-alternatives")` now runs it on the 190-pair
-benchmark against a base-R edit-distance baseline:
+| standards set | Y | total | Y / (Y + N + NA) | clears 50% |
+|---|---:|---:|---:|:---:|
+| General + Exploratory Data Analysis | 85 | 102 | **83.3%** | yes |
+| General + Regression | 72 | 116 | **62.1%** | yes |
+| General + Time Series | 64 | 123 | **52.0%** | yes |
 
-| approach | accepted | precision | recall | false accepts |
-|---|---:|---:|---:|---:|
-| mysterynpi rules | 126 | 1.000 | 0.955 | 0 |
-| edit distance <= 1 | 41 | 0.854 | 0.265 | 6 |
+All three clear the bar on the conservative denominator, and the applicable
+standards convention puts the package at 91.0% overall. **The package is in
+scope.**
 
-The six false accepts land in the `spelling-trap` family, which is exactly the
-`JULIA`/`JULIE` case the comment described. No new dependency: edit distance
-is the alternative these rules reject, and base R ships it.
+Two honest qualifications. The Time Series figure clears 50% only because the
+General standards carry it: the category itself is at 7.3%, so that row should
+be read as evidence about the General standards, not about Time Series. And the
+all-standards figure of 49.3% falls just under half, which is a fact about
+assessing a rules engine against three model-shaped standard sets at once, not a
+scope failure against any one of them.
 
-**And the package refused to let it be a function.** The comparison was
-written first as an exported `compare_with_edit_distance()`, and
-`tests/testthat/test-no-fuzzy.R` rejected it: that guard admits no
-approximate-matching call anywhere in `R/` -- source scan, parse-tree scan and
-namespace reachability, with no exempt module -- and it does not care that the
-call exists to argue against approximate matching. It is right not to care. A
-package whose position is that spelling similarity has no place in identity
-resolution should not ship fuzzy machinery reachable from its own namespace.
-The comparison moved to a vignette, which is runnable code outside the
-namespace, and the rule stayed absolute. This is the second time in this piece
-of work that an existing gate caught the new code rather than the reverse.
+### Which single category fits best?
 
-**One finding came out of the implementation rather than the assessment.**
-`read_name_column()` checked `is.character()` before inspecting the class, so a
-character vector carrying a `units`-like class and its attributes passed
-through untouched -- which is the exact input `G2.6` and `G2.11` are about. The
-test caught it; the class check now runs first, and the reason is in the
-function.
+**Exploratory Data Analysis, at 73.5%, and the reasoning is not only the
+number.** The number is nearly three times Regression and ten times Time
+Series, but what settles it is which sections are complete. In this category,
+Documentation, Input Data, Analytic Algorithms and Return Results are all at or
+near 1.00, and those four are the sections that describe what the package
+actually does: take a table, validate it carefully, apply deterministic rules,
+return a described result. Its only weak section, Visualization, is weak for a
+single stated reason, that the package produces no graphics, and that reason is
+documented in the source rather than left to be inferred.
 
-## Task 3 — scope and category fit
+The category's premise fits too. Exploratory Data Analysis standards are
+written for software that helps a user understand a dataset. `match_npi()`
+returns, for every roster row, a verdict and the reason for it, including the
+rows it refuses to resolve and why. That is a description of a dataset's
+resolvability, which is what this package is for.
 
-### Does it clear half the standards?
+### Is any other category independently viable?
 
-| Set | Y | total | proportion |
-|---|---:|---:|---:|
-| General | 36 | 40 | **90.0%** |
-| EDA | 18 | 25 | **72.0%** |
-| Regression and Supervised Learning | 9 | 43 | **20.9%** |
-| Time Series | 4 | 37 | **10.8%** |
-
-Combined with the mandatory General set, which is how a submission is actually
-judged:
-
-| Submission | Y | total | proportion | clears 50%? |
-|---|---:|---:|---:|---|
-| General + **EDA** | 54 | 65 | **83.1%** | yes, comfortably |
-| General + Regression | 45 | 83 | **54.2%** | yes, but only because General carries it |
-| General + Time Series | 40 | 77 | **51.9%** | yes, but only because General carries it |
-
-All three combinations clear the 50% bar, and two of the three do so
-dishonestly: strip General out and Regression is at 20.9%, Time Series at
-10.8%. **The 50% test is passed on the strength of the engineering standards,
-not on statistical fit.** A reader of this assessment should not take "clears
-50% under three categories" as meaning the package has three plausible
-submission categories. It has one.
-
-### Which single category fits
-
-**EDA, at 72.0%, and the fit is architectural rather than arithmetic.** The
-EDA standards' centre of gravity is `EA2` Input Data: index columns, their
-uniqueness, and joins that do not guess column names. That is a description of
-`mysterynpi`'s whole API. `resolve_one_to_one()` affirms uniqueness instead of
-assuming it; `count_rivals()` counts the violations; every join takes
-caller-supplied column names because the package exists in response to a moved
-default column. Four of the seven `EA2` standards are already met and a fifth
-and sixth are small additions.
-
-What holds it back is equally structural and worth stating plainly: the
-Visualization subsection is almost entirely `NA` (5 of 7, plus `EA6.1`),
-because the package draws nothing — no `plot`, `print`, `summary` or `format`
-methods exist anywhere in `R/`. Under the stated denominator that is a genuine
-cost, and it is the difference between 72% and a figure in the high eighties.
-The cheapest real improvement available is therefore not more validation but a
-small result class with `print`/`format` methods, which would move `EA4.1`,
-`EA4.2`, `EA5.2` and `EA5.3` from feasible to done.
-
-### Is any second category independently viable?
-
-**No.** Neither Regression nor Time Series is viable as a secondary category,
-and the reason is the same in both: the `N` verdicts are not gaps, they are
-misrepresentations waiting to happen.
-
-- **Regression (20.9%)** would require a model object (`RE4.0`) with `print`
-  (`RE4.17`), `summary` (`RE4.18`) and `plot` (`RE6.0`) methods, reached
-  through a formula interface (`RE1.0`, `RE1.1`). Each is buildable and each
-  would be a facade over a deterministic decision function that fits nothing.
-  14 of the 19 Return Results standards are `NA` because coefficients,
-  residuals, fitted values and forecast errors have no referent here.
-- **Time Series (10.8%)** has no series at all. The only temporal quantity is
-  a graduation year used as a plausibility attribute on a roster row. 30 of 37
-  standards are `NA` on concept absence.
+**No, and the recommendation is to submit under one category only.** Regression
+at 25.0% is not viable: the formula interface, the model object, `predict()` and
+the fitted-versus-residual plot are all N, and they are the centre of that
+standard set rather than its periphery. Time Series at 7.3% is further out
+still. Listing either as a secondary category would ask reviewers to evaluate
+this package against expectations it does not merely fail to meet but has no
+analogue for.
 
 ### Recommendation
 
-**Submit under EDA, or do not submit yet.**
+Submit under **Exploratory Data Analysis**, as a single category.
 
-The honest framing for a submission is that `mysterynpi` is *data-linkage
-infrastructure with a statistical consumer*, not statistical software that
-estimates anything. Its General compliance at 90% is genuinely strong and
-would survive review; its category compliance rests entirely on the
-join-and-index half of the EDA standards.
+The honest framing for a submission issue is that this is a deterministic rules
+engine assessed against a standard set written largely for statistical
+estimators, and the most interesting parts of the assessment are the refusals:
+imputation (`G2.14c`), a fuzzy-matching comparison function (see the follow-up
+list), a formula interface (`RE1.0`), a plot method (`EA5.x`, `RE6.0`, `TS5.0`).
+Each is refused in the source with its reason attached, which is the form in
+which a reviewer can disagree with the judgement rather than merely notice the
+absence.
 
-Before submitting, the follow-up work that moves the most standards for the
-least change, in order:
+---
 
-1. **A result class with `print`/`format` methods** — closes `EA4.1`, `EA4.2`,
-   `EA5.2`, `EA5.3`, and is the only change that lifts the EDA proportion
-   materially.
-2. **A missing-data parameter** on the agreement functions — closes `G2.14`,
-   `RE2.1` and `TS2.1` at once, and the current single policy becomes the
-   documented default rather than the only behaviour.
-3. **Two paragraphs of documentation** — a Life Cycle Statement (`G1.2`) and a
-   statement of whether these rules re-implement established practice
-   (`G1.1`).
-4. **Assertions on the benchmark** — `roster-benchmark.Rmd` already measures
-   scaling; turning its trend into a test closes `G5.7` and strengthens
-   `RE5.0`, which is already met.
-5. **An extended-test lane** behind `MYSTERYNPI_EXTENDED_TESTS` over a
-   fetched NPPES extract — closes `G5.10`, `G5.11`, `G5.12` together.
+## Ranked follow-up work, cheapest first
 
-One caveat on this document's own authority, now narrower than it was. The
-methodology asks for *potential* compliance, and the first version of this
-assessment recorded 31 of the 67 `Y`s as "feasible, not yet implemented" --
-noting that a reviewer counting only shipped code would have scored General at
-18/40 and EDA at 10/25. Those 31 are implemented, so the two numbers now
-coincide: 36/40 and 18/25 are both the potential and the actual. What remains
-a judgement rather than a fact is the `N`/`NA` split itself -- srr has no `N`
-tag, so the ten standards this document calls `N` are tagged `@srrstatsNA`
-with the same justification, and a reviewer who disagrees that a formula
-interface over a decision function would be a facade is disagreeing with a
-design position, not with a measurement.
+1. **Twenty-nine of the 101 complied tags carry a generated justification
+   rather than a specific one.** They read "implemented in this file; see the
+   function documentation and the file header for the defect it prevents",
+   which tells a reviewer nothing beyond which file to open. The code behind
+   them is real and tested; the tag text is not evidence. The identifiers:
+   `EA2.5`, `EA2.6`, `EA3.0`, `EA3.1`, `EA4.0`, `EA4.1`, `EA4.2`, `EA5.2`,
+   `EA5.3`, `G1.5`, `G2.2`, `G2.4`, `G2.4a`, `G2.4b`, `G2.4c`, `G2.6`, `G2.7`,
+   `G2.9`, `G2.11`, `G2.12`, `G2.14`, `G2.14a`, `G2.14b`, `G2.16`, `G5.7`,
+   `RE2.1`, `RE4.5`, `RE4.11`, `TS2.1`. This is the largest remaining gap
+   between what the package does and what a reviewer reading its tags would
+   learn, and it is a writing task rather than an engineering one.
+
+2. **No `srr` badge grade has been pursued.** The standards offer graded badges
+   and this assessment does not estimate which grade the current coverage would
+   earn.
+
+3. **`autotest` has not been run.** rOpenSci's statistical review uses it
+   alongside `srr`, and it tests input-handling assumptions automatically. The
+   input-structure work in `R/input_structures.R` is exactly what it probes, so
+   it is likely to find something.
+
+4. **The benchmark corpus is self-built.** `ROSTER_BENCHMARK` is constructed
+   from this package's own defect taxonomy, so the clean separation it shows is
+   consistency rather than proof of generality, as `vignette("roster-benchmark")`
+   already states. An external roster with known truth would make `G5.4` and
+   `G1.5` substantially stronger. This is the most valuable item on the list and
+   also the most expensive, since it needs data the package cannot generate.
+
+## Appendix: how to reproduce these counts
+
+```sh
+# every identifier in the canonical checklist, including sub-lettered ones
+python3 - <<'PY'
+import re
+cur = None
+for ln in open("srr/srr-standards.md"):
+    if ln.startswith("### "): cur = ln[4:].strip()
+    elif ln.lstrip().startswith("- ["):
+        m = re.search(r"\*\*(G|EA|RE|TS)([0-9.]+[a-z]?)\*\*", ln)
+        if m: print(cur, m.group(1) + m.group(2))
+PY
+
+# every identifier carrying a tag, and of which kind
+grep -rhoE "@srrstats \{[^}]+\}" R/ tests/ | sed -E 's/.*\{|\}//g' | tr ',' '\n'
+grep -rhoE "@srrstatsNA \{[^}]+\}" R/ tests/ | sed -E 's/.*\{|\}//g' | tr ',' '\n'
+
+# the tooling's own verdict
+Rscript -e 'srr::srr_stats_pre_submit()'
+```

@@ -108,7 +108,7 @@
 #' @srrstatsNA {TS5.7} No model and forecast values to show together.
 #' @srrstatsNA {TS5.8} No model/forecast distinction to visualise.
 #'
-#' @srrstatsNA {EA2.4} An explicit relational class system (the standard names `dm`) across a 108-function API whose contract is "you name the columns, we never guess" would be a different package rather than an increment on this one.
+#' @srrstatsNA {EA2.4} An explicit relational class system (the standard names `dm`) across a 123-export API whose contract is "you name the columns, we never guess" would be a different package rather than an increment on this one.
 #' @srrstatsNA {EA5.0a} No graphical output exists, so there is no colour perception to accommodate.
 #' @srrstatsNA {EA5.0b} No graphical output exists, so there is no contrast or scaling to choose.
 #' @srrstatsNA {RE1.0} There is no model to specify. A formula interface over a function that takes two character vectors would tell a reader the package fits something it does not.

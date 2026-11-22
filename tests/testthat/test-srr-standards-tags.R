@@ -80,5 +80,22 @@ test_that("the srr testing-standard tags name tests that exist", {
               "test-srr-result-and-benchmark.R", "test-srr-extended.R")) {
     expect_true(file.exists(here(f)), info = f)
   }
-  expect_true(file.exists(here("../../R/srr-stats-standards.R")))
+})
+
+test_that("the NA_standards block is where srr expects it", {
+  # STRUCTURAL, SO IT SKIPS ON AN INSTALLED PACKAGE. R CMD check runs the suite
+  # against the installed tree, which has no R/ directory, and an earlier
+  # version of this test asserted the file's existence unconditionally -- it
+  # passed in the repository and failed the check, which is the one place it
+  # mattered. Same reasoning as test-pkgdown-reference-index-complete.R.
+  src <- testthat::test_path("..", "..", "R", "srr-stats-standards.R")
+  skip_if_not(file.exists(src), "source tree not present (installed-package check)")
+  txt <- readLines(src, warn = FALSE)
+  expect_true(any(grepl("^#' NA_standards", txt)))
+  expect_true(any(grepl("@name NA_standards", txt)))
+  # Every NA verdict carries a justification on the same line, never a bare id.
+  tags <- grep("@srrstatsNA", txt, value = TRUE)
+  expect_gt(length(tags), 50L)
+  bare <- grep("@srrstatsNA \\{[A-Za-z0-9.]+\\}\\s*$", tags, value = TRUE)
+  expect_identical(bare, character(0))
 })

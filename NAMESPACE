@@ -109,3 +109,41 @@ export(are_nickname_equivalents)
 export(get_nicknames_for_name)
 export(given_name_agreement)
 export(assert_given_name_agreement_contract)
+
+# --- 0.10.0: the srr standards implemented in feat/srr-feasible-standards ----
+# Hand-maintained like the rest of this file. The additions are grouped and
+# commented so the next reader can see which standard each surface serves,
+# because an export list is otherwise a list of names with no why.
+
+# Missing-data policy, selectable (G2.14a, G2.14b; RE2.1; TS2.1)
+export(NA_ACTIONS)
+export(resolve_na_action)
+export(count_missing_values)
+# Undefined values are not missing values (G2.16)
+export(is_undefined_number)
+export(finite_or_na)
+
+# Input structures: shapes accepted, losses announced
+# (G2.2, G2.4, G2.6, G2.7, G2.9, G2.11, G2.12; EA2.5, EA2.6)
+export(as_linkage_table)
+export(reject_list_columns)
+export(read_name_column)
+export(drop_vector_attributes)
+export(check_scalar)
+export(affirm_unique_index)
+
+# The match result is an object with methods, not a bare list
+# (EA4.1, EA4.2, EA5.2, EA5.3, EA3.0; RE4.5)
+export(new_npi_match_result)
+S3method(print, npi_match_result)
+S3method(format, npi_match_result)
+S3method(summary, npi_match_result)
+S3method(nobs, npi_match_result)
+S3method(print, summary.npi_match_result)
+importFrom(stats, nobs)
+
+# Reference comparison and the alternative-implementation benchmark
+# (EA3.1; RE4.11; G1.5, G1.6, G5.7)
+export(benchmark_axes)
+export(benchmark_decisions)
+export(benchmark_comparison)

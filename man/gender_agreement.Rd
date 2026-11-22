@@ -4,11 +4,19 @@
 \alias{gender_agreement}
 \title{Do two recorded genders agree, disagree, or decide nothing?}
 \usage{
-gender_agreement(a, b)
+gender_agreement(a, b, na_action = NA_ACTIONS)
 }
 \arguments{
 \item{a, b}{character vectors of recorded gender codes, the same length.
 Raw encodings are fine; normalisation is applied internally.}
+
+\item{na_action}{[character(1)] how to treat a missing value on either
+side: one of [NA_ACTIONS]. The default `"uninformative"` is the
+behaviour of every release before 0.10.0 -- absence decides nothing.
+`"warn"` does the same and says so once per call; `"error"` refuses
+to compare. Imputation is deliberately absent: an imputed name is a
+fabricated identity claim (srr G2.14a, G2.14b; G2.14c refused with
+reason in `R/missing_policy.R`).}
 }
 \value{
 character: `"corroborates"`, `"conflicts"`, or `"uninformative"`.

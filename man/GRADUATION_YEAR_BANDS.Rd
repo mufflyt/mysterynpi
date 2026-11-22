@@ -51,3 +51,21 @@ that conclusion; the second also found the middle bands NEGATIVE, so a
 caller that scores `|d|` of 2 or 3 as evidence FOR a link has the sign
 wrong (see `log2_lr` below, and the note in [graduation_year_agreement()]).
 }
+\section{The unit is a whole calendar year, and nothing finer}{
+
+A band is a difference of **integer calendar years**, not of days, months or
+academic years, and the package never converts between them (srr TS1.8). The
+reason is that neither input carries a finer grain to convert from: a
+graduation year in a registry is a four-digit number with no month, and a
+credentialing year is the year a board records, which may differ from the
+date on the certificate. `band = "one_after"` therefore means "the recorded
+graduation year is one greater than the recorded credentialing year", which
+can be anything from one day to twenty-three months of real time.
+
+Two consequences a caller should know. A spring graduate credentialed the
+following January lands in `one_after` and is scored `corroborates`, which
+is intended: that is the ordinary sequence. And a band boundary is not a
+date boundary, so no band can be made sharper by supplying a month --
+passing one would be false precision, which is why no argument accepts one.
+}
+

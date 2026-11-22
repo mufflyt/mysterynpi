@@ -4,7 +4,7 @@
 \alias{given_name_agreement}
 \title{Categorical given-name agreement: verdict plus named reason}
 \usage{
-given_name_agreement(a, b)
+given_name_agreement(a, b, na_action = NA_ACTIONS)
 }
 \arguments{
 \item{a, b}{character vectors of given names.}

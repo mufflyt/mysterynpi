@@ -7,7 +7,9 @@
 graduation_year_agreement(
   credentialing_year,
   graduation_year,
-  bands = GRADUATION_YEAR_BANDS
+  bands = GRADUATION_YEAR_BANDS,
+  na_action = NA_ACTIONS,
+  undefined = c("uninformative", "error")
 )
 }
 \arguments{
@@ -17,6 +19,14 @@ length or one of length 1. Order matters: the difference is
 person graduated BEFORE they credentialed.}
 
 \item{bands}{the band table; defaults to [GRADUATION_YEAR_BANDS].}
+
+\item{na_action}{[character(1)] how to treat a missing year: one of
+[NA_ACTIONS]. Default `"uninformative"`, the behaviour of every release
+before 0.10.0.}
+
+\item{undefined}{[character(1)] how to treat `NaN`, `Inf` or `-Inf`, which
+are not years: `"uninformative"` (the default) converts them to `NA` and
+scores them as deciding nothing; `"error"` refuses (srr G2.16).}
 }
 \value{
 character: `"corroborates"`, `"conflicts"`, or `"uninformative"`.

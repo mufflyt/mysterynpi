@@ -84,6 +84,17 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
                       nppes_full_name = NULL, entity_filter = "1",
                       backend = c("auto", "data.frame", "duckdb"),
                       attributes = NULL, block = character()) {
+  # SHAPE FIRST, and in the function whose variables are used downstream. An
+  # earlier version converted inside .match_npi_inputs(), which validated the
+  # right object and then threw the conversion away: the helper returns a list
+  # of names and columns, not the tables. Tibbles and data.tables are accepted
+  # and flattened, a named matrix is accepted, a list column is refused rather
+  # than stringified, and any conversion that loses something says so
+  # (srr G2.7, G2.9, G2.11, G2.12).
+  roster <- as_linkage_table(roster, "roster")
+  if (is.data.frame(nppes) || (!is.null(dim(nppes)) && is.matrix(nppes))) {
+    nppes <- as_linkage_table(nppes, "nppes")
+  }
   spec <- .match_npi_attribute_spec(attributes, block)
   columns <- list(id = id, given = given, middle = middle, surname = surname,
                   full_name = full_name, npi = npi, entity_type = entity_type,
@@ -127,9 +138,10 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
     missing_required_name = sum(inputs$missing_name),
     blocked_by_attribute = applied$blocked,
     reference = as.list(reference_counts))
-  c(partitions, list(counts = counts, run_manifest = .match_npi_manifest(
+  new_npi_match_result(c(partitions, list(counts = counts,
+                                         run_manifest = .match_npi_manifest(
     inputs, table, entity_filter, result_columns, roster, reference_counts,
-    generated$pairs, candidates, spec)))
+    generated$pairs, candidates, spec))))
 }
 
 # The manifest is deterministic for a given input: no timestamps, so two
@@ -220,6 +232,12 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
 
 .match_npi_inputs <- function(roster, nppes, table, columns, entity_filter, backend) {
   backend <- match.arg(backend, c("auto", "data.frame", "duckdb"))
+  check_scalar(table, "table", null_ok = TRUE)
+  check_scalar(entity_filter, "entity_filter")
+  # One place decides input shape, for both backends: tibbles and data.tables
+  # are accepted and converted, a matrix with column names is accepted, a list
+  # column is refused rather than stringified, and every conversion that loses
+  # something says so (srr G2.7, G2.9, G2.12, G2.2).
   if (!is.data.frame(roster)) stop("roster must be a data.frame", call. = FALSE)
   connection <- requireNamespace("DBI", quietly = TRUE) && inherits(nppes, "DBIConnection")
   if (!is.data.frame(nppes) && !connection) {
@@ -232,6 +250,7 @@ match_npi <- function(roster, nppes, table = NULL, id, given = NULL, middle = NU
   if (backend == "data.frame" && !is.data.frame(nppes)) {
     stop("data.frame backend requires a data.frame", call. = FALSE)
   }
+
   if (connection && is.null(table)) stop("a DBI connection requires table", call. = FALSE)
   if (!connection && !is.null(table)) {
     stop("table applies only to a DBI connection; pass the reference data frame as nppes",

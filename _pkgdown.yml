@@ -149,3 +149,61 @@ reference:
   - assert_surname_agreement_contract
   - assert_license_status_contract
   - assert_org_name_matches_person_contract
+
+- title: Missing and undefined values
+  desc: >
+    The policy every agreement rule applies, selectable since 0.10.0 with the
+    previous behaviour as its default. Imputation is deliberately absent: an
+    imputed name is a fabricated identity claim.
+  contents:
+  - NA_ACTIONS
+  - resolve_na_action
+  - count_missing_values
+  - is_undefined_number
+  - finite_or_na
+
+- title: Input structures
+  desc: >
+    The shapes a caller may pass, and the diagnostics emitted when a
+    conversion loses something. One place decides input shape, so the entry
+    points stop each making their own partial version of it.
+  contents:
+  - as_linkage_table
+  - read_name_column
+  - reject_list_columns
+  - drop_vector_attributes
+  - check_scalar
+  - affirm_unique_index
+
+- title: The match result
+  desc: >
+    match_npi() returns an object with methods rather than a bare list. The
+    class is additive: the same five elements under the same names, so every
+    existing caller keeps working.
+  contents:
+  - new_npi_match_result
+  - print.npi_match_result
+  - format.npi_match_result
+  - summary.npi_match_result
+  - print.summary.npi_match_result
+  - nobs.npi_match_result
+
+- title: Benchmark and comparison
+  desc: >
+    The reference evaluation that vignette("roster-benchmark") narrates, as
+    callable functions, plus the head-to-head against the edit-distance
+    matcher these rules reject.
+  contents:
+  - benchmark_axes
+  - benchmark_decisions
+  - benchmark_comparison
+
+- title: internal
+  contents:
+  - NA_standards
+  - srr-benchmark
+  - srr-input-structures
+  - srr-match-result-class
+  - srr-missing-policy
+  - srr-stats-documentation
+  - srr-stats-input

@@ -4,7 +4,7 @@
 \alias{license_agreement}
 \title{Do two recorded licenses corroborate? (This rule cannot veto.)}
 \usage{
-license_agreement(a, state_a, b, state_b)
+license_agreement(a, state_a, b, state_b, na_action = NA_ACTIONS)
 }
 \arguments{
 \item{a, b}{character vectors of recorded license numbers, the same length.

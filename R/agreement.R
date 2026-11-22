@@ -38,11 +38,25 @@
 #'
 #' @param a_tokens,b_tokens lists of character vectors from [middle_tokens()],
 #'   the same length.
+#' @param na_action [character(1)] how to treat a missing value on either
+#'   side: one of [NA_ACTIONS]. The default `"uninformative"` is the
+#'   behaviour of every release before 0.10.0 -- absence decides nothing.
+#'   `"warn"` does the same and says so once per call; `"error"` refuses
+#'   to compare. Imputation is deliberately absent: an imputed name is a
+#'   fabricated identity claim (srr G2.14a, G2.14b; G2.14c refused with
+#'   reason in `R/missing_policy.R`).
 #' @return character: `"corroborates"`, `"conflicts"`, or `"uninformative"` --
 #'   the last when either side records no middle name, which is absence of
 #'   evidence and must never be read as evidence of difference.
 #' @export
-middle_agreement <- function(a_tokens, b_tokens) {
+middle_agreement <- function(a_tokens, b_tokens, na_action = NA_ACTIONS) {
+  # The policy this function always had, now selectable. The default
+  # reproduces every previous release exactly; see R/missing_policy.R for
+  # why imputation is not on the menu.
+  na_action <- resolve_na_action(
+    na_action,
+    count_missing_values(a_tokens) + count_missing_values(b_tokens),
+    "middle name")
   if (length(a_tokens) != length(b_tokens)) {
     stop("a_tokens and b_tokens must be the same length", call. = FALSE)
   }

@@ -59,7 +59,14 @@
 #' @return data.frame with columns `verdict` and `reason`, one row per pair.
 #' @family agreement rules
 #' @export
-given_name_agreement <- function(a, b) {
+given_name_agreement <- function(a, b, na_action = NA_ACTIONS) {
+  # The policy this function always had, now selectable. The default
+  # reproduces every previous release exactly; see R/missing_policy.R for
+  # why imputation is not on the menu.
+  na_action <- resolve_na_action(
+    na_action,
+    count_missing_values(a) + count_missing_values(b),
+    "given name")
   la <- length(a); lb <- length(b)
   if (la != lb) {
     if (la == 0L || lb == 0L) {

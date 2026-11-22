@@ -43,6 +43,22 @@
 #'   2026-06-25). Coverage of the graduation year in that directory is about
 #'   half of linked clinicians, and it originates in CMS DAC, so it exists only
 #'   for Medicare-enrolled clinicians.
+#'
+#' @section The unit is a whole calendar year, and nothing finer:
+#' A band is a difference of **integer calendar years**, not of days, months or
+#' academic years, and the package never converts between them (srr TS1.8). The
+#' reason is that neither input carries a finer grain to convert from: a
+#' graduation year in a registry is a four-digit number with no month, and a
+#' credentialing year is the year a board records, which may differ from the
+#' date on the certificate. `band = "one_after"` therefore means "the recorded
+#' graduation year is one greater than the recorded credentialing year", which
+#' can be anything from one day to twenty-three months of real time.
+#'
+#' Two consequences a caller should know. A spring graduate credentialed the
+#' following January lands in `one_after` and is scored `corroborates`, which
+#' is intended: that is the ordinary sequence. And a band boundary is not a
+#' date boundary, so no band can be made sharper by supplying a month --
+#' passing one would be false precision, which is why no argument accepts one.
 #' @export
 GRADUATION_YEAR_BANDS <- data.frame(
   band    = c("same_year", "one_before", "one_after", "two_three_before",
@@ -131,6 +147,12 @@ graduation_year_band <- function(credentialing_year, graduation_year,
 #' sensitivity analysis. Quarantine and review; do not delete.
 #'
 #' @inheritParams graduation_year_band
+#' @param na_action [character(1)] how to treat a missing year: one of
+#'   [NA_ACTIONS]. Default `"uninformative"`, the behaviour of every release
+#'   before 0.10.0.
+#' @param undefined [character(1)] how to treat `NaN`, `Inf` or `-Inf`, which
+#'   are not years: `"uninformative"` (the default) converts them to `NA` and
+#'   scores them as deciding nothing; `"error"` refuses (srr G2.16).
 #' @return character: `"corroborates"`, `"conflicts"`, or `"uninformative"`.
 #' @examples
 #' graduation_year_agreement(2015, 2015)   # "corroborates"
@@ -142,7 +164,32 @@ graduation_year_band <- function(credentialing_year, graduation_year,
 #'   [graduation_year_band()] for the band a pair falls in.
 #' @export
 graduation_year_agreement <- function(credentialing_year, graduation_year,
-                                      bands = GRADUATION_YEAR_BANDS) {
+                                      bands = GRADUATION_YEAR_BANDS,
+                                      na_action = NA_ACTIONS,
+                                      undefined = c("uninformative", "error")) {
+  # THE ONE PLACE IMPUTATION WOULD BE DEFINED, and it is still not offered.
+  # Years are numeric, so "replace a missing year with a value" is at least a
+  # real operation on a real scale -- unlike a name. It is refused anyway: the
+  # bands decide whether a credential date and a graduation date are
+  # compatible, and imputing either one manufactures the compatibility the
+  # function is asked to judge. What IS offered is the undefined-value
+  # handling srr G2.16 asks for, below: NaN and +/-Inf are not years, and a
+  # caller can choose between scoring them as deciding nothing or refusing.
+  undefined <- match.arg(undefined)
+  n_undef <- sum(is_undefined_number(credentialing_year),
+                 is_undefined_number(graduation_year))
+  if (n_undef > 0L && undefined == "error") {
+    stop(sprintf(paste0("%d undefined year value(s) (NaN, Inf or -Inf); ",
+                        "undefined = \"error\" refuses to band them. Pass ",
+                        "undefined = \"uninformative\" to score them as ",
+                        "deciding nothing."), n_undef), call. = FALSE)
+  }
+  credentialing_year <- finite_or_na(credentialing_year)
+  graduation_year <- finite_or_na(graduation_year)
+  na_action <- resolve_na_action(
+    na_action,
+    sum(is.na(credentialing_year)) + sum(is.na(graduation_year)),
+    "year")
   band <- graduation_year_band(credentialing_year, graduation_year, bands)
   out <- rep("uninformative", length(band))
   hit <- match(band, bands$band)

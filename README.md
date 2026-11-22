@@ -262,6 +262,82 @@ flowchart LR
     ALBERT -.->|"NEVER inferred"| ALEXANDER
 ```
 
+## What this re-implements, and what is original
+
+Nothing here is a novel algorithm, and the distinction matters for anyone
+deciding whether to trust it (srr G1.1).
+
+The **primitives are established practice**: transliterating a name to a
+comparison key, tokenising given/middle/surname, blocking on exact keys plus
+deletion signatures, and classifying a pair as agreeing / conflicting /
+uninformative are all standard record-linkage machinery, with the
+agree-disagree-uninformative vocabulary and the blocking-then-compare shape
+going back to Fellegi and Sunter, and the surname-frequency weighting to
+Winkler's census work (`WINKLER_CENSUS` ships that table). The full-name
+parser is not ours at all: `parse_person()` wraps
+[humaniformat](https://cran.r-project.org/package=humaniformat).
+
+What is **original is the refusals**, and they are the reason the package
+exists: that a missing middle name is uninformative rather than conflicting;
+that middle names compare as token *sets* rather than by position; that there
+is no edit-distance tolerance on names; that a nickname is evidence but never
+an expansion; that a conflict is a flag for review rather than a veto. Each is
+a decision a general linkage library leaves to the caller, and each one is
+here because the opposite shipped and produced a wrong cohort.
+
+## Compared with an edit-distance matcher
+
+The claim that a one-edit tolerance on names costs more than it buys is
+measured rather than asserted, in
+`vignette("comparison-with-alternatives")` (srr G1.5, G1.6):
+
+| approach | accepted | precision | recall | false accepts |
+|---|---:|---:|---:|---:|
+| mysterynpi rules | 126 | 1.000 | 0.955 | 0 |
+| edit distance <= 1 | 41 | 0.854 | 0.265 | 6 |
+
+On the 190 `ROSTER_BENCHMARK` pairs, a one-edit baseline accepts a third as
+many true matches and makes six false accepts — concentrated in the
+`spelling-trap` family, which is exactly the `JULIA`/`JULIE` case
+`R/agreement.R` records being measured and removed from the real pipeline.
+The vignette lists every pair the two approaches decide differently, with the
+truth and the edit count beside it.
+
+The comparison is a **vignette rather than an exported function**, and that is
+the package's own rule enforcing itself: `tests/testthat/test-no-fuzzy.R`
+refuses any approximate-matching call anywhere in `R/`, including one written
+to argue against approximate matching. It rejected the first version of this
+comparison, correctly. The baseline is base R on purpose: it needs no new
+dependency, and edit distance is the specific alternative these rules reject.
+It is not a comparison against
+[reclin2](https://cran.r-project.org/package=reclin2) or
+[fastLink](https://cran.r-project.org/package=fastLink), which solve the
+*scoring* problem this package deliberately stops short of.
+
+## Life cycle
+
+**Maturing.** The API is in production use and the agreement rules are stable:
+every exported rule ships with a contract asserter a consumer runs in their own
+suite, and breaking one is a major version bump by the policy below.
+
+- **Stable, and depended upon:** the agreement rules, the name keys and
+  tokenisers, `parse_person()`, the blocking-key constructors, and the
+  `assert_*_contract()` functions. Two downstream repositories pin this package
+  and run its contracts in their CI.
+- **Maturing, may gain arguments:** `match_npi()` and its backends, the
+  resolution helpers, the clerical-review sampling. Arguments will be added
+  (`na_action` was added in 0.10.0 without changing any default); none will be
+  removed without a major bump.
+- **Expected to grow:** the nickname and surname-particle dictionaries, which
+  are data rather than rules.
+- **Deliberately out of scope, and not planned:** blended scoring, probabilistic
+  weights, candidate-generation policy per dataset, and anything that decides
+  what a study may claim. `DESCRIPTION` states this boundary; it is a design
+  position, not a backlog.
+- **Not yet 1.0** because the `match_npi()` surface is younger than the rules
+  it composes. Reaching 1.0 means that surface stops gaining arguments, not
+  that the rules change.
+
 ## Versioning
 
 Semantic. Any change that flips an assertion in

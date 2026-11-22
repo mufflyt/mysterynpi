@@ -1,0 +1,206 @@
+set,subsection,standard,verdict,tag,tagged_in
+General,Documentation,G1.0,Y,@srrstats,R/srr-stats-documentation.R
+General,Documentation,G1.1,Y,@srrstats,R/srr-stats-documentation.R
+General,Documentation,G1.2,Y,@srrstats,R/srr-stats-documentation.R
+General,Documentation,G1.3,Y,@srrstats,R/srr-stats-documentation.R
+General,Documentation,G1.4,Y,@srrstats,R/srr-stats-documentation.R
+General,Documentation,G1.4a,Y,@srrstats,R/srr-stats-input.R
+General,Documentation,G1.5,Y,@srrstats,R/benchmark.R;R/srr-stats-documentation.R
+General,Documentation,G1.6,Y,@srrstats,R/srr-stats-documentation.R
+General,Input Structures,G2.0,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.0a,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.1,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.1a,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.2,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.3,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.3a,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.3b,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.4,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.4a,Y,@srrstats,R/graduation_year.R
+General,Input Structures,G2.4b,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Input Structures,G2.4c,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.4d,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.4e,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.5,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Input Structures,G2.6,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.7,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.8,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.9,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.10,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.11,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.12,Y,@srrstats,R/input_structures.R
+General,Input Structures,G2.13,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.14,Y,@srrstats,R/missing_policy.R
+General,Input Structures,G2.14a,Y,@srrstats,R/missing_policy.R
+General,Input Structures,G2.14b,Y,@srrstats,R/missing_policy.R
+General,Input Structures,G2.14c,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Input Structures,G2.15,Y,@srrstats,R/srr-stats-input.R
+General,Input Structures,G2.16,Y,@srrstats,R/missing_policy.R
+General,Algorithms,G3.0,Y,@srrstats,R/srr-stats-input.R
+General,Algorithms,G3.1,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Algorithms,G3.1a,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Output Structures,G4.0,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Testing,G5.0,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.1,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.2,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.2a,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.2b,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.3,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.4,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.4a,Y,@srrstats,R/srr-stats-input.R
+General,Testing,G5.4b,Y,@srrstats,R/srr-stats-input.R
+General,Testing,G5.4c,Y,@srrstats,R/srr-stats-input.R
+General,Testing,G5.5,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.6,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Testing,G5.6a,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Testing,G5.6b,NA,@srrstatsNA,R/srr-stats-standards.R
+General,Testing,G5.7,Y,@srrstats,R/benchmark.R;tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.8,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.8a,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.8b,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.8c,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.8d,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.9,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.9a,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.9b,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.10,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.11,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.11a,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+General,Testing,G5.12,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+EDA,Documentation Standards,EA1.0,Y,@srrstats,R/srr-stats-documentation.R
+EDA,Documentation Standards,EA1.1,Y,@srrstats,R/srr-stats-documentation.R
+EDA,Documentation Standards,EA1.2,Y,@srrstats,R/srr-stats-documentation.R
+EDA,Documentation Standards,EA1.3,Y,@srrstats,R/srr-stats-documentation.R
+EDA,Input Data,EA2.0,Y,@srrstats,R/srr-stats-input.R
+EDA,Input Data,EA2.1,Y,@srrstats,R/srr-stats-input.R
+EDA,Input Data,EA2.2,Y,@srrstats,R/srr-stats-input.R
+EDA,Input Data,EA2.2a,Y,@srrstats,R/srr-stats-input.R
+EDA,Input Data,EA2.2b,Y,@srrstats,R/srr-stats-input.R
+EDA,Input Data,EA2.3,Y,@srrstats,R/srr-stats-input.R
+EDA,Input Data,EA2.4,N,@srrstatsNA,R/srr-stats-standards.R
+EDA,Input Data,EA2.5,Y,@srrstats,R/input_structures.R
+EDA,Input Data,EA2.6,Y,@srrstats,R/input_structures.R
+EDA,Analytic Algorithms,EA3.0,Y,@srrstats,R/match_result_class.R
+EDA,Analytic Algorithms,EA3.1,Y,@srrstats,R/benchmark.R
+EDA,Return Results / Output Data,EA4.0,Y,@srrstats,R/match_result_class.R
+EDA,Return Results / Output Data,EA4.1,Y,@srrstats,R/match_result_class.R
+EDA,Return Results / Output Data,EA4.2,Y,@srrstats,R/match_result_class.R
+EDA,Visualization and Summary Output,EA5.0,NA,@srrstatsNA,R/srr-stats-standards.R
+EDA,Visualization and Summary Output,EA5.0a,NA,@srrstatsNA,R/srr-stats-standards.R
+EDA,Visualization and Summary Output,EA5.0b,NA,@srrstatsNA,R/srr-stats-standards.R
+EDA,Visualization and Summary Output,EA5.1,NA,@srrstatsNA,R/srr-stats-standards.R
+EDA,Visualization and Summary Output,EA5.2,Y,@srrstats,R/match_result_class.R
+EDA,Visualization and Summary Output,EA5.3,Y,@srrstats,R/match_result_class.R
+EDA,Visualization and Summary Output,EA5.4,NA,@srrstatsNA,R/srr-stats-standards.R
+EDA,Visualization and Summary Output,EA5.5,NA,@srrstatsNA,R/srr-stats-standards.R
+EDA,Visualization and Summary Output,EA5.6,NA,@srrstatsNA,R/srr-stats-standards.R
+EDA,Testing,EA6.0,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+EDA,Testing,EA6.0a,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+EDA,Testing,EA6.0b,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+EDA,Testing,EA6.0c,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+EDA,Testing,EA6.0d,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+EDA,Testing,EA6.0e,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+EDA,Testing,EA6.1,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Input data structures and validation,RE1.0,N,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Input data structures and validation,RE1.1,N,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Input data structures and validation,RE1.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Input data structures and validation,RE1.3,Y,@srrstats,R/srr-stats-input.R
+Regression and Supervised Learning,Input data structures and validation,RE1.3a,Y,@srrstats,R/srr-stats-input.R
+Regression and Supervised Learning,Input data structures and validation,RE1.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Pre-processing and Variable Transformation,RE2.0,Y,@srrstats,R/srr-stats-input.R
+Regression and Supervised Learning,Pre-processing and Variable Transformation,RE2.1,Y,@srrstats,R/missing_policy.R
+Regression and Supervised Learning,Pre-processing and Variable Transformation,RE2.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Pre-processing and Variable Transformation,RE2.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Pre-processing and Variable Transformation,RE2.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Pre-processing and Variable Transformation,RE2.4a,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Pre-processing and Variable Transformation,RE2.4b,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Algorithms,RE3.0,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Algorithms,RE3.1,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Algorithms,RE3.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Algorithms,RE3.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.0,N,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.1,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.5,Y,@srrstats,R/match_result_class.R
+Regression and Supervised Learning,Return Results,RE4.6,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.7,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.8,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.9,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.10,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.11,Y,@srrstats,R/benchmark.R
+Regression and Supervised Learning,Return Results,RE4.12,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.13,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.14,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.15,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.16,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.17,N,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Return Results,RE4.18,N,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Documentation,RE5.0,Y,@srrstats,R/srr-stats-documentation.R
+Regression and Supervised Learning,Visualization,RE6.0,N,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Visualization,RE6.1,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Visualization,RE6.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Visualization,RE6.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Testing,RE7.0,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+Regression and Supervised Learning,Testing,RE7.0a,Y,@srrstats,R/srr-stats-input.R
+Regression and Supervised Learning,Testing,RE7.1,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+Regression and Supervised Learning,Testing,RE7.1a,Y,@srrstats,R/srr-stats-input.R
+Regression and Supervised Learning,Testing,RE7.2,Y,@srrstats,tests/testthat/test-srr-standards-tags.R
+Regression and Supervised Learning,Testing,RE7.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Regression and Supervised Learning,Testing,RE7.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.0,N,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.1,Y,@srrstats,R/srr-stats-input.R
+Time Series,Input data structures and validation,TS1.2,N,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.5,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.6,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.7,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Input data structures and validation,TS1.8,Y,@srrstats,R/srr-stats-input.R
+Time Series,Pre-processing and Variable Transformation,TS2.0,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.1,Y,@srrstats,R/missing_policy.R
+Time Series,Pre-processing and Variable Transformation,TS2.1a,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.1b,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.1c,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.4a,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.4b,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.5,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Pre-processing and Variable Transformation,TS2.6,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Analytic Algorithms,TS3.0,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Analytic Algorithms,TS3.1,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Analytic Algorithms,TS3.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Analytic Algorithms,TS3.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Analytic Algorithms,TS3.3a,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Analytic Algorithms,TS3.3b,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.0,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.0a,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.0b,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.1,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.2,Y,@srrstats,R/srr-stats-input.R
+Time Series,Return Results,TS4.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.5,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.5a,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.5b,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.5c,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.6,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.6a,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.6b,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.6c,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.7,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.7a,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.7b,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Return Results,TS4.7c,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.0,N,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.1,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.2,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.3,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.4,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.5,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.6,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.7,NA,@srrstatsNA,R/srr-stats-standards.R
+Time Series,Visualization,TS5.8,NA,@srrstatsNA,R/srr-stats-standards.R

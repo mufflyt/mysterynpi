@@ -2,8 +2,8 @@
 
 Every srr standard this package can meet is now met *and tagged*, rather than
 assessed as reachable. `srr::srr_stats_pre_submit()` reports all applicable
-standards documented: 104 complied with, 104 not applicable, none missing. The
-full assessment, with a verdict for each of the 145 checklist IDs and a
+standards documented: 102 complied with, 105 not applicable, none missing. The
+full assessment, with a verdict for each of the 205 individual standards and a
 per-subsection table, is in `srr/standards-compliance.md`.
 
 ## New features
@@ -68,6 +68,33 @@ per-subsection table, is in `srr/standards-compliance.md`.
 
 ## Documentation
 
+* **An appendix for the three subsystems this release added**, none of which
+  had user-facing documentation: `vignette("missing-values-inputs-and-results")`
+  covers the `na_action` contract (including why imputation is refused and why
+  undefined values are kept separate from missing ones), what the input layer
+  accepts and what each conversion warning actually means, and the
+  `npi_match_result` contract (additive, so existing callers keep working).
+  Writing it with runnable examples caught that the rules differ in what they
+  take: `middle_agreement()` compares token lists from `middle_tokens()`, not
+  name strings, and `license_agreement()` takes a number and a state per side.
+  The appendix now says so, because an example that does not run is worse than
+  no example.
+* **The standards assessment is a table, not just prose.**
+  `srr/verdict-ledger.csv` carries one row per individual standard: the set,
+  the subsection, the verdict, which tag carries it and which file to read.
+  `srr/standards-compliance.md` counts from it rather than from a judgement
+  recorded in prose.
+* **`tests/testthat/test-srr-verdict-ledger.R`** keeps that ledger honest: it
+  regenerates every verdict from the tags in the source and fails on any
+  disagreement, so the ledger cannot become a stale claim. Its first version
+  failed for a reason worth keeping, recorded in the file: the verdict label
+  `"NA"` is a value, and `read.csv()` cannot tell it from a missing one, so
+  every not-applicable row read back as absent. That is this package's own
+  subject matter turning up in its own test fixture.
+* README gains a "rOpenSci statistical standards" section with the
+  per-standards-set table and the submission recommendation, and three rows in
+  the surface table for the missing-value policy, the input layer and the
+  result object.
 * README gains "What this re-implements, and what is original" (the primitives
   are established linkage practice; the refusals are what is ours),
   "Compared with an edit-distance matcher", and a "Life cycle" statement.

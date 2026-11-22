@@ -20,6 +20,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/comparison-with-alternatives.html">Compared with an edit-distance matcher</a></li>
     <li><a class="dropdown-item" href="../articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+    <li><a class="dropdown-item" href="../articles/missing-values-inputs-and-results.html">Appendix: missing values, input shapes, and the result object</a></li>
     <li><a class="dropdown-item" href="../articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="../articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="../articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
@@ -43,7 +44,7 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.10.0" id="mysterynpi-0100">mysterynpi 0.10.0<a class="anchor" aria-label="anchor" href="#mysterynpi-0100"></a></h2>
-<p>Every srr standard this package can meet is now met <em>and tagged</em>, rather than assessed as reachable. <code>srr::srr_stats_pre_submit()</code> reports all applicable standards documented: 104 complied with, 104 not applicable, none missing. The full assessment, with a verdict for each of the 145 checklist IDs and a per-subsection table, is in <code>srr/standards-compliance.md</code>.</p>
+<p>Every srr standard this package can meet is now met <em>and tagged</em>, rather than assessed as reachable. <code>srr::srr_stats_pre_submit()</code> reports all applicable standards documented: 102 complied with, 105 not applicable, none missing. The full assessment, with a verdict for each of the 205 individual standards and a per-subsection table, is in <code>srr/standards-compliance.md</code>.</p>
 <div class="section level3">
 <h3 id="new-features-0-10-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-10-0"></a></h3>
 <ul><li>
@@ -64,7 +65,14 @@
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-10-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-10-0"></a></h3>
-<ul><li>README gains “What this re-implements, and what is original” (the primitives are established linkage practice; the refusals are what is ours), “Compared with an edit-distance matcher”, and a “Life cycle” statement.</li>
+<ul><li>
+<strong>An appendix for the three subsystems this release added</strong>, none of which had user-facing documentation: <code><a href="../articles/missing-values-inputs-and-results.html">vignette("missing-values-inputs-and-results")</a></code> covers the <code>na_action</code> contract (including why imputation is refused and why undefined values are kept separate from missing ones), what the input layer accepts and what each conversion warning actually means, and the <code>npi_match_result</code> contract (additive, so existing callers keep working). Writing it with runnable examples caught that the rules differ in what they take: <code><a href="../reference/middle_agreement.html">middle_agreement()</a></code> compares token lists from <code><a href="../reference/middle_tokens.html">middle_tokens()</a></code>, not name strings, and <code><a href="../reference/license_agreement.html">license_agreement()</a></code> takes a number and a state per side. The appendix now says so, because an example that does not run is worse than no example.</li>
+<li>
+<strong>The standards assessment is a table, not just prose.</strong> <code>srr/verdict-ledger.csv</code> carries one row per individual standard: the set, the subsection, the verdict, which tag carries it and which file to read. <code>srr/standards-compliance.md</code> counts from it rather than from a judgement recorded in prose.</li>
+<li>
+<strong><code>tests/testthat/test-srr-verdict-ledger.R</code></strong> keeps that ledger honest: it regenerates every verdict from the tags in the source and fails on any disagreement, so the ledger cannot become a stale claim. Its first version failed for a reason worth keeping, recorded in the file: the verdict label <code>"NA"</code> is a value, and <code><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv()</a></code> cannot tell it from a missing one, so every not-applicable row read back as absent. That is this package’s own subject matter turning up in its own test fixture.</li>
+<li>README gains a “rOpenSci statistical standards” section with the per-standards-set table and the submission recommendation, and three rows in the surface table for the missing-value policy, the input layer and the result object.</li>
+<li>README gains “What this re-implements, and what is original” (the primitives are established linkage practice; the refusals are what is ours), “Compared with an edit-distance matcher”, and a “Life cycle” statement.</li>
 <li>
 <code>GRADUATION_YEAR_BANDS</code> states that its unit is a whole calendar year, that a band boundary is not a date boundary, and why no argument accepts a month.</li>
 </ul></div>

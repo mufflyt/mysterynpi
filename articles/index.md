@@ -6,6 +6,8 @@
   matcher](https://mufflyt.github.io/mysterynpi/articles/comparison-with-alternatives.md):
 - [End-to-end NPPES matching: a roster to NPIs with
   match_npi()](https://mufflyt.github.io/mysterynpi/articles/end-to-end-nppes-matching.md):
+- [Appendix: missing values, input shapes, and the result
+  object](https://mufflyt.github.io/mysterynpi/articles/missing-values-inputs-and-results.md):
 - [Appendix: the nickname policy, and the ablation that decided
   it](https://mufflyt.github.io/mysterynpi/articles/nickname-policy.md):
 - [Resolving a roster to

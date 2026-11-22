@@ -36,6 +36,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/comparison-with-alternatives.html">Compared with an edit-distance matcher</a></li>
     <li><a class="dropdown-item" href="articles/end-to-end-nppes-matching.html">End-to-end NPPES matching: a roster to NPIs with match_npi()</a></li>
+    <li><a class="dropdown-item" href="articles/missing-values-inputs-and-results.html">Appendix: missing values, input shapes, and the result object</a></li>
     <li><a class="dropdown-item" href="articles/nickname-policy.html">Appendix: the nickname policy, and the ablation that decided it</a></li>
     <li><a class="dropdown-item" href="articles/resolving-a-roster.html">Resolving a roster to NPIs</a></li>
     <li><a class="dropdown-item" href="articles/roster-benchmark.html">The roster benchmark: 190 labeled pairs, and what they measure</a></li>
@@ -245,6 +246,22 @@
 </td>
 </tr>
 <tr>
+<td>missing and undefined</td>
+<td>
+<code>na_action = c("uninformative", "warn", "error")</code> on all eight agreement rules; <code><a href="reference/is_undefined_number.html">is_undefined_number()</a></code>, <code><a href="reference/finite_or_na.html">finite_or_na()</a></code> — absence decides nothing by default, and <code>NaN</code>/<code>Inf</code> are kept distinct from a value nobody recorded. Imputation is refused; see <code><a href="articles/missing-values-inputs-and-results.html">vignette("missing-values-inputs-and-results")</a></code>
+</td>
+</tr>
+<tr>
+<td>input shapes</td>
+<td>
+<code><a href="reference/as_linkage_table.html">as_linkage_table()</a></code>, <code><a href="reference/read_name_column.html">read_name_column()</a></code>, <code><a href="reference/reject_list_columns.html">reject_list_columns()</a></code>, <code><a href="reference/check_scalar.html">check_scalar()</a></code>, <code><a href="reference/affirm_unique_index.html">affirm_unique_index()</a></code> — <code>data.frame</code>/<code>tbl_df</code>/<code>data.table</code>/named matrix in, one conversion at the boundary, and every lossy conversion says what it cost</td>
+</tr>
+<tr>
+<td>the result object</td>
+<td>
+<code><a href="reference/match_npi.html">match_npi()</a></code> returns an <code>npi_match_result</code> with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and <code><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs()</a></code>; <code>summary()$statistics</code> carries a <code>denominator</code> column and <code>summary()$columns</code> the class, storage mode and missing count per column. No <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method, on purpose</td>
+</tr>
+<tr>
 <td>contracts</td>
 <td>
 <code><a href="reference/assert_middle_agreement_contract.html">assert_middle_agreement_contract()</a></code> and one per agreement rule</td>
@@ -364,6 +381,71 @@
 <strong>Deliberately out of scope, and not planned:</strong> blended scoring, probabilistic weights, candidate-generation policy per dataset, and anything that decides what a study may claim. <code>DESCRIPTION</code> states this boundary; it is a design position, not a backlog.</li>
 <li>
 <strong>Not yet 1.0</strong> because the <code><a href="reference/match_npi.html">match_npi()</a></code> surface is younger than the rules it composes. Reaching 1.0 means that surface stops gaining arguments, not that the rules change.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="ropensci-statistical-standards">rOpenSci statistical standards<a class="anchor" aria-label="anchor" href="#ropensci-statistical-standards"></a>
+</h2>
+<p>Assessed against the rOpenSci statistical software standards for General, Exploratory Data Analysis, Regression and Time Series. <code>srr::srr_stats_pre_submit()</code> reports every applicable standard documented: <strong>102 complied with, 105 not applicable, none missing</strong>, across all 205 individual standard identifiers.</p>
+<table class="table">
+<colgroup>
+<col width="13%">
+<col width="17%">
+<col width="17%">
+<col width="17%">
+<col width="17%">
+<col width="17%">
+</colgroup>
+<thead><tr>
+<th>standards set</th>
+<th align="right">complied</th>
+<th align="right">not viable</th>
+<th align="right">not applicable</th>
+<th align="right">total</th>
+<th align="right">proportion</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>General</td>
+<td align="right">59</td>
+<td align="right">0</td>
+<td align="right">9</td>
+<td align="right">68</td>
+<td align="right">86.8%</td>
+</tr>
+<tr>
+<td>Exploratory Data Analysis</td>
+<td align="right">25</td>
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">34</td>
+<td align="right">73.5%</td>
+</tr>
+<tr>
+<td>Regression and Supervised Learning</td>
+<td align="right">12</td>
+<td align="right">6</td>
+<td align="right">30</td>
+<td align="right">48</td>
+<td align="right">25.0%</td>
+</tr>
+<tr>
+<td>Time Series</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">48</td>
+<td align="right">55</td>
+<td align="right">7.3%</td>
+</tr>
+</tbody>
+</table>
+<p>Exploratory Data Analysis is the submission category: four of its six subsections are complete, and those four are the ones that describe what this package does. Regression is not viable, since a formula interface, a model object, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and a fitted-versus-residual plot are all out of scope for a rules engine that fits nothing, and they are that standard set’s centre rather than its periphery.</p>
+<p>The refusals are the interesting part of the assessment and each is tagged with its reasoning rather than left as an absence: imputation (<code>G2.14c</code>), a formula interface (<code>RE1.0</code>), any plot method (<code>EA5.x</code>, <code>RE6.0</code>, <code>TS5.0</code>), and an edit-distance comparison function, which this package’s own <code>test-no-fuzzy.R</code> refused even though it existed to argue <em>against</em> edit distance.</p>
+<ul>
+<li>
+<code>srr/standards-compliance.md</code> — the full assessment, with a per-subsection table and the evidence for each verdict.</li>
+<li>
+<code>srr/verdict-ledger.csv</code> — one row per standard: verdict, which tag carries it, and which file to read. <code>tests/testthat/test-srr-verdict-ledger.R</code> keeps it from drifting out of step with the tags.</li>
 </ul>
 </div>
 <div class="section level2">

@@ -45,8 +45,9 @@ duplicate_differences <- function(df, key, ignore = character(0)) {
          call. = FALSE)
   }
   cols <- setdiff(names(df), c(key, ignore))
-  k <- do.call(paste, c(unname(df[key]), list(sep = "\r")))
-  k[Reduce(`|`, lapply(df[key], is.na))] <- NA    # an absent key groups nothing
+  # key_paste() is injective (length-prefixed fields): plain paste(sep="\r")
+  # let two different key tuples sharing pasted bytes group as duplicates.
+  k <- key_paste(df, key)
   dup_keys <- unique(k[!is.na(k) & (duplicated(k) | duplicated(k, fromLast = TRUE))])
   out <- lapply(sort(dup_keys), function(kv) {
     g <- df[!is.na(k) & k == kv, , drop = FALSE]

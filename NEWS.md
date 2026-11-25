@@ -1,3 +1,27 @@
+# mysterynpi 0.12.1
+
+* **The injective `key_paste()` encoding now covers every multi-column key
+  comparison in the package, and `count_rivals()` no longer propagates `NA`
+  from an unrecorded veto.** `key_paste()`'s length-prefixed fields were
+  introduced in 0.11.1 for `join_ledger.R`; two other sites still hand-rolled
+  `paste(sep = "\\r")` and inherited the same collision class -- two
+  different tuples whose pasted bytes coincide:
+
+  * `duplicate_differences()` grouped registry rows by pasted key, so
+    `("a\rb", "c")` and `("a", "b\rc")` reported as duplicates of each
+    other. It now calls `key_paste()` directly.
+
+  * `award_contested()` compared candidate signatures the same way; a
+    collision manufactured a tie that `strict_dominance` exists to refuse,
+    silently quarantining a record the evidence did separate. Signatures now
+    come from `key_paste()` (with `NA` components keeping `paste()`'s
+    grouping behaviour).
+
+  * `count_rivals()` computed `is_rival` as
+    `is.na(candidate) | vetoed != candidate` -- an `NA` `vetoed` made the
+    whole expression `NA`, and `aggregate(sum)` returned `NA` `n_rivals`
+    rather than a count. An unrecorded veto cannot be the winner, so it now
+    counts as a rival explicitly.
 # mysterynpi 0.12.0
 
 ## New features

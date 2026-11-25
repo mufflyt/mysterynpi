@@ -65,3 +65,18 @@ test_that("it reads the Winkler household duplicates", {
                     c("surname", "given", "middle", "house", "street",
                       "<identical>")))
 })
+
+test_that("a literal CR in key values cannot weld two tuples into one group", {
+  # paste(sep="\\r") made ("a\\rb","c") and ("a","b\\rc") the same key;
+  # key_paste()'s length-prefixed encoding keeps them distinct.
+  df <- data.frame(k1 = c("a\rb", "a"), k2 = c("c", "b\rc"),
+                   v = 1:2, stringsAsFactors = FALSE)
+  expect_identical(nrow(duplicate_differences(df, key = c("k1", "k2"))), 0L)
+  # ...while genuine duplicates still report, CR and all.
+  df2 <- data.frame(k1 = c("a\rb", "a\rb"), k2 = c("c", "c"),
+                    v = c("x", "y"), stringsAsFactors = FALSE)
+  d <- duplicate_differences(df2, key = c("k1", "k2"))
+  expect_identical(nrow(d), 1L)
+  expect_identical(d$column, "v")
+  expect_identical(d$values, "x | y")
+})

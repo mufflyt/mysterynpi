@@ -247,3 +247,31 @@ test_that("other short NAME_NOISE tokens (PA, OD, DC, MS, LM, BA) stay unconditi
   expect_identical(parse_person("John Smith DC")$last, "SMITH")
   expect_identical(parse_person("John Smith LM")$last, "SMITH")
 })
+
+test_that("fellowship and international-degree credentials never land in a name slot", {
+  # THE DEFECT: FAAP / FACP / MBBS were absent from NAME_NOISE, so a trailing
+  # credential became the surname, and a credential after a comma made the
+  # whole string look like a reversed "LAST, FIRST" name.
+  for (cred in c("FAAP", "FACP", "MBBS", "faap", "F.A.C.P.", "M.B.B.S.")) {
+    trailing <- parse_person(paste("John Smith", cred))
+    expect_identical(trailing$first, "JOHN", info = cred)
+    expect_identical(trailing$last, "SMITH", info = cred)
+    comma <- parse_person(paste0("John Smith, ", cred))
+    expect_identical(comma$first, "JOHN", info = cred)
+    expect_identical(comma$last, "SMITH", info = cred)
+  }
+  stacked <- parse_person("Jane Doe, MD, FACP")
+  expect_identical(stacked$first, "JANE")
+  expect_identical(stacked$last, "DOE")
+  # a genuine reversal carrying the credential still reverses correctly
+  reversed <- parse_person("Smith, John, MBBS")
+  expect_identical(reversed$first, "JOHN")
+  expect_identical(reversed$last, "SMITH")
+})
+
+test_that("the new credential tokens match whole tokens only, never substrings", {
+  # surnames that merely CONTAIN the letters must survive intact
+  expect_identical(parse_person("Anna Mbbsen")$last, "MBBSEN")
+  expect_identical(parse_person("Tom Facpworth")$last, "FACPWORTH")
+  expect_identical(strip_name_noise("Faapman Jones"), "Faapman Jones")
+})

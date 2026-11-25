@@ -84,6 +84,7 @@ reference:
   - graduation_year_band
   - GRADUATION_YEAR_BANDS
   - taxonomy_consistent
+  - taxonomy_allowlist_consistent
   - taxonomy_tiebreak_rank
   - taxonomy_family_pattern
   - TAXONOMY_FAMILY_PATTERNS
@@ -123,6 +124,9 @@ reference:
   contents:
   - match_npi
   - MATCH_NPI_ATTRIBUTES
+  - npi_match_evidence
+  - grade_npi_match_confidence
+  - NPI_MATCH_CONFIDENCE_LEVELS
 - title: NPI
   contents:
   - npi_luhn_ok

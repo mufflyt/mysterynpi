@@ -70,13 +70,18 @@ taxonomy_family_pattern <- function(specialty) {
 #'
 #' @param taxonomy character vector of pipe-concatenated NUCC codes (empty
 #'   segments tolerated).
-#' @param expected character vector of pipe-separated prefix patterns, e.g.
+#' @param expected character vector of pipe-separated prefix patterns, the
+#'   same length as `taxonomy` or length 1 (broadcast), e.g.
 #'   from [taxonomy_family_pattern()].
 #' @return logical vector: `TRUE` / `FALSE` / `NA`.
 #' @family taxonomy-agreement
 #' @export
 taxonomy_consistent <- function(taxonomy, expected) {
-  n <- max(length(taxonomy), length(expected))
+  # A pattern broadcast across zero records is zero verdicts, not one NA;
+  # otherwise equal lengths or scalar broadcast -- rep_len() silently paired
+  # record 3 with record 1's expectation.
+  if (!length(taxonomy) && length(expected) <= 1L) return(logical(0))
+  n <- .nm_pair_len(taxonomy, expected, c("taxonomy", "expected"))
   taxonomy <- rep_len(as.character(taxonomy), n)
   expected <- rep_len(as.character(expected), n)
   mapply(function(tx, ex) {

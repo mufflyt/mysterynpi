@@ -40,3 +40,17 @@ test_that("rank is for ties only: caller ordering keeps it after stronger axes",
   win <- d[order(-d$recency, d$rank), ][1, "id"]
   expect_identical(win, "a")
 })
+
+test_that("taxonomy_consistent refuses non-broadcast length mismatches", {
+  # Record 3 used to be judged against record 1's expectation.
+  expect_error(taxonomy_consistent(c("207V00000X", "207V00000X", "1223X"),
+                                   c("207V", "207Q")),
+               "Refusing to recycle")
+  # A pattern broadcast across zero records is zero verdicts, not one NA.
+  expect_identical(taxonomy_consistent(character(0), "207V"), logical(0))
+  expect_identical(taxonomy_allowlist_consistent(character(0), "207V"),
+                   logical(0))
+  # Scalar broadcast still works.
+  expect_identical(taxonomy_consistent(c("207V00000X", "207Q00000X"), "207V"),
+                   c(TRUE, FALSE))
+})

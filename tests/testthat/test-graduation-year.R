@@ -60,3 +60,18 @@ test_that("a caller may supply its own calibration, as with NICKNAME_EDGES", {
   expect_identical(graduation_year_agreement(2015, 2016, bands = strict), "uninformative")
   expect_identical(graduation_year_agreement(2015, 2016), "corroborates")
 })
+
+test_that("mismatched year vectors are refused, never silently recycled", {
+  # rep_len() used to pair person 3's credentialing year with person 1's
+  # graduation year and return a band nobody asked for.
+  expect_error(graduation_year_band(c(2010, 2011, 2012), c(2010, 2011)),
+               "Refusing to recycle")
+  expect_error(graduation_year_agreement(c(2010, 2011, 2012), c(2010, 2011)),
+               "Refusing to recycle")
+  # Zero records against one is not a broadcast: it fabricated "unknown" rows.
+  expect_error(graduation_year_band(numeric(0), c(2010, 2011)), "empty")
+  # Scalar broadcast and equal lengths still work.
+  expect_identical(graduation_year_band(2010, c(2010, 2011)),
+                   c("same_year", "one_after"))
+  expect_identical(graduation_year_band(numeric(0), numeric(0)), character(0))
+})

@@ -158,6 +158,6 @@ surname_token_table <- function(x, id, strip_alternates = TRUE) {
   # Tokens keep apostrophes ("O'BRIEN") for the agreement layer to dequote,
   # but THIS table is a join key: "O'Brien" and "OBrien" are the same
   # component and must land on the same token or the join silently misses.
-  tok <- gsub("['‘’`]", "", unlist(lst, use.names = FALSE))
+  tok <- gsub("['\u2018\u2019`]", "", unlist(lst, use.names = FALSE))
   data.frame(id = rep(id, n), token = tok, stringsAsFactors = FALSE)
 }

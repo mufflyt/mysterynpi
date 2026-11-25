@@ -105,3 +105,25 @@ test_that("a full tie on every key column: greedy hands it to the lowest id, str
   w <- award_contested(cc, "greedy")
   expect_identical(w$id, "A")   # "A" sorts before "B"
 })
+
+test_that("count_rivals does not propagate NA from an unrecorded veto", {
+  # vetoed=NA used to make is_rival NA, and aggregate(sum) returned NA.
+  v <- mk(id = c("A", "A", "B"), vetoed = c("n1", NA, "n2"))
+  w <- mk(id = c("A", "B"), candidate = c("n1", "n9"))
+  r <- count_rivals(v, w)
+  expect_identical(r$n_rivals, c(1L, 1L))   # A: only the NA veto counts
+})
+
+test_that("award_contested signatures cannot collide across a literal CR", {
+  # paste(sep="\\r") fused ("x\\ry","z") and ("x","y\\rz") into one signature,
+  # manufacturing the tie strict_dominance exists to refuse.
+  cc <- mk(id = c("p", "q"), candidate = c("n1", "n1"),
+           r1 = c("x\ry", "x"), r2 = c("z", "y\rz"), rank = 1:2)
+  w <- award_contested(cc, "strict_dominance", key = c("r1", "r2"))
+  expect_identical(nrow(w), 1L)             # distinct signatures: one wins
+  # A REAL tie still refuses, CR-free signatures included.
+  cc2 <- mk(id = c("p", "q"), candidate = c("n1", "n1"),
+            r1 = c("x", "x"), r2 = c("z", "z"), rank = 1:2)
+  expect_identical(nrow(award_contested(cc2, "strict_dominance",
+                                      key = c("r1", "r2"))), 0L)
+})

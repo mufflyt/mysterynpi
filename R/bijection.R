@@ -33,7 +33,10 @@ count_rivals <- function(vetoed, won, id = "id") {
   }
   v <- unique(vetoed[, c(id, "vetoed")])
   j <- merge(v, won[, c(id, "candidate")], by = id, all.x = TRUE)
-  j$is_rival <- is.na(j$candidate) | j$vetoed != j$candidate
+  # is.na() guards keep NA components from propagating NA into n_rivals:
+  # an unrecorded vetoed candidate cannot be the winner, so it counts.
+  j$is_rival <- is.na(j$candidate) | is.na(j$vetoed) |
+    j$vetoed != j$candidate
   agg <- stats::aggregate(list(n_rivals = j$is_rival), by = j[id], FUN = sum)
   agg$n_rivals <- as.integer(agg$n_rivals)
   agg[order(agg[[id]]), , drop = FALSE]
@@ -87,7 +90,10 @@ award_contested <- function(contested, policy = "strict_dominance",
                                  function(k) contested[[k]]),
                           list(method = "radix")))
   cc <- contested[ord, , drop = FALSE]
-  sig <- do.call(paste, c(lapply(key, function(k) cc[[k]]), list(sep = "\r")))
+  # key_paste() is injective: paste(sep="\r") could fuse two different
+  # signature tuples into one, manufacturing a tie strict_dominance refuses.
+  sig <- key_paste(cc, key)
+  sig[is.na(sig)] <- "NA"   # a missing key component still groups, as paste() did
   idx <- split(seq_len(nrow(cc)), cc[[candidate]])
   keep <- unlist(lapply(idx, function(ix) {
     if (length(ix) < 2L) return(integer(0))

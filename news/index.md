@@ -1,5 +1,73 @@
 # Changelog
 
+## mysterynpi 0.11.1
+
+- **[`ledgered_join()`](https://mufflyt.github.io/mysterynpi/reference/ledgered_join.md)
+  no longer loses the unmatched side’s data, and multi-column joins can
+  no longer false-match through
+  [`merge()`](https://rdrr.io/r/base/merge.html)’s internal key paste.**
+  Three defects in the join ledger, found by adversarial probing:
+
+  - When `x` and `y` shared ANY non-key column name,
+    [`merge()`](https://rdrr.io/r/base/merge.html) suffixed the pair
+    (`.x`/`.y`) but the held-out NA-key rows were appended by padding
+    the RAW rows – whose unsuffixed names matched nothing in the
+    template, so every colliding column’s value became `NA`. A `full`
+    join returned an unmatched row that was nothing but missing values
+    while the ledger reported `conserved = TRUE`. Shared column names
+    (`note`, `state`, `name`) are the norm in roster-to-registry joins.
+    Held-out rows are now merged against an empty slice of the opposite
+    side, so [`merge()`](https://rdrr.io/r/base/merge.html) itself
+    assigns the correct suffixed names.
+
+  - `key_paste()` joined key columns with `"\r"` – and so does
+    [`merge()`](https://rdrr.io/r/base/merge.html) internally for
+    MULTI-column keys. Two different tuples, `("a\rb", "c")` and
+    `("a", "b\rc")`, produce the same pasted string on BOTH sides, so
+    the old code counted a match
+    [`merge()`](https://rdrr.io/r/base/merge.html) also manufactured: a
+    silent wrong join with `conserved = TRUE`. `key_paste()` now
+    length-prefixes each field (`"<bytes>:<value>"`), which is injective
+    for any bytes a value can contain, and multi-column joins merge on
+    that encoding as a single surrogate key before the real key columns
+    are rebuilt by coalescing – reproducing
+    [`merge()`](https://rdrr.io/r/base/merge.html)’s schema exactly
+    (verified row-for-row on all four join kinds, `by.x != by.y`, factor
+    and numeric keys). Single-column joins are unaffected: no paste,
+    exact comparison.
+
+  - [`surname_token_table()`](https://mufflyt.github.io/mysterynpi/reference/surname_token_table.md)
+    emitted `"O'BRIEN"` and `"OBRIEN"` as different join tokens, so
+    apostrophe variants could never join – the exact defect class the
+    package’s own key doctrine exists to prevent. The table now strips
+    quote characters;
+    [`surname_tokens()`](https://mufflyt.github.io/mysterynpi/reference/surname_tokens.md)
+    itself is unchanged for the agreement layer, which dequotes anyway.
+
+  - [`clerical_sample()`](https://mufflyt.github.io/mysterynpi/reference/clerical_sample.md)
+    left `.Random.seed` in
+    [`globalenv()`](https://rdrr.io/r/base/environment.html) when none
+    existed before, contradicting its “does not perturb the caller’s
+    randomness” contract. It now removes the seed it created.
+
+- **[`middle_agreement()`](https://mufflyt.github.io/mysterynpi/reference/middle_agreement.md)
+  caps concatenated-initials corroboration at three characters.**
+  `"MARY"` against `MARK ANDREW ROBERT YOLAND` mapped perfectly onto the
+  four middle initials and corroborated – a real name winning a veto on
+  coincidence. Every recorded case the path exists for is a
+  two-character concatenation (`VL`, `MJ`, `CJ`); three keeps genuine
+  `JRL`-style recordings. Three-letter collisions remain possible and
+  are documented as the accepted price.
+
+- **[`resolve_one_to_one()`](https://mufflyt.github.io/mysterynpi/reference/resolve_one_to_one.md)
+  counts now report records as well as rows.** The
+  resolved/quarantined/unmatched frames are row-level evidence and can
+  overlap on `id` – a record resolved on one row can still appear in
+  `unmatched` through a sibling row carrying no candidate. `counts`
+  gains `records_total`, `records_resolved`, `records_quarantined` and
+  `records_unmatched` so “did every person get an answer” is a count,
+  not a frame-algebra exercise.
+
 ## mysterynpi 0.11.0
 
 ### New features

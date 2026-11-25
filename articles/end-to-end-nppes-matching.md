@@ -300,7 +300,7 @@ result_db$run_manifest[c("backend", "table", "package_version", "nickname_policy
 #> [1] "npidata"
 #> 
 #> $package_version
-#> [1] "0.11.0"
+#> [1] "0.11.1"
 #> 
 #> $nickname_policy
 #> [1] "nickname-policy-2026-09-07"

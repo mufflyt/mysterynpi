@@ -68,6 +68,14 @@ distinguish a tie within a record from a candidate claimed by multiple
 records. With \`output = "table"\`, the \`resolved\` data frame carrying
 the other three as attributes.
 
+The frames are ROW-level and may overlap on \`id\`: \`unmatched\` holds
+every row lacking a candidate, so a record resolved on one evidence row
+can still appear there through a sibling row. \`counts\` therefore
+reports both rows (\`resolved\`, \`quarantined\`, \`unmatched\`) and
+distinct records (\`records_resolved\`, \`records_quarantined\`,
+\`records_unmatched\`, \`records_total\`) – check the record counts
+before concluding a person went unanswered.
+
 ## Details
 
 Duplicate evidence rows for the same record-candidate pair are collapsed

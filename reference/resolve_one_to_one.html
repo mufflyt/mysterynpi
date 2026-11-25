@@ -17,7 +17,7 @@ score or first row. This is deliberately not a maximum-weight assignment."></hea
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,6 +120,13 @@ are returned in `quarantined` with status `"yielded_to_eligible"`.</p></dd>
   within a record from a candidate claimed by multiple records. With
   `output = "table"`, the `resolved` data frame carrying the other three as
   attributes.</p>
+<p>The frames are ROW-level and may overlap on `id`: `unmatched` holds every
+  row lacking a candidate, so a record resolved on one evidence row can
+  still appear there through a sibling row. `counts` therefore reports both
+  rows (`resolved`, `quarantined`, `unmatched`) and distinct records
+  (`records_resolved`, `records_quarantined`, `records_unmatched`,
+  `records_total`) – check the record counts before concluding a person
+  went unanswered.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

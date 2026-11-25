@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,14 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.0" id="mysterynpi-0110">mysterynpi 0.11.0<a class="anchor" aria-label="anchor" href="#mysterynpi-0110"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-11-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-11-0"></a></h3>
+<ul><li>
+<strong><code><a href="../reference/phrase_key.html">phrase_key()</a></code></strong>: the phrase-equality join key the package did not have. <code><a href="../reference/normalize_string.html">normalize_string()</a></code> is a fold, not a key (it keeps <code>"ST. MARY"</code> intact); <code><a href="../reference/name_key.html">name_key()</a></code> keeps punctuation and drops parenthesised alternates; <code><a href="../reference/compact_name_key.html">compact_name_key()</a></code> glues every word boundary away (<code>"VAN DER BERG"</code> -&gt; <code>"VANDERBERG"</code>). <code><a href="../reference/phrase_key.html">phrase_key()</a></code> is the contract between them: upper-case ASCII words separated by single spaces, punctuation demoted to a separator, and apostrophes <em>deleted</em> before that pass so <code>"O'BRIEN"</code> and <code>"OBRIEN"</code> – one surname recorded two ways – share a key instead of counting as a disagreement. Curly, modifier and okina apostrophes close the token too. Parenthesised text is data here, not an alternate name, which is what separates it from <code><a href="../reference/name_key.html">name_key()</a></code>. <code>NA</code> in, <code>NA</code> out; a phrase with no keyable characters is <code>NA</code>, never <code>""</code>. Origin: three downstream pipelines each carried a private copy of this contract and they drifted apart twice in one week – first an OS-dependent accent fold, then the apostrophe split.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.10.0" id="mysterynpi-0100">mysterynpi 0.10.0<a class="anchor" aria-label="anchor" href="#mysterynpi-0100"></a></h2>
 <p>Every srr standard this package can meet is now met <em>and tagged</em>, rather than assessed as reachable. <code>srr::srr_stats_pre_submit()</code> reports all applicable standards documented: 102 complied with, 105 not applicable, none missing. The full assessment, with a verdict for each of the 205 individual standards and a per-subsection table, is in <code>srr/standards-compliance.md</code>.</p>

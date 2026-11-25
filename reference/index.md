@@ -21,6 +21,9 @@ Keys where absence is never read as a value.
   tokens.
 - [`compact_name_key()`](https://mufflyt.github.io/mysterynpi/reference/compact_name_key.md)
   : Letters-only compact key for equality joins
+- [`phrase_key()`](https://mufflyt.github.io/mysterynpi/reference/phrase_key.md)
+  : Phrase join key: fold, apostrophes closed, punctuation demoted to
+  separator
 - [`blocking_key()`](https://mufflyt.github.io/mysterynpi/reference/blocking_key.md)
   : Canonical blocking key, by named mode
 - [`blocking_spec()`](https://mufflyt.github.io/mysterynpi/reference/blocking_spec.md)

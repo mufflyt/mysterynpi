@@ -1,5 +1,31 @@
 # Changelog
 
+## mysterynpi 0.11.0
+
+### New features
+
+- **[`phrase_key()`](https://mufflyt.github.io/mysterynpi/reference/phrase_key.md)**:
+  the phrase-equality join key the package did not have.
+  [`normalize_string()`](https://mufflyt.github.io/mysterynpi/reference/normalize_string.md)
+  is a fold, not a key (it keeps `"ST. MARY"` intact);
+  [`name_key()`](https://mufflyt.github.io/mysterynpi/reference/name_key.md)
+  keeps punctuation and drops parenthesised alternates;
+  [`compact_name_key()`](https://mufflyt.github.io/mysterynpi/reference/compact_name_key.md)
+  glues every word boundary away (`"VAN DER BERG"` -\> `"VANDERBERG"`).
+  [`phrase_key()`](https://mufflyt.github.io/mysterynpi/reference/phrase_key.md)
+  is the contract between them: upper-case ASCII words separated by
+  single spaces, punctuation demoted to a separator, and apostrophes
+  *deleted* before that pass so `"O'BRIEN"` and `"OBRIEN"` – one surname
+  recorded two ways – share a key instead of counting as a disagreement.
+  Curly, modifier and okina apostrophes close the token too.
+  Parenthesised text is data here, not an alternate name, which is what
+  separates it from
+  [`name_key()`](https://mufflyt.github.io/mysterynpi/reference/name_key.md).
+  `NA` in, `NA` out; a phrase with no keyable characters is `NA`, never
+  `""`. Origin: three downstream pipelines each carried a private copy
+  of this contract and they drifted apart twice in one week – first an
+  OS-dependent accent fold, then the apostrophe split.
+
 ## mysterynpi 0.10.0
 
 Every srr standard this package can meet is now met *and tagged*, rather

@@ -169,12 +169,22 @@ middle_agreement <- function(a_tokens, b_tokens, na_action = NA_ACTIONS) {
 #' onto distinct tokens on the other side. Order-preserving, so `"VL"` matches
 #' `VELMA LAURITZEN` and not `LAURITZEN VELMA`.
 #'
+#' THE LENGTH CAP IS THE COINCIDENCE CONTROL. Every recorded case this exists
+#' for is a TWO-character concatenation (`"VL"`, `"MJ"`, `"CJ"`); three keeps
+#' plausible `"JRL"`-style recordings. At four the surface inverts: four-letter
+#' tokens are overwhelmingly real names, and a four-token middle name whose
+#' initials spell one is a coincidence waiting to happen -- `"MARY"` against
+#' `MARK ANDREW ROBERT YOLAND` maps perfectly and would corroborate a veto
+#' away. Three-letter collisions (`"ANN"` vs `ALICE NANCY NELL`) remain
+#' possible; they are strictly rarer than the four-token case and the price
+#' of keeping genuine three-initial recordings.
+#'
 #' @keywords internal
 #' @noRd
 initials_string_matches <- function(short, toks) {
   if (length(short) != 1L) return(FALSE)
   ch <- strsplit(short, "")[[1]]
-  if (length(ch) < 2L || length(ch) > 4L || length(toks) < length(ch)) return(FALSE)
+  if (length(ch) < 2L || length(ch) > 3L || length(toks) < length(ch)) return(FALSE)
   j <- 1L
   for (k in seq_along(ch)) {
     hit <- FALSE

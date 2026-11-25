@@ -8,6 +8,15 @@ test_that("surname components drop particles and short tokens", {
   expect_identical(MIN_SURNAME_TOKEN, 4L)        # pinned by value
 })
 
+test_that("surname_token_table joins apostrophe variants onto one token", {
+  # The table is a join key: "O'Brien" and "OBrien" are the same component.
+  # Tokens retain apostrophes for the agreement layer, so the table must
+  # strip them itself or the join silently misses.
+  tab <- surname_token_table(c("O'Brien", "OBrien", "D\u2019Angelo"),
+                             c("a", "b", "c"))
+  expect_identical(tab$token, c("OBRIEN", "OBRIEN", "DANGELO"))
+})
+
 test_that("middle tokens keep initials; given tokens drop them", {
   expect_identical(middle_tokens("BETH HARVEY")[[1]], c("BETH", "HARVEY"))
   expect_identical(middle_tokens("H")[[1]], "H")

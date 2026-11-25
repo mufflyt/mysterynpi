@@ -14,6 +14,17 @@ test_that("concatenated initials are initials, and order matters", {
   expect_identical(ag("VL", "LAURITZEN VELMA"), "conflicts")
 })
 
+test_that("a real name cannot corroborate on coincidental initials", {
+  # "MARY" is a name, not an initials string: it maps perfectly onto the
+  # initials of MARK ANDREW ROBERT YOLAND, and at four characters that
+  # coincidence is likely enough to veto the veto. The cap is three.
+  expect_identical(ag("MARY", "MARK ANDREW ROBERT YOLAND"), "conflicts")
+  expect_identical(ag("JOAN", "JACQUELYN OLIVIA ANNE NELL"), "conflicts")
+  # the boundary still admits a genuine three-initial recording
+  expect_identical(ag("JRL", "JOHN RAYMOND LEE"), "corroborates")
+  expect_identical(ag("VL", "VELMA LAURITZEN"), "corroborates")
+})
+
 test_that("the veto still vetoes", {
   expect_identical(ag("JANE", "DENISE"), "conflicts")
   expect_identical(ag("MARILYN", "F"), "conflicts")

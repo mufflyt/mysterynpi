@@ -38,6 +38,52 @@ test_that("absence never joins: NA keys meet nothing, but are kept and counted",
   expect_true(inner$ledger$conserved)
 })
 
+test_that("unmatched NA-key rows keep their values when column names collide", {
+  # merge() suffixes shared non-key names (.x/.y); the held-out rows must be
+  # mapped onto those suffixed names or every colliding value is lost.
+  x <- data.frame(id = c("a", "b"), k = c("K1", "K2"),
+                  note = c("x-a", "x-b"), stringsAsFactors = FALSE)
+  y <- data.frame(id = c("c", "d"), k = c("K1", NA),
+                  note = c("y-c", "y-d"), stringsAsFactors = FALSE)
+  j <- ledgered_join(x, y, by = "k", kind = "full",
+                     relationship = "many-to-many")
+  na_y <- j$result[is.na(j$result$id.x) & !is.na(j$result$id.y), ]
+  expect_identical(na_y$id.y, "d")
+  expect_identical(na_y$note.y, "y-d")
+  x2 <- data.frame(id = c("a", "b"), k = c("K1", NA),
+                   note = c("x-a", "x-b"), stringsAsFactors = FALSE)
+  y2 <- data.frame(id = c("c", "d"), k = c("K1", "K3"),
+                   note = c("y-c", "y-d"), stringsAsFactors = FALSE)
+  jl <- ledgered_join(x2, y2, by = "k", kind = "left",
+                      relationship = "many-to-many")
+  na_x <- jl$result[is.na(jl$result$k), ]
+  expect_identical(na_x$id.x, "b")
+  expect_identical(na_x$note.x, "x-b")
+  expect_true(is.na(na_x$id.y))
+})
+
+test_that("multi-column keys cannot collide through merge()'s internal paste", {
+  # merge() joins multi-column keys by paste()-ing them with "\r"; these two
+  # DIFFERENT tuples paste to the same string and false-matched before the
+  # surrogate-key path. They must stay unmatched and conserved.
+  x <- data.frame(k1 = "a\rb", k2 = "c", v = "x", stringsAsFactors = FALSE)
+  y <- data.frame(k1 = "a", k2 = "b\rc", w = "y", stringsAsFactors = FALSE)
+  j <- ledgered_join(x, y, by = c("k1", "k2"), kind = "full",
+                     relationship = "many-to-many")
+  expect_true(j$ledger$conserved)
+  expect_identical(j$ledger$matched_pairs, 0)
+  expect_identical(nrow(j$result), 2L)
+  # and a genuine multi-column match still works through the same path
+  x2 <- data.frame(k1 = c("K1", "K2"), k2 = c("p", "q"), v = 1:2,
+                   stringsAsFactors = FALSE)
+  y2 <- data.frame(k1 = c("K1", "K3"), k2 = c("p", "r"), w = 3:4,
+                   stringsAsFactors = FALSE)
+  j2 <- ledgered_join(x2, y2, by = c("k1", "k2"), kind = "full",
+                      relationship = "many-to-many")
+  expect_identical(j2$result$v[j2$result$k1 == "K1" & j2$result$k2 == "p"], 1L)
+  expect_true(j2$ledger$conserved)
+})
+
 test_that("the entry catches an engine that matched NA to NA", {
   # base::merge()'s default is exactly that defect -- and it even FANS OUT
   # on shared absence: one NA-key x row against two NA-key y rows becomes

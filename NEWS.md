@@ -1,3 +1,21 @@
+# mysterynpi 0.12.0
+
+## New features
+
+* **Post-match confidence grading.** `npi_match_evidence()` builds canonical
+  surname/given/state/city evidence for one roster-candidate pair per row,
+  and `grade_npi_match_confidence()` maps that evidence to the stable receipt
+  vocabulary `high` / `medium` / `low` / `ambiguous` / `unmatched`. The grader
+  deliberately happens after resolution: it annotates the evidence behind an
+  accepted candidate and never overrides `match_npi()`'s accept/review
+  decision. Given-name credit uses `given_name_agreement()`'s named rules, so
+  a recorded bare initial is distinguishable from two full names that merely
+  share a first letter.
+* **`taxonomy_allowlist_consistent()`**: a thin, documented wrapper for the
+  exact-code/prefix allowlist case downstream NPPES scripts kept hand-rolling.
+  It inspects the full pipe-concatenated taxonomy string through
+  `taxonomy_consistent()` rather than only the first code.
+
 # mysterynpi 0.11.1
 
 * **`ledgered_join()` no longer loses the unmatched side's data, and

@@ -178,6 +178,14 @@ resolve_ordered_classes <- function(candidates, id = "id",
 #'   within a record from a candidate claimed by multiple records. With
 #'   `output = "table"`, the `resolved` data frame carrying the other three as
 #'   attributes.
+#'
+#'   The frames are ROW-level and may overlap on `id`: `unmatched` holds every
+#'   row lacking a candidate, so a record resolved on one evidence row can
+#'   still appear there through a sibling row. `counts` therefore reports both
+#'   rows (`resolved`, `quarantined`, `unmatched`) and distinct records
+#'   (`records_resolved`, `records_quarantined`, `records_unmatched`,
+#'   `records_total`) -- check the record counts before concluding a person
+#'   went unanswered.
 #' @export
 #' @examples
 #' candidates <- data.frame(
@@ -257,6 +265,16 @@ resolve_one_to_one <- function(candidates, id = "id", candidate = "candidate",
       unmatched = as.integer(nrow(res$unmatched))
     )
   }
+  # The three frames are ROW-level and need not partition records: a record
+  # resolved on one evidence row can still appear in `unmatched` through a
+  # sibling row that carried no candidate. The counts above are rows; these
+  # are distinct records, so a caller checking "did every person get an
+  # answer" reads records_*, not rows.
+  res$counts <- c(res$counts,
+    records_total = as.integer(length(unique(candidates[[id]]))),
+    records_resolved = as.integer(length(unique(res$resolved[[id]]))),
+    records_quarantined = as.integer(length(unique(res$quarantined[[id]]))),
+    records_unmatched = as.integer(length(unique(res$unmatched[[id]]))))
   if (output == "list") return(res)
   out <- res$resolved
   attr(out, "quarantined") <- res$quarantined

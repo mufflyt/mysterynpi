@@ -27,9 +27,72 @@
 # =============================================================================
 
 key_paste <- function(d, cols) {
-  k <- do.call(paste, c(unname(d[cols]), list(sep = "\r")))
+  if (!nrow(d)) return(character(0))  # paste() recycles empty inputs to ">"
+  # Each field is LENGTH-PREFIXED ("<bytes>:<value>") before joining, which
+  # makes the encoding injective: a literal "\r" inside a value cannot fuse
+  # two different key tuples into one string. Plain paste(sep = "\r") could --
+  # ("a\rb", "c") and ("a", "b\rc") produced the same key, and the ledger then
+  # counted matches merge() never made, tripping `conserved` with a message
+  # blaming this package for the caller's data.
+  enc <- lapply(d[cols], function(v) {
+    v <- as.character(v)   # paste() coerced silently; nchar() will not
+    paste0(nchar(v, type = "bytes"), ":", v)
+  })
+  k <- do.call(paste, c(enc, list(sep = "\r")))
   k[Reduce(`|`, lapply(d[cols], is.na))] <- NA
   k
+}
+
+# merge() joins MULTI-column keys by paste()-ing them with "\r" internally,
+# so two different key tuples whose pasted forms coincide FALSE-MATCH:
+# ("a\rb", "c") against ("a", "b\rc") is the measured case, and it produced a
+# clean-looking wrong join. Single-column keys are safe -- no paste, exact
+# comparison -- which is why only the multi-column path needs this. Merging on
+# key_paste()'s injective encoding cannot collide; the real key columns are
+# then rebuilt by coalescing the two sides, reproducing merge()'s schema
+# (by.x names first, then x columns, then y columns).
+.coalesce_key <- function(xv, yv) {
+  if (is.factor(xv) || is.factor(yv)) {
+    lx <- if (is.factor(xv)) levels(xv) else unique(xv[!is.na(xv)])
+    ly <- if (is.factor(yv)) levels(yv) else unique(yv[!is.na(yv)])
+    v <- ifelse(is.na(xv), as.character(yv), as.character(xv))
+    return(factor(v, levels = union(lx, ly)))
+  }
+  miss <- is.na(xv)
+  out <- xv
+  out[miss] <- yv[miss]
+  out
+}
+
+.ledger_merge_multi <- function(xc, yc, bx, by_y, kind) {
+  tmp <- "..ledger_key"
+  while (tmp %in% c(names(xc), names(yc))) tmp <- paste0(".", tmp)
+  xc[[tmp]] <- key_paste(xc, bx)
+  yc[[tmp]] <- key_paste(yc, by_y)
+  out <- merge(xc, yc, by = tmp,
+               all.x = kind %in% c("left", "full"),
+               all.y = kind %in% c("right", "full"))
+  out[[tmp]] <- NULL
+  # Locate each key pair's columns: merge() suffixes any name present on both
+  # sides, and with `by = tmp` every shared name collides.
+  xk <- ynk <- character(length(bx))
+  for (i in seq_along(bx)) {
+    xk[i] <- if (bx[i] %in% names(yc)) paste0(bx[i], ".x") else bx[i]
+    ynk[i] <- if (by_y[i] %in% names(xc)) paste0(by_y[i], ".y") else by_y[i]
+  }
+  keys <- lapply(seq_along(bx), function(i) {
+    .coalesce_key(out[[xk[i]]], out[[ynk[i]]])
+  })
+  names(keys) <- bx
+  out <- out[, setdiff(names(out), c(xk, ynk)), drop = FALSE]
+  out <- cbind(as.data.frame(keys, stringsAsFactors = FALSE), out)
+  # merge() sorted by its internal pasted key, not by the tuple -- re-sort on
+  # the rebuilt columns so row order means the same thing as a real merge.
+  ord <- do.call(order, c(lapply(out[bx], identity),
+                        list(method = "radix", na.last = TRUE)))
+  out <- out[ord, , drop = FALSE]
+  rownames(out) <- NULL
+  out
 }
 
 #' The accounting for one join, from its inputs and its output
@@ -169,21 +232,27 @@ ledgered_join <- function(x, y, by, kind, relationship,
   # absence never joins: hold NA-key rows out, merge the rest
   xn <- x[is.na(kx), , drop = FALSE]; xc <- x[!is.na(kx), , drop = FALSE]
   yn <- y[is.na(ky), , drop = FALSE]; yc <- y[!is.na(ky), , drop = FALSE]
-  out <- merge(xc, yc, by.x = bx, by.y = by_y,
-               all.x = kind %in% c("left", "full"),
-               all.y = kind %in% c("right", "full"), sort = TRUE)
-  pad_to <- function(d, template, key_from, key_to) {
-    names(d)[match(key_from, names(d))] <- key_to
-    for (nm in setdiff(names(template), names(d))) {
-      d[[nm]] <- template[[nm]][rep(NA_integer_, nrow(d))]
-    }
-    d[names(template)]
+  out <- if (length(bx) == 1L) {
+    merge(xc, yc, by.x = bx, by.y = by_y,
+          all.x = kind %in% c("left", "full"),
+          all.y = kind %in% c("right", "full"), sort = TRUE)
+  } else {
+    .ledger_merge_multi(xc, yc, bx, by_y, kind)
   }
+  # Held-out rows are merged against an EMPTY slice of the other side, so
+  # merge() itself assigns the .x/.y-suffixed names it gave the matched rows.
+  # Padding the raw rows instead dropped every colliding column's value: a
+  # shared non-key name like "note" arrives here as "note" but the template
+  # only has "note.x"/"note.y", so the unmatched row's data silently became NA.
   if (kind %in% c("left", "full") && nrow(xn)) {
-    out <- rbind(out, pad_to(xn, out, bx, bx))
+    xa <- merge(xn, yc[0, , drop = FALSE], by.x = bx, by.y = by_y,
+                all.x = TRUE, all.y = FALSE, sort = TRUE)
+    out <- rbind(out, xa[names(out)])
   }
   if (kind %in% c("right", "full") && nrow(yn)) {
-    out <- rbind(out, pad_to(yn, out, by_y, bx))
+    ya <- merge(xc[0, , drop = FALSE], yn, by.x = bx, by.y = by_y,
+                all.x = FALSE, all.y = TRUE, sort = TRUE)
+    out <- rbind(out, ya[names(out)])
   }
   rownames(out) <- NULL
   ledger <- join_ledger_entry(x, y, out, by, kind, step)

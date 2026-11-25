@@ -46,6 +46,18 @@ test_that("the global random state is left untouched", {
   expect_identical(.Random.seed, before)
 })
 
+test_that("no .Random.seed is created when none existed before", {
+  # set.seed() inside clerical_sample would otherwise leave a seed behind,
+  # perturbing a caller whose stream had never been initialised.
+  if (exists(".Random.seed", globalenv())) {
+    old <- get(".Random.seed", globalenv())
+    on.exit(assign(".Random.seed", old, globalenv()), add = TRUE)
+    rm(".Random.seed", envir = globalenv())
+  }
+  clerical_sample(pc, n_per_class = 3, seed = 5)
+  expect_false(exists(".Random.seed", globalenv()))
+})
+
 test_that("a seed is required, and bad columns are named", {
   expect_error(clerical_sample(pc, n_per_class = 3), "seed is required")
   expect_error(clerical_sample(pc[, 1:2], n_per_class = 3, seed = 1),

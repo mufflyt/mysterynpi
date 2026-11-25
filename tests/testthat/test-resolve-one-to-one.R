@@ -105,6 +105,32 @@ test_that("resolver rejects missing columns and invalid ranking directions", {
   )
 })
 
+test_that("counts expose record-level totals behind the row-level frames", {
+  # Record A resolves on its candidate row but also carries a sibling row
+  # with no candidate: the frames are row-level, so A appears in BOTH
+  # resolved and unmatched. The records_* counts are what a caller checking
+  # "did every person get an answer" must read.
+  candidates <- data.frame(
+    id = c("A", "A", "B", "C"),
+    candidate = c("n1", NA, "n2", NA),
+    priority = c(1L, 1L, 1L, 1L),
+    stringsAsFactors = FALSE
+  )
+  result <- resolve_one_to_one(candidates, rank_by = c(priority = "asc"))
+  expect_setequal(result$resolved$id, c("A", "B"))
+  expect_setequal(result$unmatched$id, c("A", "C"))
+  expect_identical(result$counts[["records_total"]], 3L)
+  expect_identical(result$counts[["records_resolved"]], 2L)
+  expect_identical(result$counts[["records_quarantined"]], 0L)
+  expect_identical(result$counts[["records_unmatched"]], 2L)
+  # and the same fields exist on the eligible path
+  flagged <- resolve_one_to_one(
+    transform(candidates, in_cohort = TRUE),
+    rank_by = c(priority = "asc"), eligible = "in_cohort")
+  expect_identical(flagged$counts[["records_total"]], 3L)
+  expect_identical(flagged$counts[["records_resolved"]], 2L)
+})
+
 test_that("missing candidate IDs are unmatched, not contested identities", {
   candidates <- data.frame(
     id = c("A", "B"), candidate = NA_character_, priority = c(1L, 1L),

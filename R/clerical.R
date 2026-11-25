@@ -57,7 +57,15 @@ clerical_sample <- function(per_candidate, n_per_class, seed,
          call. = FALSE)
   }
   old <- if (exists(".Random.seed", globalenv())) get(".Random.seed", globalenv())
-  on.exit(if (!is.null(old)) assign(".Random.seed", old, globalenv()))
+  on.exit(if (is.null(old)) {
+    # No seed existed before: set.seed() created one, and leaving it would
+    # perturb the caller's stream -- remove it to honour the restore contract.
+    if (exists(".Random.seed", globalenv())) {
+      rm(".Random.seed", envir = globalenv())
+    }
+  } else {
+    assign(".Random.seed", old, globalenv())
+  })
   set.seed(seed)
   # Sort before sampling so the draw is a property of the data and the seed,
   # not of input row order -- same reasoning as collapse_candidates().

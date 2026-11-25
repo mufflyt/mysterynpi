@@ -14,6 +14,7 @@ reference:
   - strip_parenthetical
   - split_given
   - compact_name_key
+  - phrase_key
   - blocking_key
   - blocking_spec
   - blocking_key_info

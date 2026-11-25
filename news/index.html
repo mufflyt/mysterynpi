@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,16 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.12.0" id="mysterynpi-0120">mysterynpi 0.12.0<a class="anchor" aria-label="anchor" href="#mysterynpi-0120"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-12-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-12-0"></a></h3>
+<ul><li>
+<strong>Post-match confidence grading.</strong> <code><a href="../reference/npi_match_evidence.html">npi_match_evidence()</a></code> builds canonical surname/given/state/city evidence for one roster-candidate pair per row, and <code><a href="../reference/grade_npi_match_confidence.html">grade_npi_match_confidence()</a></code> maps that evidence to the stable receipt vocabulary <code>high</code> / <code>medium</code> / <code>low</code> / <code>ambiguous</code> / <code>unmatched</code>. The grader deliberately happens after resolution: it annotates the evidence behind an accepted candidate and never overrides <code><a href="../reference/match_npi.html">match_npi()</a></code>’s accept/review decision. Given-name credit uses <code><a href="../reference/given_name_agreement.html">given_name_agreement()</a></code>’s named rules, so a recorded bare initial is distinguishable from two full names that merely share a first letter.</li>
+<li>
+<strong><code><a href="../reference/taxonomy_allowlist_consistent.html">taxonomy_allowlist_consistent()</a></code></strong>: a thin, documented wrapper for the exact-code/prefix allowlist case downstream NPPES scripts kept hand-rolling. It inspects the full pipe-concatenated taxonomy string through <code><a href="../reference/taxonomy_consistent.html">taxonomy_consistent()</a></code> rather than only the first code.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.11.1" id="mysterynpi-0111">mysterynpi 0.11.1<a class="anchor" aria-label="anchor" href="#mysterynpi-0111"></a></h2>
 <ul><li>

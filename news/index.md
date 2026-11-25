@@ -1,5 +1,30 @@
 # Changelog
 
+## mysterynpi 0.12.0
+
+### New features
+
+- **Post-match confidence grading.**
+  [`npi_match_evidence()`](https://mufflyt.github.io/mysterynpi/reference/npi_match_evidence.md)
+  builds canonical surname/given/state/city evidence for one
+  roster-candidate pair per row, and
+  [`grade_npi_match_confidence()`](https://mufflyt.github.io/mysterynpi/reference/grade_npi_match_confidence.md)
+  maps that evidence to the stable receipt vocabulary `high` / `medium`
+  / `low` / `ambiguous` / `unmatched`. The grader deliberately happens
+  after resolution: it annotates the evidence behind an accepted
+  candidate and never overrides
+  [`match_npi()`](https://mufflyt.github.io/mysterynpi/reference/match_npi.md)’s
+  accept/review decision. Given-name credit uses
+  [`given_name_agreement()`](https://mufflyt.github.io/mysterynpi/reference/given_name_agreement.md)’s
+  named rules, so a recorded bare initial is distinguishable from two
+  full names that merely share a first letter.
+- **[`taxonomy_allowlist_consistent()`](https://mufflyt.github.io/mysterynpi/reference/taxonomy_allowlist_consistent.md)**:
+  a thin, documented wrapper for the exact-code/prefix allowlist case
+  downstream NPPES scripts kept hand-rolling. It inspects the full
+  pipe-concatenated taxonomy string through
+  [`taxonomy_consistent()`](https://mufflyt.github.io/mysterynpi/reference/taxonomy_consistent.md)
+  rather than only the first code.
+
 ## mysterynpi 0.11.1
 
 - **[`ledgered_join()`](https://mufflyt.github.io/mysterynpi/reference/ledgered_join.md)

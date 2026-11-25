@@ -24,6 +24,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NA_standards.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_EDGES.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/NICKNAME_POLICY.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/NPI_MATCH_CONFIDENCE_LEVELS.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ORG_NOISE.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/ROSTER_BENCHMARK.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/SOURCE_CLASSES.html</loc></url>
@@ -75,6 +76,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/get_nicknames_for_name.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/given_name_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/given_tokens.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/grade_npi_match_confidence.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/graduation_year_band.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/has_name_information.html</loc></url>
@@ -114,6 +116,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/normalize_suffix.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_corroborate.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_luhn_ok.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_match_evidence.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/npi_search.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/org_name_matches_person.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/parse_npi_licenses.html</loc></url>
@@ -154,6 +157,7 @@
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_rarity.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_token_table.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/surname_tokens.html</loc></url>
+<url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_allowlist_consistent.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_consistent.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_family_pattern.html</loc></url>
 <url><loc>https://mufflyt.github.io/mysterynpi/reference/taxonomy_tiebreak_rank.html</loc></url>

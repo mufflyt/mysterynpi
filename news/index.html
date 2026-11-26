@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,9 +43,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.12.0" id="mysterynpi-0120">mysterynpi 0.12.0<a class="anchor" aria-label="anchor" href="#mysterynpi-0120"></a></h2>
-<div class="section level3">
-<h3 id="new-features-0-12-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-12-0"></a></h3>
+<h2 class="pkg-version" data-toc-text="0.12.1" id="mysterynpi-0121">mysterynpi 0.12.1<a class="anchor" aria-label="anchor" href="#mysterynpi-0121"></a></h2>
+<ul><li>
+<p><strong>The injective <code>key_paste()</code> encoding now covers every multi-column key comparison in the package, and <code><a href="../reference/count_rivals.html">count_rivals()</a></code> no longer propagates <code>NA</code> from an unrecorded veto.</strong> <code>key_paste()</code>’s length-prefixed fields were introduced in 0.11.1 for <code>join_ledger.R</code>; two other sites still hand-rolled <code>paste(sep = "\\r")</code> and inherited the same collision class – two different tuples whose pasted bytes coincide:</p>
+<ul><li><p><code><a href="../reference/duplicate_differences.html">duplicate_differences()</a></code> grouped registry rows by pasted key, so <code>("a\rb", "c")</code> and <code>("a", "b\rc")</code> reported as duplicates of each other. It now calls <code>key_paste()</code> directly.</p></li>
+<li><p><code><a href="../reference/award_contested.html">award_contested()</a></code> compared candidate signatures the same way; a collision manufactured a tie that <code>strict_dominance</code> exists to refuse, silently quarantining a record the evidence did separate. Signatures now come from <code>key_paste()</code> (with <code>NA</code> components keeping <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code>’s grouping behaviour).</p></li>
+<li><p><code><a href="../reference/count_rivals.html">count_rivals()</a></code> computed <code>is_rival</code> as <code>is.na(candidate) | vetoed != candidate</code> – an <code>NA</code> <code>vetoed</code> made the whole expression <code>NA</code>, and <code>aggregate(sum)</code> returned <code>NA</code> <code>n_rivals</code> rather than a count. An unrecorded veto cannot be the winner, so it now counts as a rival explicitly. # mysterynpi 0.12.0</p></li>
+</ul></li>
+</ul><div class="section level3">
+<h3 id="new-features-0-12-1">New features<a class="anchor" aria-label="anchor" href="#new-features-0-12-1"></a></h3>
 <ul><li>
 <strong>Post-match confidence grading.</strong> <code><a href="../reference/npi_match_evidence.html">npi_match_evidence()</a></code> builds canonical surname/given/state/city evidence for one roster-candidate pair per row, and <code><a href="../reference/grade_npi_match_confidence.html">grade_npi_match_confidence()</a></code> maps that evidence to the stable receipt vocabulary <code>high</code> / <code>medium</code> / <code>low</code> / <code>ambiguous</code> / <code>unmatched</code>. The grader deliberately happens after resolution: it annotates the evidence behind an accepted candidate and never overrides <code><a href="../reference/match_npi.html">match_npi()</a></code>’s accept/review decision. Given-name credit uses <code><a href="../reference/given_name_agreement.html">given_name_agreement()</a></code>’s named rules, so a recorded bare initial is distinguishable from two full names that merely share a first letter.</li>
 <li>

@@ -211,7 +211,7 @@ CATALOGUE <- list(
        why  = "a second dictionary reader appears outside the canonical module; the invariant must catch it"),
   list(id = "resolve-keeps-weakest",
        file = "R/resolve.R",
-       find = "as.integer(stats::ave(d[[class]], key, FUN = min))[keep]",
+       find = "as.integer(stats::ave(d[[class]], key, FUN = .min_class))[keep]",
        repl = "as.integer(stats::ave(d[[class]], key, FUN = max))[keep]",
        why  = "collapse keeps the weakest class per pair; every pool ranks on its worst evidence"))
 

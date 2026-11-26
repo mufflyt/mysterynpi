@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,15 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.12.4" id="mysterynpi-0124">mysterynpi 0.12.4<a class="anchor" aria-label="anchor" href="#mysterynpi-0124"></a></h2>
+<ul><li>
+<p><strong>The input-structure guards now refuse the three corruptions they were written to prevent.</strong> All in <code>input_structures.R</code>, found by adversarial probing:</p>
+<ul><li><p><code><a href="../reference/read_name_column.html">read_name_column()</a></code> accepted a data.frame and fell through to <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>, which DEPARSES a frame to the literal text <code>c(\"a\", \"b\")</code> – the exact silent corruption <code><a href="../reference/reject_list_columns.html">reject_list_columns()</a></code> exists to refuse. A frame or matrix passed where a column was meant is now an error.</p></li>
+<li><p><code><a href="../reference/affirm_unique_index.html">affirm_unique_index()</a></code> promises an index that is “present, complete and unique” but only counted <code><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated()</a></code> values: a single <code>NA</code> index passed, two <code>NA</code>s errored as duplicates, and a row that cannot join anything meanwhile satisfies no constraint at all. Missing index values are now reported as <code>incomplete</code> (alongside <code>not unique</code>, when both hold) under the same error/warn action.</p></li>
+<li><p><code><a href="../reference/as_linkage_table.html">as_linkage_table()</a></code> passed a table carrying duplicated column names straight through; a name lookup then reads only the first such column and the rest are silently shadowed. Duplicated names are now refused after conversion (checked on <code>colnames</code> for matrices too).</p></li>
+</ul></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.3" id="mysterynpi-0123">mysterynpi 0.12.3<a class="anchor" aria-label="anchor" href="#mysterynpi-0123"></a></h2>
 <ul><li>

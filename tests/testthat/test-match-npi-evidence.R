@@ -211,3 +211,23 @@ test_that("eligible alternatives below a source's strongest pool do not contest 
   expect_identical(parts$matches$npi, c("1234567893", "1999999984"))
   expect_equal(nrow(parts$review), 0L)
 })
+
+test_that("partition_npi_matches: NA rank columns cannot inject phantom claims", {
+  # max(NA) is NA; indexing rows by an NA comparison injects all-NA rows into
+  # `claims`, which then pollutes the contested-candidate guard.
+  roster <- data.frame(source_id = c("r1", "r2"), given = c("John", "Jane"),
+                       stringsAsFactors = FALSE)
+  cands <- data.frame(source_id = c("r1", "r1", "r2"),
+                      npi = c("1", "2", "3"),
+                      evidence_class = c(1L, NA, 1L),
+                      middle_rank = c(0L, 0L, NA),
+                      attribute_rank = c(0L, NA, 0L),
+                      disposition = "eligible",
+                      reason = c("a", "b", "c"),
+                      stringsAsFactors = FALSE)
+  parts <- partition_npi_matches(roster, cands)
+  # r1 resolves on its real class-1 candidate; the NA-class rival is ignored.
+  expect_identical(sort(parts$matches$source_id), c("r1", "r2"))
+  expect_false(anyNA(parts$matches$source_id))
+  expect_false(anyNA(parts$matches$npi))
+})

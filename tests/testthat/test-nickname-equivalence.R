@@ -96,3 +96,19 @@ test_that("the cache returns one dictionary, and refresh rebuilds", {
   c <- get_nickname_dictionary(refresh = TRUE)
   expect_identical(a$formal_count, c$formal_count)
 })
+
+test_that("scalar-by-contract APIs refuse vectors with a clear message", {
+  # A vector used to fall through to [[ / == dispatch and die on
+  # "recursive indexing failed at level 2" or a length->1 if().
+  dict <- get_nickname_dictionary()
+  expect_error(get_canonical_name(c("Bob", "William"), dict),
+               "must be a single value")
+  expect_error(are_nickname_equivalents(c("Bob", "Bill"), "Robert", dict),
+               "must be a single value")
+  expect_error(get_nicknames_for_name(c("Bob", "Robert"), dict),
+               "must be a single value")
+  # Scalars, NA and NULL still behave.
+  expect_identical(get_canonical_name("Bob", dict), "BERT")
+  expect_identical(get_canonical_name(NA_character_, dict), NA_character_)
+  expect_false(are_nickname_equivalents("Bob", NA_character_, dict))
+})

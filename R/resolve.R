@@ -15,6 +15,14 @@
 # compared never coexisted -- rather than evidence the threshold was right.
 # =============================================================================
 
+# The strongest (minimum) class, ignoring NA: an NA class means the candidate
+# EARNED no class, so it can never be a pool's best. Plain min() returned NA
+# whenever any sibling row was unclassed -- erasing a real class 2 in
+# collapse_candidates(), and in pool_stats() blanking a person's whole pool so
+# a unique class-1 candidate was quarantined while resolve_best_class()'s NA
+# row index fabricated all-NA "resolved" rows.
+.min_class <- function(v) if (all(is.na(v))) v[NA_integer_] else min(v, na.rm = TRUE)
+
 #' Collapse candidates to one row per (id, candidate), keeping the strongest class
 #'
 #' DETERMINISTIC TIEBREAK. Picking with `which.min()` returns the FIRST minimum,
@@ -49,7 +57,7 @@ collapse_candidates <- function(candidates, id = "id", candidate = "candidate",
   key <- paste(d[[id]], d[[candidate]], sep = "\r")
   keep <- !duplicated(key)                       # first row after sorting
   out <- d[keep, , drop = FALSE]
-  out[[class]] <- as.integer(stats::ave(d[[class]], key, FUN = min))[keep]
+  out[[class]] <- as.integer(stats::ave(d[[class]], key, FUN = .min_class))[keep]
   rownames(out) <- NULL
   out
 }
@@ -68,8 +76,9 @@ collapse_candidates <- function(candidates, id = "id", candidate = "candidate",
 pool_stats <- function(per_candidate, id = "id", class = "evidence_class",
                        facet = NULL) {
   k <- per_candidate[[id]]
-  best <- stats::ave(per_candidate[[class]], k, FUN = min)
-  at_best <- per_candidate[[class]] == best
+  best <- stats::ave(per_candidate[[class]], k, FUN = .min_class)
+  cls <- per_candidate[[class]]
+  at_best <- !is.na(cls) & !is.na(best) & cls == best
   agg <- data.frame(
     id = unique(k),
     n_candidates = as.integer(table(k)[as.character(unique(k))]),
@@ -112,7 +121,8 @@ resolve_best_class <- function(per_candidate, stats, id = "id",
   }
   m <- merge(per_candidate, stats[, c(id, "best_class", "n_at_best")],
              by = id, all.x = TRUE)
-  out <- m[m[[class]] == m$best_class & m$n_at_best == 1L, , drop = FALSE]
+  # which(): an NA comparison must drop the row, not inject an all-NA one.
+  out <- m[which(m[[class]] == m$best_class & m$n_at_best == 1L), , drop = FALSE]
   if (!is.null(confidence)) out$confidence <- confidence[out[[class]]]
   rownames(out) <- NULL
   out

@@ -58,3 +58,39 @@ test_that("resolve_ordered_classes on zero rows returns well-formed empty output
   expect_equal(nrow(r$resolved), 0L)
   expect_identical(r$quarantined, character(0))
 })
+
+test_that("an unclassed (NA) sibling row cannot erase a candidate's real class", {
+  # min(c(NA, 2)) is NA: the collapse used to report candidate n1 as unclassed.
+  pc <- collapse_candidates(mk(id = c("A", "A"), candidate = c("n1", "n1"),
+                               evidence_class = c(NA, 2L)))
+  expect_identical(pc$evidence_class, 2L)
+  # ...and an all-NA candidate stays NA rather than becoming Inf or a warning.
+  pc2 <- collapse_candidates(mk(id = "A", candidate = "n1",
+                                evidence_class = NA_integer_))
+  expect_true(is.na(pc2$evidence_class))
+})
+
+test_that("an unclassed rival cannot blank a pool or fabricate resolved rows", {
+  cand <- mk(id = c("A", "A", "B", "B", "C"),
+             candidate = c("n1", "n1", "n3", "n4", "n5"),
+             evidence_class = c(NA, 2L, 1L, NA, NA))
+  r <- resolve_ordered_classes(cand)
+  # B's only CLASSED candidate is unique at class 1: it resolves. Before the
+  # fix best_class was NA, B was quarantined, and the NA row index injected
+  # three all-NA rows into `resolved`.
+  expect_false(anyNA(r$resolved$id))
+  expect_identical(sort(r$resolved$id), c("A", "B"))
+  expect_identical(r$resolved$candidate[r$resolved$id == "B"], "n3")
+  st <- r$stats[r$stats$id == "C", ]
+  expect_true(is.na(st$best_class))   # nothing earned a class
+  expect_identical(st$n_at_best, 0L)  # so nothing is at best: quarantined
+  expect_identical(r$quarantined, "C")
+})
+
+test_that("resolve_best_class drops NA comparisons instead of injecting rows", {
+  pc <- mk(id = c("A", "B"), candidate = c("n1", "n2"),
+           evidence_class = c(1L, NA))
+  st <- mk(id = c("A", "B"), best_class = c(1L, NA), n_at_best = c(1L, NA))
+  out <- resolve_best_class(pc, st)
+  expect_identical(out$id, "A")
+})

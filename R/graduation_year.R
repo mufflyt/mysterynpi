@@ -95,7 +95,10 @@ graduation_year_band <- function(credentialing_year, graduation_year,
                                  bands = GRADUATION_YEAR_BANDS) {
   a <- suppressWarnings(as.integer(credentialing_year))
   b <- suppressWarnings(as.integer(graduation_year))
-  n <- max(length(a), length(b))
+  # Equal lengths or scalar broadcast, never rep_len(): recycling a 3-vector
+  # against a 2-vector paired person 3's year with person 1's and returned a
+  # band for a comparison nobody asked for.
+  n <- .nm_pair_len(a, b, c("credentialing_year", "graduation_year"))
   a <- rep_len(a, n); b <- rep_len(b, n)
   d <- b - a
   out <- rep("unknown", n)

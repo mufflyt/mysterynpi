@@ -17,6 +17,12 @@
     rank values now mean "no evidence" and are filtered before each
     maximum is taken.
 
+  * `get_canonical_name()`, `are_nickname_equivalents()` and
+    `get_nicknames_for_name()` are scalar by contract but took vectors
+    straight into `[[`/== dispatch, dying on "recursive indexing failed"
+    or a length>1 `if()`. They now guard with the canonical
+    `check_scalar()` and refuse vectors by name.
+
 # mysterynpi 0.12.4
 
 * **The input-structure guards now refuse the three corruptions they were

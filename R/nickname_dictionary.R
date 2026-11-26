@@ -88,6 +88,7 @@ get_canonical_name <- function(name, nickname_dict) {
       (length(name) == 1 && is.na(name))) {
     return(name)
   }
+  check_scalar(name, "name")
   name_clean <- normalize_string(name)
   roots <- nickname_dict$nickname_to_formal[[name_clean]]
   if (!is.null(roots) && length(roots)) {
@@ -113,6 +114,7 @@ are_nickname_equivalents <- function(name1, name2, nickname_dict) {
       (length(name2) == 1 && is.na(name2))) {
     return(FALSE)
   }
+  check_scalar(name1, "name1"); check_scalar(name2, "name2")
   x <- normalize_string(name1); y <- normalize_string(name2)
   if (x == y) return(TRUE)
   cx <- c(x, nickname_dict$nickname_to_formal[[x]])
@@ -129,6 +131,7 @@ get_nicknames_for_name <- function(formal_name, nickname_dict) {
   if (is.null(nickname_dict) || is.null(formal_name)) {
     return(character(0))
   }
+  check_scalar(formal_name, "formal_name")
   formal_clean <- normalize_string(formal_name)
   if (formal_clean %in% names(nickname_dict$formal_to_nicknames)) {
     return(nickname_dict$formal_to_nicknames[[formal_clean]])

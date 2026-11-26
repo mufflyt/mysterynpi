@@ -20,7 +20,8 @@ person_matches(last_a, given_a, last_b, given_b)
 
 - given_a, given_b:
 
-  lists from \[given_tokens()\].
+  lists from \[given_tokens()\], the same lengths as their surname
+  vectors.
 
 ## Value
 

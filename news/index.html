@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,11 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.12.3" id="mysterynpi-0123">mysterynpi 0.12.3<a class="anchor" aria-label="anchor" href="#mysterynpi-0123"></a></h2>
+<ul><li>
+<strong><code><a href="../reference/person_matches.html">person_matches()</a></code> no longer silently recycles mismatched pair vectors.</strong> The last remaining pair-comparison export without a length guard: <code>&amp;</code> and <code>==</code> warn on non-multiple recycling but <code><a href="https://rdrr.io/r/base/mapply.html" class="external-link">mapply()</a></code> recycles with NO warning at all, so a 4-vs-2 call compared record 3’s surname with record 1’s given tokens and returned an answer nobody asked for. It now applies <code>.nm_pair_len()</code> on both sides plus a cross-side consistency check (the surname vectors and the given-name vectors must cover the same records), scalar broadcast is still permitted, and an empty call returns <code>logical(0)</code> rather than erroring on <code><a href="https://rdrr.io/r/base/mapply.html" class="external-link">mapply()</a></code>’s <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> return.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.2" id="mysterynpi-0122">mysterynpi 0.12.2<a class="anchor" aria-label="anchor" href="#mysterynpi-0122"></a></h2>
 <ul><li>

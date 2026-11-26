@@ -200,11 +200,20 @@ partition_npi_matches <- function(roster, candidates, id = "source_id",
                                          attribute_rank = "desc"))
   # The resolver counts only unique selections as claims. Tied best pools must
   # also contest a supported NPI; compute that guard over bounded evidence only.
+  # NA in a rank column is "no evidence", never max: max(NA) returns NA and
+  # indexing with NA comparisons injects all-NA rows into `claims`.
+  at_max <- function(rows, v) {
+    rows <- rows[!is.na(v[rows])]
+    if (!length(rows)) return(integer(0))
+    rows[v[rows] == max(v[rows])]
+  }
   strongest <- unlist(lapply(split(seq_len(nrow(eligible)), eligible$source_id),
     function(rows) {
-      rows <- rows[eligible$evidence_class[rows] == max(eligible$evidence_class[rows])]
-      rows <- rows[eligible$middle_rank[rows] == max(eligible$middle_rank[rows])]
-      rows[eligible$attribute_rank[rows] == max(eligible$attribute_rank[rows])]
+      rows <- at_max(rows, eligible$evidence_class)
+      if (!length(rows)) return(integer(0))
+      rows <- at_max(rows, eligible$middle_rank)
+      if (!length(rows)) return(integer(0))
+      at_max(rows, eligible$attribute_rank)
     }), use.names = FALSE)
   claims <- eligible[strongest, , drop = FALSE]
   contested <- names(Filter(function(sources) length(unique(sources)) > 1L,

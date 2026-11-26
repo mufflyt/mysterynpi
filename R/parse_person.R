@@ -302,7 +302,9 @@ parse_person <- function(x, format = c("given_first", "surname_first")) {
   # humaniformat throws a C++ range_error on an empty string, so an absent name
   # would abort the whole vector. Parse only the rows that carry text and put
   # the blanks back afterwards: absence is a value here, not an exception.
-  out <- data.frame(first = rep("", length(raw)), middle = "", last = "",
+  out <- data.frame(first = rep("", length(raw)),
+                    middle = rep("", length(raw)),
+                    last = rep("", length(raw)),
                     suffix = suffix_out, stringsAsFactors = FALSE)
   ok <- !is.na(raw) & nzchar(raw)
   if (any(ok)) {

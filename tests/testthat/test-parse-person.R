@@ -275,3 +275,14 @@ test_that("the new credential tokens match whole tokens only, never substrings",
   expect_identical(parse_person("Tom Facpworth")$last, "FACPWORTH")
   expect_identical(strip_name_noise("Faapman Jones"), "Faapman Jones")
 })
+
+test_that("empty and NULL inputs return a 0-row frame, not an rbind error", {
+  # data.frame(first = rep("", 0), middle = "") used to collide: a scalar ""
+  # against a 0-length column is "arguments imply differing number of rows".
+  for (v in list(character(0), NULL)) {
+    out <- parse_person(v)
+    expect_s3_class(out, "data.frame")
+    expect_identical(nrow(out), 0L)
+    expect_identical(names(out), c("first", "middle", "last", "suffix"))
+  }
+})

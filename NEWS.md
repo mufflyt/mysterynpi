@@ -1,3 +1,22 @@
+# mysterynpi 0.12.5
+
+* **`parse_person()` handles empty input, and `partition_npi_matches()`
+  cannot inject phantom claims from `NA` rank columns.**
+
+  * `parse_person(character(0))` and `parse_person(NULL)` built their
+    result with `data.frame(first = rep("", length(raw)), middle = "",
+    last = "", ...)` -- a scalar `""` against a zero-length `first`
+    column, which errors with the cryptic `arguments imply differing
+    number of rows: 0, 1`. The scalar columns are now `rep()`'d to the
+    input length, so empty input returns the documented zero-row frame.
+
+  * `partition_npi_matches()` computed each source's tied-best pool with
+    `rows[col == max(col)]` on the raw rank columns. `max(NA)` is `NA`,
+    and indexing with `NA` comparisons injected all-`NA` rows into
+    `claims`, polluting the contested-candidate guard downstream. `NA`
+    rank values now mean "no evidence" and are filtered before each
+    maximum is taken.
+
 # mysterynpi 0.12.4
 
 * **The input-structure guards now refuse the three corruptions they were

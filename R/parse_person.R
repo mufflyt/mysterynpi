@@ -44,7 +44,12 @@ NAME_NOISE <- c(
   "MISS","JR","SR","II","III","IV",
   # all-provider-type credentials (2026-09-13 Medicaid exclusion linkage)
   "DDS","DMD","DC","DPM","OD","PA","PAC","PA-C","LPN","LVN","PSYD",
-  "PHARMD","RPH","LCSW","DPT")
+  "PHARMD","RPH","LCSW","DPT",
+  # physician fellowship / international medical degree tokens. "John Smith
+  # FAAP" parsed with last = "FAAP", and "Jane Doe, MD, FACP" failed the
+  # credential-comma test and was read as a reversed "FACP, Jane Doe" --
+  # MBBS is the standard degree for internationally-trained physicians.
+  "FAAP","FACP","MBBS")
 
 #' `NAME_NOISE` tokens that are ALSO common real surnames.
 #'

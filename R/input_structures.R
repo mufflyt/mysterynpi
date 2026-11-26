@@ -61,6 +61,15 @@ as_linkage_table <- function(x, arg = "input", quiet = FALSE) {
     }
     x <- as.data.frame(x, stringsAsFactors = FALSE)
   }
+  if (anyDuplicated(names(x))) {
+    stop(sprintf(paste0("%s has duplicated column name(s): %s. A column lookup ",
+                        "by name reads only the first, so the duplicates are ",
+                        "refused rather than silently shadowed."),
+                 arg,
+                 paste(unique(names(x)[duplicated(names(x))]),
+                       collapse = ", ")),
+         call. = FALSE)
+  }
   reject_list_columns(x, arg)
   x
 }
@@ -109,6 +118,15 @@ reject_list_columns <- function(x, arg = "input") {
 #' read_name_column(c(1001, 1002), "npi")
 #' @export
 read_name_column <- function(x, nm = "column", quiet = FALSE) {
+  # A data.frame reaching as.character() DEPARSES to the literal text
+  # `c("a", "b")` -- the exact corruption reject_list_columns() refuses, so
+  # a frame passed where a column was meant is an error, not a coercion.
+  if (is.data.frame(x) || length(dim(x))) {
+    stop(sprintf(paste0("column %s is a %s, not a column; coercing it would ",
+                        "deparse its contents into one string. Pass the ",
+                        "column itself."), nm, class(x)[1]),
+         call. = FALSE)
+  }
   # CLASS FIRST, THEN TYPE. An earlier version checked is.character() first and
   # returned early, so a character vector carrying a units-like class and its
   # attributes passed through untouched -- which is exactly the input G2.6 and
@@ -222,13 +240,23 @@ affirm_unique_index <- function(x, col, arg = "input",
     stop(sprintf("%s has no column %s to use as an index", arg, col),
          call. = FALSE)
   }
+  n_na <- sum(is.na(x[[col]]))
   dup <- unique(x[[col]][duplicated(x[[col]])])
-  if (!length(dup)) return(invisible(x))
-  msg <- sprintf(paste0("%s index column %s is not unique: %d repeated ",
-                        "value(s), e.g. %s. A one-to-one constraint over a ",
-                        "repeated index enforces nothing."),
-                 arg, col, length(dup),
-                 paste(utils::head(as.character(dup), 3), collapse = ", "))
+  dup <- dup[!is.na(dup)]   # NA repetition is completeness, reported with n_na
+  if (!n_na && !length(dup)) return(invisible(x))
+  parts <- c(if (n_na) sprintf("%d missing value(s)", n_na),
+             if (length(dup)) {
+               sprintf("%d repeated value(s), e.g. %s", length(dup),
+                       paste(utils::head(as.character(dup), 3),
+                             collapse = ", "))
+             })
+  msg <- sprintf(paste0("%s index column %s is %s: %s. A one-to-one ",
+                        "constraint over an incomplete or repeated index ",
+                        "enforces nothing."),
+                 arg, col,
+                 if (n_na && length(dup)) "incomplete and not unique"
+                 else if (n_na) "incomplete" else "not unique",
+                 paste(parts, collapse = "; "))
   if (action == "error") stop(msg, call. = FALSE) else warning(msg, call. = FALSE)
   invisible(x)
 }

@@ -98,3 +98,32 @@ test_that("G2.2, G2.7: match_npi() accepts the wider shapes and rejects the bad 
                                          entity_filter = c("1", "2")), args)),
                "entity_filter must be a single value")
 })
+
+test_that("read_name_column refuses a frame, which would deparse to c(\"a\",\"b\")", {
+  # The exact corruption reject_list_columns() exists to prevent, reached by
+  # passing the frame instead of df$col.
+  expect_error(read_name_column(data.frame(n = c("a", "b")), "n"),
+               "not a column")
+  expect_error(read_name_column(matrix(1:4, 2), "n"), "not a column")
+})
+
+test_that("as_linkage_table refuses duplicated column names", {
+  df <- `names<-`(data.frame(1:2, 3:4), c("a", "a"))
+  expect_error(as_linkage_table(df, "roster"), "duplicated column name")
+  # Matrix path too (colnames are checked, not names()).
+  m <- matrix(c("1","2","x","y"), 2, dimnames = list(NULL, c("a", "a")))
+  expect_error(suppressMessages(as_linkage_table(m, "roster")),
+               "duplicated column name")
+})
+
+test_that("affirm_unique_index treats NA index values as incomplete", {
+  # One NA used to pass silently while two NAs errored as duplicates -- an
+  # index row that cannot join anything is not complete either way.
+  expect_error(affirm_unique_index(data.frame(id = c("a", NA)), "id"),
+               "incomplete")
+  expect_warning(affirm_unique_index(data.frame(id = c("a", NA)), "id",
+                                     action = "warn"), "incomplete")
+  # Both violations report both.
+  expect_error(affirm_unique_index(data.frame(id = c("a", NA, "a")), "id"),
+               "incomplete and not unique")
+})

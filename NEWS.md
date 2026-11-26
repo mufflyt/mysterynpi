@@ -1,3 +1,27 @@
+# mysterynpi 0.12.4
+
+* **The input-structure guards now refuse the three corruptions they were
+  written to prevent.** All in `input_structures.R`, found by adversarial
+  probing:
+
+  * `read_name_column()` accepted a data.frame and fell through to
+    `as.character()`, which DEPARSES a frame to the literal text
+    `c(\"a\", \"b\")` -- the exact silent corruption
+    `reject_list_columns()` exists to refuse. A frame or matrix passed
+    where a column was meant is now an error.
+
+  * `affirm_unique_index()` promises an index that is "present, complete
+    and unique" but only counted `duplicated()` values: a single `NA`
+    index passed, two `NA`s errored as duplicates, and a row that cannot
+    join anything meanwhile satisfies no constraint at all. Missing index
+    values are now reported as `incomplete` (alongside `not unique`, when
+    both hold) under the same error/warn action.
+
+  * `as_linkage_table()` passed a table carrying duplicated column names
+    straight through; a name lookup then reads only the first such column
+    and the rest are silently shadowed. Duplicated names are now refused
+    after conversion (checked on `colnames` for matrices too).
+
 # mysterynpi 0.12.3
 
 * **`person_matches()` no longer silently recycles mismatched pair vectors.**

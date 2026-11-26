@@ -213,10 +213,28 @@ initials_string_matches <- function(short, toks) {
 #' blocking passes should rank on its verdicts rather than loosen this one.
 #'
 #' @param last_a,last_b character vectors of normalised surnames.
-#' @param given_a,given_b lists from [given_tokens()].
+#' @param given_a,given_b lists from [given_tokens()], the same lengths as
+#'   their surname vectors.
 #' @return logical vector.
 #' @export
 person_matches <- function(last_a, given_a, last_b, given_b) {
+  # & and == warn on non-multiple recycling but mapply() recycles SILENTLY,
+  # even for non-multiples in some paths and always for multiples -- so a
+  # 4-vs-2 pair compared record 3's surname with record 1's given tokens
+  # and returned an answer nobody asked for. Pair lengths are enforced on
+  # both sides and across surname/given, the same contract .nm_pair_len()
+  # applies everywhere else.
+  n_last <- .nm_pair_len(last_a, last_b, c("last_a", "last_b"))
+  n_given <- .nm_pair_len(given_a, given_b, c("given_a", "given_b"))
+  .nm_pair_len(last_a, given_a, c("last_a", "given_a"))
+  .nm_pair_len(last_b, given_b, c("last_b", "given_b"))
+  if (n_last != n_given) {
+    stop(sprintf(paste0("the surname vectors pair %d record(s) but the ",
+                        "given-name vectors pair %d; both sides must cover ",
+                        "the same records."), n_last, n_given), call. = FALSE)
+  }
+  if (!n_last) return(logical(0))   # mapply() on empty lists returns list(),
+                                   # which & cannot combine with logical(0)
   same_last <- has_name_information(last_a) & has_name_information(last_b) &
     last_a == last_b
   shared <- mapply(function(x, y) length(intersect(x, y)) > 0, given_a, given_b)

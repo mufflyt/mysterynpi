@@ -1,3 +1,15 @@
+# mysterynpi 0.12.3
+
+* **`person_matches()` no longer silently recycles mismatched pair vectors.**
+  The last remaining pair-comparison export without a length guard: `&` and
+  `==` warn on non-multiple recycling but `mapply()` recycles with NO warning
+  at all, so a 4-vs-2 call compared record 3's surname with record 1's given
+  tokens and returned an answer nobody asked for. It now applies
+  `.nm_pair_len()` on both sides plus a cross-side consistency check (the
+  surname vectors and the given-name vectors must cover the same records),
+  scalar broadcast is still permitted, and an empty call returns
+  `logical(0)` rather than erroring on `mapply()`'s `list()` return.
+
 # mysterynpi 0.12.2
 
 * **Resolution can no longer fabricate `NA` rows or lose evidence classes,

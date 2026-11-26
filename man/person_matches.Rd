@@ -9,7 +9,8 @@ person_matches(last_a, given_a, last_b, given_b)
 \arguments{
 \item{last_a, last_b}{character vectors of normalised surnames.}
 
-\item{given_a, given_b}{lists from [given_tokens()].}
+\item{given_a, given_b}{lists from [given_tokens()], the same lengths as
+their surname vectors.}
 }
 \value{
 logical vector.

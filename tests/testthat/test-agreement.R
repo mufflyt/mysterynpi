@@ -59,3 +59,29 @@ test_that("the shipped contract passes, and can fail", {
   always_agree <- function(a, b) rep("corroborates", length(a))
   expect_error(assert_middle_agreement_contract(always_agree))
 })
+
+test_that("person_matches refuses mismatched pairs instead of silently recycling", {
+  # mapply() recycles with NO warning when lengths are multiples, so a 4-vs-2
+  # pair compared record 3's surname with record 1's given tokens.
+  g <- function(...) lapply(list(...), given_tokens)
+  expect_error(person_matches(rep("S", 4L), g("A", "B", "C", "D"),
+                              rep("S", 2L), g("A", "B")),
+               "Refusing to recycle")
+  expect_error(person_matches(rep("S", 3L), g("A", "B", "C"),
+                              rep("S", 2L), g("A", "B")),
+               "Refusing to recycle")
+  # The surname and given sides must cover the same records too: a
+  # scalar-vs-2 surname pair is two records, a scalar-vs-1 given pair is one.
+  expect_error(person_matches("S", g("A"), c("S", "S"), g("B")),
+               "same records")
+  # And the two sides of one person must correspond.
+  expect_error(person_matches(rep("S", 3L), g("A", "B"),
+                              rep("S", 3L), g("A", "B", "C")),
+               "Refusing to recycle")
+  # Scalar broadcast still works on both sides.
+  expect_identical(person_matches("S", g("A", "B"), c("S", "S"), g("A", "B")),
+                   c(TRUE, TRUE))
+  # Empty input is a length-0 logical, not a type error.
+  expect_identical(person_matches(character(0), list(), character(0), list()),
+                   logical(0))
+})

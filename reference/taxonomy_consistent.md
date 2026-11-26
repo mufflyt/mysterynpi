@@ -22,7 +22,8 @@ taxonomy_consistent(taxonomy, expected)
 
 - expected:
 
-  character vector of pipe-separated prefix patterns, e.g. from
+  character vector of pipe-separated prefix patterns, the same length as
+  \`taxonomy\` or length 1 (broadcast), e.g. from
   \[taxonomy_family_pattern()\].
 
 ## Value

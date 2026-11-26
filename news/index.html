@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,15 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.12.2" id="mysterynpi-0122">mysterynpi 0.12.2<a class="anchor" aria-label="anchor" href="#mysterynpi-0122"></a></h2>
+<ul><li>
+<p><strong>Resolution can no longer fabricate <code>NA</code> rows or lose evidence classes, and identity-vector comparisons refuse silent recycling.</strong> Three defects found by adversarial probing:</p>
+<ul><li><p><code><a href="../reference/collapse_candidates.html">collapse_candidates()</a></code> / <code><a href="../reference/pool_stats.html">pool_stats()</a></code> computed per-key minimum class with plain <code><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min()</a></code>, which is <code>NA</code> whenever ANY sibling row is unclassed. A candidate carrying a real class 2 collapsed to <code>NA</code>; a pool whose unique class-1 candidate shared a person with an unclassed rival had its <code>best_class</code> blanked entirely – <code><a href="../reference/resolve_ordered_classes.html">resolve_ordered_classes()</a></code> then quarantined the resolvable person AND returned fabricated all-<code>NA</code> <code>resolved</code> rows (the <code>NA == NA</code> index comparison injects <code>NA</code> rows into an output frame). Class minima now ignore <code>NA</code> (an all-<code>NA</code> pool still reports <code>best_class = NA</code> and is quarantined), <code>at_best</code> treats an <code>NA</code> class as never-best, and <code><a href="../reference/resolve_best_class.html">resolve_best_class()</a></code> drops <code>NA</code> comparisons with <code><a href="https://rdrr.io/r/base/which.html" class="external-link">which()</a></code>.</p></li>
+<li><p><code><a href="../reference/graduation_year_band.html">graduation_year_band()</a></code> / <code><a href="../reference/graduation_year_agreement.html">graduation_year_agreement()</a></code> recycled mismatched year vectors with <code><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep_len()</a></code>, pairing person 3’s credentialing year with person 1’s graduation year and returning a fabricated band. Every other agreement rule refuses non-broadcast length mismatches; these now go through the same <code>.nm_pair_len()</code> check (“the same length or one of length 1” is the documented contract).</p></li>
+<li><p><code><a href="../reference/taxonomy_consistent.html">taxonomy_consistent()</a></code> recycled the same way – record 3 judged against record 1’s expectation – and paired an empty <code>taxonomy</code> with a scalar <code>expected</code> into a single <code>NA</code> verdict. Now strict-length via <code>.nm_pair_len()</code>, with a pattern broadcast across zero records returning <code>logical(0)</code>.</p></li>
+</ul></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.1" id="mysterynpi-0121">mysterynpi 0.12.1<a class="anchor" aria-label="anchor" href="#mysterynpi-0121"></a></h2>
 <ul><li>

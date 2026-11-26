@@ -1,5 +1,48 @@
 # Changelog
 
+## mysterynpi 0.12.2
+
+- **Resolution can no longer fabricate `NA` rows or lose evidence
+  classes, and identity-vector comparisons refuse silent recycling.**
+  Three defects found by adversarial probing:
+
+  - [`collapse_candidates()`](https://mufflyt.github.io/mysterynpi/reference/collapse_candidates.md)
+    /
+    [`pool_stats()`](https://mufflyt.github.io/mysterynpi/reference/pool_stats.md)
+    computed per-key minimum class with plain
+    [`min()`](https://rdrr.io/r/base/Extremes.html), which is `NA`
+    whenever ANY sibling row is unclassed. A candidate carrying a real
+    class 2 collapsed to `NA`; a pool whose unique class-1 candidate
+    shared a person with an unclassed rival had its `best_class` blanked
+    entirely –
+    [`resolve_ordered_classes()`](https://mufflyt.github.io/mysterynpi/reference/resolve_ordered_classes.md)
+    then quarantined the resolvable person AND returned fabricated
+    all-`NA` `resolved` rows (the `NA == NA` index comparison injects
+    `NA` rows into an output frame). Class minima now ignore `NA` (an
+    all-`NA` pool still reports `best_class = NA` and is quarantined),
+    `at_best` treats an `NA` class as never-best, and
+    [`resolve_best_class()`](https://mufflyt.github.io/mysterynpi/reference/resolve_best_class.md)
+    drops `NA` comparisons with
+    [`which()`](https://rdrr.io/r/base/which.html).
+
+  - [`graduation_year_band()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_band.md)
+    /
+    [`graduation_year_agreement()`](https://mufflyt.github.io/mysterynpi/reference/graduation_year_agreement.md)
+    recycled mismatched year vectors with
+    [`rep_len()`](https://rdrr.io/r/base/rep.html), pairing person 3’s
+    credentialing year with person 1’s graduation year and returning a
+    fabricated band. Every other agreement rule refuses non-broadcast
+    length mismatches; these now go through the same `.nm_pair_len()`
+    check (“the same length or one of length 1” is the documented
+    contract).
+
+  - [`taxonomy_consistent()`](https://mufflyt.github.io/mysterynpi/reference/taxonomy_consistent.md)
+    recycled the same way – record 3 judged against record 1’s
+    expectation – and paired an empty `taxonomy` with a scalar
+    `expected` into a single `NA` verdict. Now strict-length via
+    `.nm_pair_len()`, with a pattern broadcast across zero records
+    returning `logical(0)`.
+
 ## mysterynpi 0.12.1
 
 - **The injective `key_paste()` encoding now covers every multi-column

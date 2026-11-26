@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mysterynpi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,15 @@
       <small>Source: <a href="https://github.com/mufflyt/mysterynpi/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.12.5" id="mysterynpi-0125">mysterynpi 0.12.5<a class="anchor" aria-label="anchor" href="#mysterynpi-0125"></a></h2>
+<ul><li>
+<p><strong><code><a href="../reference/parse_person.html">parse_person()</a></code> handles empty input, and <code>partition_npi_matches()</code> cannot inject phantom claims from <code>NA</code> rank columns.</strong></p>
+<ul><li><p><code>parse_person(character(0))</code> and <code>parse_person(NULL)</code> built their result with <code>data.frame(first = rep("", length(raw)), middle = "", last = "", ...)</code> – a scalar <code>""</code> against a zero-length <code>first</code> column, which errors with the cryptic <code>arguments imply differing number of rows: 0, 1</code>. The scalar columns are now <code><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep()</a></code>’d to the input length, so empty input returns the documented zero-row frame.</p></li>
+<li><p><code>partition_npi_matches()</code> computed each source’s tied-best pool with <code>rows[col == max(col)]</code> on the raw rank columns. <code>max(NA)</code> is <code>NA</code>, and indexing with <code>NA</code> comparisons injected all-<code>NA</code> rows into <code>claims</code>, polluting the contested-candidate guard downstream. <code>NA</code> rank values now mean “no evidence” and are filtered before each maximum is taken.</p></li>
+<li><p><code><a href="../reference/get_canonical_name.html">get_canonical_name()</a></code>, <code><a href="../reference/are_nickname_equivalents.html">are_nickname_equivalents()</a></code> and <code><a href="../reference/get_nicknames_for_name.html">get_nicknames_for_name()</a></code> are scalar by contract but took vectors straight into <code>[[</code>/== dispatch, dying on “recursive indexing failed” or a length&gt;1 <code>if()</code>. They now guard with the canonical <code><a href="../reference/check_scalar.html">check_scalar()</a></code> and refuse vectors by name.</p></li>
+</ul></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.4" id="mysterynpi-0124">mysterynpi 0.12.4<a class="anchor" aria-label="anchor" href="#mysterynpi-0124"></a></h2>
 <ul><li>
